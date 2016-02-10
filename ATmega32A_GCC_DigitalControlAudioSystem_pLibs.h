@@ -20,7 +20,7 @@
 /*******************************
 ** DEFINITION PROJECT VERSION **
 *******************************/
-#define FIRMWARE_VERSION 29
+#define FIRMWARE_VERSION 30
 
 /*******************************
 ** DEFINITION DEBUG CONSTANTS **
@@ -118,9 +118,9 @@ void timer1_on(void);
 void timer1_on_speed(void);
 void timer1_off(void);
 void timer2_init(void);
-void FAN_PWM_ON(void);
-void FAN_PWM_SPEED1(void);
-void FAN_PWM_OFF(void);
+void fan_pwm_on(void);
+void fan_pwm_control_speed(void);
+void fan_pwm_off(void);
 
 void timer2_init(void);
 void timer2_on(void);

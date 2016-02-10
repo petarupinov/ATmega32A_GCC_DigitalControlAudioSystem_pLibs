@@ -41,6 +41,7 @@
 ;;**27. Edit on date 06.12.2015 - adding main header file in project **********************;;
 ;;**28. Edit on date 07.12.2015 - adding remote volume and mute ***************************;;
 ;;**29. Edit on date 09.12.2015 - adding fan stepping with timer1 ORC1AL ******************;;
+;;**30. Edit on date 09.12.2015 - change fan function names & temp sensors are works ******;;
 ;;*****************************************************************************************;;
 ;;** Used library version: _Soft_Library_Pesho_v0.07 **************************************;;
 ;;*****************************************************************************************;;
@@ -103,9 +104,9 @@ unsigned char storeTemp [10] = {};	// data bytes massive
 // FAN SPEED STEPS
 #define FAN_LIMIT_POSITIONS 8
 #define FAN_SPEED_ABSOLUTE_MIN 0
-#define FAN_SPEED_MIN 100		// critical minimum = 90
-#define FAN_SPEED_MAX 250
-unsigned char fanSpeed = 1;	// FAN SPEED OCR1AL = 100
+#define FAN_SPEED_MIN 1		// min buffer position
+#define FAN_SPEED_MAX 7		// max buffer position
+unsigned char fanSpeed = FAN_SPEED_MIN;	// FAN SPEED OCR1AL = 100
 unsigned char fanSpeedStep [FAN_LIMIT_POSITIONS] = { 0x00, 100, 125, 150, 175, 200, 225, 250 };
 unsigned char byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9; // bytes ot temperaturen sensor
 
@@ -300,11 +301,11 @@ void timer1_off(void)
 /***********************************
 ******** DEFINITIONS OF FAN ********
 ***********************************/
-void FAN_PWM_SPEED1(void)
+void fan_pwm_control_speed(void)
 {
 	timer1_on_speed();
 }
-void FAN_PWM_OFF(void)
+void fan_pwm_off(void)
 {
 	timer1_off();
 }
@@ -375,7 +376,7 @@ void irDecode(void)
 		LCD_DATA_INT(fanSpeed);		// 20 symbols
 		LCD_DATA_STRING(" or ");
 		LCD_DATA_INT(fanSpeedStep[fanSpeed]);
-		timer1_on_speed();
+		fan_pwm_control_speed();
 	}
 	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_UP)) && flagStatusBits->flagPower == 1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> ON
 	{	// FAN STEP DOWN
@@ -393,7 +394,12 @@ void irDecode(void)
 		LCD_DATA_INT(fanSpeed);		// 20 symbols
 		LCD_DATA_STRING(" or ");
 		LCD_DATA_INT(fanSpeedStep[fanSpeed]);
-		timer1_on_speed();
+		fan_pwm_control_speed();
+	}
+	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_SCRL)) && (flagStatusBits->flagPower == 0 || flagStatusBits->flagPower == 1))						// Sony CarAudio IR Remote Device - "SCRL" -> TEMPERATURE
+	{
+		temperature();
+		_delay_ms(200);
 	}
 /*	else if((((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_ATT)) && mute==1) && flagPower==1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> OFF
 	{	// UNMUTE
@@ -416,11 +422,6 @@ void irDecode(void)
 		LCD_INIT();
 		LED_high_DISPLAYLED_low();
 		_delay_ms(200);	
-	}
-	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_SCRL)) && (flagPower==0 || flagPower==1))						// Sony CarAudio IR Remote Device - "SCRL" -> TEMPERATURE
-	{
-		temperature();
-		_delay_ms(200);
 	}
 	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_MODE)) && (flagPower==0 || flagPower==1))						// Sony CarAudio IR Remote Device - "MODE"
 	{
@@ -541,13 +542,16 @@ void ampliferOn(void)
 	LCD_COMMAND(LCD_SELECT_2ROW);				// select row 2
 	LCD_DATA_STRING("P.UPINOV  P.STOYANOV");	// 20 symbols //	LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
 	LCD_COMMAND(LCD_ON);						// LCD ON without CURSOR
+
 // FANS FUNC & MESSAGE
 	#ifdef DEBUG_INFO
 		transmitUartString("[UART INFO] Fan is on\r\n");
+		transmitUartString("[UART INFO] Fan rotation with max speed\r\n");
 		transmitUartString("[UART INFO] Fan is always on, it isn't sensitive to temperature, because DS18S20 is disabling\r\n");
 	#endif
-	FAN_PWM_SPEED1();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
-//	FAN_high();			// PORTD5 - FAN ON (logic "1")	NON PWM, NON TIMER1
+//	FAN_high();			// PORTD5 - FAN ON (logic "1")	NON PWM, NON TIMER1	
+	fanSpeed = FAN_SPEED_MAX;	// amplifer run with max fan speed
+	fan_pwm_control_speed();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
 
 // RELAYS ON FUNC & MESSAGE
 	#ifdef DEBUG_INFO
@@ -565,6 +569,14 @@ void ampliferOn(void)
 	#endif
 	relays_out_6ch();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
 	_delay_ms(1000);	// izchakvane pri natiskane za vkliuchvane i otpuskane na buton - filtar treptqsht kontakt buton
+
+// FANS FUNC & MESSAGE
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Fan rotation with min speed\r\n");
+		transmitUartString("[UART INFO] Fan manual controlling with remote menu up to speed step up and menu down button to speed step down\r\n");
+	#endif	
+	fanSpeed = FAN_SPEED_MIN;	// amplifer works with min fan speed
+	fan_pwm_control_speed();
 }
 
 /*********************
@@ -601,7 +613,7 @@ void ampliferOff(void)
 	#ifdef DEBUG_INFO
 		transmitUartString("[UART INFO] Fan is off\r\n");
 	#endif
-	FAN_PWM_OFF();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
+	fan_pwm_off();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
 
 // FANS FUNC & MESSAGE
 	LCD_CLEAR_CONTAIN();
@@ -823,8 +835,10 @@ void temperature()
 	unsigned char i;
 //	LED_low_DISPLAYLED_high();
 //	LCD_INIT();								// LCD INITIZLIZATION
+	LCD_CLEAR_CONTAIN();
+
 	LCD_COMMAND(LCD_SELECT_1ROW);	// select row 1
-	LCD_DATA_STRING("    TEPERATURE    ");		//
+	LCD_DATA_STRING("     TEMERATURE     ");		//
 	LCD_COMMAND(LCD_SELECT_2ROW);	// select row 2
 	LCD_DATA_STRING("LEFT  SENSOR: ");				//
 
