@@ -8,6 +8,7 @@
 *************************************************************************/
 
 #include <avr/io.h>			// for PORTs: DDRC, PORTC
+#include "uart.h"
 #include "utility.h"		// using for debug and others, needed to delclare serPin as pin of port
 
 /********************************************************************************************
@@ -147,6 +148,20 @@ void delay_ms(int miliSec)  //for 1 Mhz crystal
 	}
 }
 
+
+void about(void)
+{
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] =====================================================\r\n");
+	transmitUartString("[UART INFO] \tAuthors and creators: P.Upinov and P.Stoyanov\r\n");
+	transmitUartString("[UART INFO] \tDevice name: Digital Control Audio System\r\n");
+	transmitUartString("[UART INFO] \tFirmware version beta ");
+	transmitUartInt(FIRMWARE_VERSION);
+	transmitUartString("\r\n");
+	transmitUartString("[UART INFO] =====================================================\r\n");
+	transmitUartString("[UART INFO] Da dobavq upravlenie na:\r\n- FAN\r\n- DS18S20\r\n- IR\r\n- RTC\r\n- Memory\r\n\r\n");
+#endif
+}
 /********************************************************************************************
 ************************************* END OF FUNCTIONS **************************************
 ********************************************************************************************/

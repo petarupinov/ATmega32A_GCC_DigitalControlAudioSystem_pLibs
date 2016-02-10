@@ -35,6 +35,7 @@
 ;;**21. Edit on date 28.11.2015 - update lib uart.c and add uart support ******************;;
 ;;**22. Edit on date 29.11.2015 - update all libs and add debug support *******************;;
 ;;**23. Edit on date 29.11.2015 - adding and formating debug messages *********************;;
+;;**24. Edit on date 29.11.2015 - adding about and firmware version ***********************;;
 ;;*****************************************************************************************;;
 ;;** Used library version: _Soft_Library_Pesho_v0.07 **************************************;;
 ;;*****************************************************************************************;;
@@ -49,7 +50,6 @@
 #include <util/delay.h>
 #include <stdlib.h>			// itoa() - function
 //#include <stdbool.h>		// type boolean true/false
-
 
 /******************************************
 ** INCLUDE SPECIFIED PESHO LIBRARY FILES **
@@ -602,9 +602,13 @@ void init_all()
 //	timer2_init();
 	LCD_INIT();			// LCD init and reset all lcd contain
 	uart_init();		// UART debug init
+	about();			// Any debug important information
+
 	pga2310_init();		// SPI init and reset all (U6, U7, U8) PGA2310 volume values to null
 	relays_in_init();	// ?? nujno li e ?
 	relays_out_init();	// ?? nujno li e ?
+
+
 }
 
 void buttons_press()
@@ -642,6 +646,7 @@ struct flagStatus	 // bit fields from struct
 		if(BUTTON_ON_OFF_low() && flagStatusBits->flagPower == 0)//fSB.flagPower == 0)//flagStatusBits->flagPower == 0)	// obj ptr flagStatusBtnRegister from struct flagStatusBtnOnOff
 		{
 			flagStatusBits->flagPower = 1;			// filter za buton ON
+
 			ampliferOn();
 			_delay_ms(1000);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
 		}
