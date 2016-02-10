@@ -36,7 +36,7 @@ void rtc_ds1307_init()
 	i2c_start();
 	i2c_write(RTC_DS1307_I2C_ADDRESS_WRITE);	// RTC DS1307 ADDRESS ACCESS WRITE
 	i2c_write(RTC_DS1307_I2C_SECONDS);			// MINUTES ADDRESS REGISTER ACCESS
-	for(i=0; i<8; i++)
+	for(i=0; i<6; i++)
 	{
 		i2c_write(0x00);	// SECOND, MINUTE, HOUR, DAY, DATE, MONTH, YEAR, CONTROL
 	}

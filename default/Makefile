@@ -37,7 +37,7 @@ HEX_EEPROM_FLAGS += --change-section-lma .eeprom=0 --no-change-warnings
 
 
 ## Objects that must be built in order to link
-OBJECTS = ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o 24c64.o ds18x20.o i2c_twi.o lcd_hd44780_74hc595.o pga2310.o uart.o spi.o 
+OBJECTS = ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o 24c64.o ds18x20.o i2c_twi.o lcd_hd44780_74hc595.o pga2310.o uart.o spi.o utility.o 
 
 ## Objects explicitly added by the user
 LINKONLYOBJECTS = 
@@ -68,6 +68,9 @@ uart.o: ../_Soft_Library_Pesho_/uart.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 
 spi.o: ../_Soft_Library_Pesho_/spi.c
+	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
+
+utility.o: ../_Soft_Library_Pesho_/utility.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 
 ##Link

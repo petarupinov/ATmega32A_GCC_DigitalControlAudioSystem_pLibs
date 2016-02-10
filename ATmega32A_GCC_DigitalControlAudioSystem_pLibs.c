@@ -21,6 +21,7 @@
 ;;** 7. Edit on date 18.10.2015 - update all library files ********************************;;
 ;;** 8. Edit on date 26.10.2015 - update spi and pga2310 **********************************;;
 ;;** 9. Edit on date 26.10.2015 - update i2c, rtc, 24c64 **********************************;;
+;;**10. Edit on date 26.10.2015 - update **************************************************;;
 ;;*****************************************************************************************;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
@@ -268,6 +269,9 @@ void init_all()
 
 void buttons_press()
 {
+	unsigned char pgaVolumeLeft, pgaVolumeRight;
+	pgaVolumeLeft = pgaVolumeRight = 0b00001111;
+
 	while(1)
 	{
 		if(BUTTON_ON_OFF_low())	// obj ptr flagStatusBtnRegister from struct flagStatusBtnOnOff
@@ -280,6 +284,8 @@ void buttons_press()
 
 				LCD_CGRAM_CUSTOM_SYMBOLS();					// Generate and Store new missing characters into LCD CGRAM
 
+				pga2310_reset();
+//				rtc_ds1307_reset();
 //				unsigned char *str_new = malloc(9);		// ALLOCATE MEMORY
 //				strcpy(str_new, "123PES9");				// str = "123PESH9";
 
@@ -300,6 +306,9 @@ void buttons_press()
 				{
 					LCD_EXECUTE_DATA_ONE(i);		// bytes send
 				}
+				PGA2310_Volume_Update(pgaVolumeLeft, pgaVolumeRight);
+//				rtc_ds1307_get();
+
 				flagStatusBits->flagPower = 0;
 				_delay_ms(200);
 			}

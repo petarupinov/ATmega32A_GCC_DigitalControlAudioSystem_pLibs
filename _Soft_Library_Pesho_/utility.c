@@ -18,6 +18,8 @@
 ** DEFINITION OF FUNCTIONS **
 ****************************/
 
+#define serPin 0
+
 /**************************************************************
 **** CONVERT NORMAL DECIMAL NUMBERS TO BINARY CODED DECIMAL ***
 **************************************************************/
