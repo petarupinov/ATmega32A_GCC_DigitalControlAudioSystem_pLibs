@@ -40,6 +40,7 @@
 ;;**26. Edit on date 04.12.2015 - adding ir support ***************************************;;
 ;;**27. Edit on date 06.12.2015 - adding main header file in project **********************;;
 ;;**28. Edit on date 07.12.2015 - adding remote volume and mute ***************************;;
+;;**29. Edit on date 09.12.2015 - adding fan stepping with timer1 ORC1AL ******************;;
 ;;*****************************************************************************************;;
 ;;** Used library version: _Soft_Library_Pesho_v0.07 **************************************;;
 ;;*****************************************************************************************;;
@@ -78,49 +79,35 @@
 ********************************* START OF INITIALIZATIONS **********************************
 ********************************************************************************************/
 
-// https://en.wikipedia.org/wiki/Bit_field
-// http://www.geeksforgeeks.org/bit-fields-c/
-// http://stackoverflow.com/questions/24933242/when-to-use-bit-fields-in-c
-// http://stackoverflow.com/questions/8258483/accessing-bit-field-in-c-by-its-address
-//#define flagStatusBtnOnOffBit0 0
+// STATUS FLAGS
 struct flagStatus	 // ako bade obqveno ime na strukturata, shte mogat da badat sazdavani i drugi strukturni promenlivi (obekti) i ukazateli ot tazi struktura
 {
 	unsigned int flagPower	: 1;	// bit0: '0' = Power OFF, '1' = Power ON	// ne sa inicializirani
 	unsigned int flagMute	: 1;	// bit1: '0' = Mute OFF, '1' = Mute ON		// ne sa inicializirani
 } fSB, *flagStatusBits;		// sazdadeni fiksirani kam tazi struktura: strukturna promenliva (obekt) i ukazatel
-/*
-struct flagStatus	 // bit fields from struct
-{
-	unsigned int flagPower	: 1;	// bit0: '0' = Power OFF, '1' = Power ON
-	unsigned int flagMute	: 1;	// bit1: '0' = Mute OFF, '1' = Mute ON
 
-} *flagStatusBits;	// edin ukazatel kam strukturata, vazmojeno e sazdavane i na drugi ukazateli ili obekti
-// dostap chrez imeto na ukazatelq: flagStatusBits->flagPower
 
-*/
-
-/*
-struct flagStatusBtnOnOff
-{
-	unsigned int bit0 : 1;	// = 0;	// bit0 from struct bit field
-	unsigned int bit1 : 1;	// = 1;	// bit1 from struct bit field
-}flagStatusBtnRegister;
-*/
+// INFRA RED RECEIVER and VOLUME STEPS
 #define REMOTE_VOLUME_UP 1
 #define REMOTE_VOLUME_DOWN -1
 #define VOLUME_LIMIT_POSITIONS 20
 unsigned char volumeBuffer = 0;				// fro MUTE function
 unsigned char volumeIndex = VOLUME_MUTE;	// defined in pga2310.h
-
 unsigned char volumeValue [VOLUME_LIMIT_POSITIONS] = { 0x00, 0x28, 0x32, 0x3C, 0x46, 0x50, 0x5A, 0x64, 0x6E, 0x78, 0x82, 0x8C, 0x96, 0xA0, 0xAA, 0xB4, 0xBE, 0xC8, 0xD2, 0xD7 };
 //       values of volume  ->	0,    40,   50,   60,   70,   80,   90,   100,  110,  120,  130,  140,  150,  160,  170,  180,  190,  200,  210,  215	<-	values of volume
 // index of values of volume    0      1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19
 
-// temper sensor
-//unsigned char i=0;				// counter cycle
+// TEMPERATURE SENSOR
 unsigned char storeTemp [10] = {};	// data bytes massive
-unsigned char byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9; // bytes ot temperaturen sensor
 
+// FAN SPEED STEPS
+#define FAN_LIMIT_POSITIONS 8
+#define FAN_SPEED_ABSOLUTE_MIN 0
+#define FAN_SPEED_MIN 100		// critical minimum = 90
+#define FAN_SPEED_MAX 250
+unsigned char fanSpeed = 1;	// FAN SPEED OCR1AL = 100
+unsigned char fanSpeedStep [FAN_LIMIT_POSITIONS] = { 0x00, 100, 125, 150, 175, 200, 225, 250 };
+unsigned char byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9; // bytes ot temperaturen sensor
 
 
 /*****************************************
@@ -220,7 +207,7 @@ void ext2_intrpt_init(void)
 /*****************************
 ** INITIZLIZATION OF TIMER1 **
 *****************************/
-void timer1_init()
+void timer1_init(void)
 {
 // http://www.mikroe.com/forum/viewtopic.php?f=72&t=51076
 
@@ -282,19 +269,23 @@ void timer0_off()
 /***************************************
 ******** DEFINITIONS OF TIMER 1 ********
 ***************************************/
-void timer1_on_speed1()
+void timer1_on_speed(void)
 {
-	TCCR1A = 0b10000001;		// 0b10100001 - OC1A,OC1B - PWM;  0b10000001 - OC1A PWM, OC1B - Disabled, normal port.
-	TCCR1B = 0b00010001;
+//		ldi	r16, 0			; maskov registar za prekasvaniq
+//		out	TIMSK, r16		; 
+	TCCR1A = 0b10100001;	// 0b10000001;	// nastroika na 2 kanala rejim na rabota na SHIM		// 0b10100001 - OC1A,OC1B - PWM;  0b10000001 - OC1A PWM, OC1B - Disabled, normal port.
+	TCCR1B = 0b00000001;	// 0b00010001;	// nastroika na 2 kanala rejim na rabota na SHIM i preddelitel 8
 
-	OCR1AH = 0; // FAN PWM ON
-	OCR1AL = 1; // FAN PWM ON
+// CHANNEL A
+	OCR1AH = 0;		// 0; // FAN PWM ON		// out	OCR1AH, r16		; 0   = 0b00000000 (DEC = BIN)
+	OCR1AL = fanSpeedStep [fanSpeed];//100;	// 1; // FAN PWM ON		// out	OCR1AL, r17		; 200 = 0b11001000 (DEC = BIN)
 
-//	OCR1BH = 0; // LED PWM ON
-//	OCR1BL = 1; // LED PWM ON
+// CHANNEL B
+//	OCR1BH = 0; // LED PWM ON				// out	OCR1BH, r16		; 0   = 0b00000000 (DEC = BIN)
+//	OCR1BL = 1; // LED PWM ON				// out	OCR1BL, r17		; 200 = 0b11001000 (DEC = BIN)
 }
 
-void timer1_off()
+void timer1_off(void)
 {
 	TCCR1A = 0b00000000;		// DISABLED OCOC1A - PWM, OC1B - Disabled, normal port.
 	TCCR1B = 0b00000000;		// 
@@ -309,11 +300,11 @@ void timer1_off()
 /***********************************
 ******** DEFINITIONS OF FAN ********
 ***********************************/
-void FAN_PWM_SPEED1()
+void FAN_PWM_SPEED1(void)
 {
-	timer1_on_speed1();
+	timer1_on_speed();
 }
-void FAN_PWM_OFF()
+void FAN_PWM_OFF(void)
 {
 	timer1_off();
 }
@@ -323,14 +314,14 @@ void FAN_PWM_OFF()
 ***************************************/
 void timer2_on(void)	// Timer2 On
 {
-	TCCR2 = 0b10000001;		// 0b10100001 - OC1A,OC1B - PWM;  0b10000001 - OC1A PWM, OC1B - Disabled, normal port.
-	OCR2 = 1; // FAN PWM ON
+//	TCCR2 = 0b10000001;		// 0b10100001 - OC1A,OC1B - PWM;  0b10000001 - OC1A PWM, OC1B - Disabled, normal port.
+//	OCR2 = 1; // FAN PWM ON
 }
 
 void timer2_off(void)	// Timer2 Off
 {
-	TCCR2 = 0b00000000;		// DISABLED OCOC1A - PWM, OC1B - Disabled, normal port.
-	OCR2 = 0; // FAN PWM OFF
+//	TCCR2 = 0b00000000;		// DISABLED OCOC1A - PWM, OC1B - Disabled, normal port.
+//	OCR2 = 0; // FAN PWM OFF
 }
 
 /************************************
@@ -367,6 +358,42 @@ void irDecode(void)
 	{	// MUTE
 		volumeMute();
 //		break;
+	}
+	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_DOWN)) && flagStatusBits->flagPower == 1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> ON
+	{	// FAN STEP UP
+		if(fanSpeed < FAN_SPEED_ABSOLUTE_MIN + 1)//0)
+		{
+			fanSpeed = FAN_SPEED_ABSOLUTE_MIN;	//0;	// 0-7
+		}
+		else
+		{
+			fanSpeed--;	// sabirane s polojitelno chislo, kratak zapis na: volumeIndex = volumeIndex + temp;
+		}
+//		fanSpeedStep [fanSpeed];// = { 0x00, 100, 125, 150, 175, 200, 225, 250 };
+		LCD_COMMAND(LCD_SELECT_4ROW);	// select row 3								// and next is update volume lcd information
+		LCD_DATA_STRING("Fan Step: ");	// 20 symbols			
+		LCD_DATA_INT(fanSpeed);		// 20 symbols
+		LCD_DATA_STRING(" or ");
+		LCD_DATA_INT(fanSpeedStep[fanSpeed]);
+		timer1_on_speed();
+	}
+	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_UP)) && flagStatusBits->flagPower == 1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> ON
+	{	// FAN STEP DOWN
+		if(fanSpeed > FAN_LIMIT_POSITIONS - 2)//7)
+		{
+			fanSpeed = FAN_LIMIT_POSITIONS - 1;	//7;	// 0-7
+		}
+		else
+		{
+			fanSpeed++;	// sabirane s polojitelno chislo, kratak zapis na: volumeIndex = volumeIndex + temp;
+		}
+//		fanSpeedStep [fanSpeed];// = { 0x00, 100, 125, 150, 175, 200, 225, 250 };
+		LCD_COMMAND(LCD_SELECT_4ROW);	// select row 3								// and next is update volume lcd information
+		LCD_DATA_STRING("Fan Step: ");	// 20 symbols			
+		LCD_DATA_INT(fanSpeed);		// 20 symbols
+		LCD_DATA_STRING(" or ");
+		LCD_DATA_INT(fanSpeedStep[fanSpeed]);
+		timer1_on_speed();
 	}
 /*	else if((((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_ATT)) && mute==1) && flagPower==1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> OFF
 	{	// UNMUTE
@@ -737,6 +764,7 @@ void commonEncoder(void)	// not finished
 		else
 		{
 			saveValue += temp;	// sabirane s polojitelno chislo, kratak zapis na: volumeIndex = volumeIndex + temp;
+//			fanSpeedStep [FAN_LIMIT_POSITIONS]
 		}
 // LCD PRINT VALUE
 	LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
@@ -1114,14 +1142,15 @@ ISR(TIMER2_OVF_vect)
 void init_all()
 {
 	port_init();		// IO init and configure all port
+	timer1_init();		// FAN INIT
 //	timer2_init();
 	LCD_INIT();			// LCD init and reset all lcd contain
 	uart_init();		// UART debug init
 	about();			// Any debug important information
 
 	pga2310_init();		// SPI init and reset all (U6, U7, U8) PGA2310 volume values to null
-//	relays_in_init();	// ?? nujno li e ?
-//	relays_out_init();	// ?? nujno li e ?
+	relays_in_init();	// nujno e daden reset be da bade izkliuche usilvatelq, togava reletata za vhod i izhod (bez power relay) sa ostanali vkliucheni
+	relays_out_init();	// nujno e daden reset be da bade izkliuche usilvatelq, togava reletata za vhod i izhod (bez power relay)sa ostanali vkliucheni
 
 
 }
@@ -1200,7 +1229,8 @@ void buttons_press()
 		}
 		else if(flagStatusBits->flagPower == 0)
 		{
-			commonEncoder();
+//			commonEncoderFanSpeedSteping();
+//			commonEncoder();
 		}
 		else
 		{

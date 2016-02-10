@@ -166,7 +166,7 @@ LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
 .rela.plt
  *(.rela.plt)
 
-.text           0x00000000     0x17aa
+.text           0x00000000     0x1838
  *(.vectors)
  .vectors       0x00000000       0x54 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5/crtm32.o
                 0x00000000                __vectors
@@ -238,177 +238,177 @@ LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
                 0x0000008e                __vector_16
                 0x0000008e                __vector_18
                 0x0000008e                __vector_20
- .text          0x00000092      0x9a2 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
+ .text          0x00000092      0xa60 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
                 0x00000092                port_init
-                0x00000108                FAN_PWM_OFF
-                0x000009ca                __vector_1
-                0x0000011c                timer2_off
+                0x00000120                FAN_PWM_OFF
+                0x00000a88                __vector_1
+                0x0000012c                timer2_off
                 0x000000d2                timer2_init
-                0x0000056e                volumeUpdate
-                0x000001d2                temperMeasur
-                0x0000032a                oneWireLeft
-                0x000007e4                buttons_press
-                0x00000136                __vector_3
+                0x00000588                volumeUpdate
+                0x000001ec                temperMeasur
+                0x00000344                oneWireLeft
+                0x00000808                buttons_press
+                0x00000142                __vector_3
                 0x000000ca                timer1_init
-                0x000003e2                temperature
-                0x000000f8                FAN_PWM_SPEED1
-                0x000004c4                commonEncoder
-                0x000001bc                init_all
-                0x000000de                timer1_on_speed1
+                0x000003fc                temperature
+                0x00000104                FAN_PWM_SPEED1
+                0x000004de                commonEncoder
+                0x000001c8                init_all
                 0x000000b0                ext0_intrpt_init
-                0x000005c2                volumeMute
-                0x00000112                timer2_on
-                0x0000015e                __vector_5
-                0x00000608                volumeProcessRemote
+                0x000005dc                volumeMute
+                0x0000012a                timer2_on
+                0x0000016a                __vector_5
+                0x00000622                volumeProcessRemote
                 0x000000be                ext0_intrpt_off
-                0x000008dc                main
-                0x0000014a                __vector_4
-                0x00000726                ampliferOn
-                0x000000ee                timer1_off
+                0x000008fa                main
+                0x00000156                __vector_4
+                0x00000740                ampliferOn
+                0x000000fa                timer1_off
                 0x000000c6                ext1_intrpt_init
-                0x00000684                ampliferOff
+                0x000000de                timer1_on_speed
+                0x0000069e                ampliferOff
                 0x000000b6                ext0_intrpt_on
                 0x000000c8                ext2_intrpt_init
-                0x00000122                __vector_2
-                0x000008f0                irDecode
-                0x00000172                about
-                0x00000642                volumeProcess
-                0x00000272                oneWireRight
- .text          0x00000a34       0xbc 24c64.o
-                0x00000a7e                eeprom_24c64_write
-                0x00000a34                eeprom_24c64_read
-                0x00000ab8                eeprom_24c64_reset
- .text          0x00000af0      0x150 ds18x20.o
-                0x00000be8                wait_ready
-                0x00000af0                reset
-                0x00000bf2                read_scratchpad
-                0x00000b1a                read_bit
-                0x00000b48                read_byte
-                0x00000b32                write_bit
-                0x00000ba2                write_byte
- .text          0x00000c40       0x46 i2c_twi.o
-                0x00000c62                i2c_write
-                0x00000c50                i2c_start
-                0x00000c5c                i2c_stop
-                0x00000c70                i2c_read
-                0x00000c40                i2c_init
- .text          0x00000c86      0x302 lcd_hd44780_74hc595.o
-                0x00000dcc                LCD_INIT
-                0x00000d64                LCD_EXECUTE_DATA_LAST
-                0x00000dbc                LCD_CLEAR_CONTAIN
-                0x00000ea8                LCD_DATA_ULONG
-                0x00000cc4                LCD_EXECUTE_DATA
-                0x00000f50                LCD_DATA_UINT
-                0x00000e3c                LCD_CGRAM_CUSTOM_SYMBOLS
-                0x00000ee0                LCD_DATA_LONG
-                0x00000c86                LCD_EXECUTE_COMMAND
-                0x00000d7e                LCD_COMMAND
-                0x00000dee                LCD_DATA_STRING
-                0x00000d26                LCD_EXECUTE_DATA_ONE
-                0x00000f18                LCD_DATA_INT
- .text          0x00000f88       0x82 pga2310.o
-                0x00000f88                PGA2310_Volume_Update
-                0x00000fb6                pga2310_init
-                0x00000fe0                pga2310_reset
- .text          0x0000100a      0x194 uart.o
-                0x000010ac                transmitUartULong
-                0x000010e4                transmitUartInt
-                0x0000106c                receiveUart
-                0x00001074                transmitUartLong
-                0x0000100a                uart_transmit
-                0x00001034                uart_transmit_DEC_to_BCD
-                0x00001154                uart_init
-                0x0000102c                uart_transmit_one
-                0x00001050                transmitUart
-                0x00001058                transmitUartString
-                0x0000111c                transmitUartUInt
- .text          0x0000119e       0x58 spi.o
-                0x0000119e                spi_init
-                0x000011aa                spi_start
-                0x000011d2                spi_write_more_bytes
-                0x000011b0                spi_stop
-                0x000011ec                spi_read_more_bytes
-                0x000011c0                spi_write_two_bytes
-                0x000011b4                spi_write_one_byte
- .text          0x000011f6       0xae utility.o
-                0x00001272                shiftLeftInMsbFirst
-                0x00001264                shiftRightInLsbFirst
-                0x000011f6                decToBcd
-                0x00001280                delay_ms
-                0x00001218                bcdToDec
-                0x0000122c                shiftRightOutLsbFirst
-                0x00001248                shiftLeftOutMsbFirst
- .text          0x000012a4       0x98 rotation_encoder.o
-                0x000012e4                rotaryEncoderVer1
-                0x00001324                rotaryEncoderVer2
-                0x000012a4                rotaryEncoderNikBarzakov
- .text          0x0000133c       0xc0 relay_74hc595.o
-                0x00001376                relays_in1_6ch
-                0x0000136e                relays_in1_2ch
-                0x000013f4                relays_out_init
-                0x0000137e                relays_in2_2ch
-                0x0000133e                RELAYS_OUT_INIT
-                0x00001340                RELAYS_IN_CHOOSE
-                0x000013e4                relays_out_6ch
-                0x000013ae                RELAYS_OUT_CHOOSE
-                0x000013ec                relays_out_off
-                0x00001396                relays_in3_6ch
-                0x000013dc                relays_out_1ch
-                0x0000139e                relays_in_off
-                0x0000138e                relays_in3_2ch
-                0x00001386                relays_in2_6ch
-                0x000013a6                relays_in_init
-                0x0000133c                RELAYS_IN_INIT
- .text          0x000013fc      0x1c0 ir_sirc.o
-                0x000013fc                GetSIRC12
-                0x00001504                GetSIRC20
-                0x00001480                GetSIRC15
- .text          0x000015bc        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodqi4.o)
- .text          0x000015bc        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_divmodhi4.o)
- .text          0x000015bc        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
- .text          0x000015bc        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_copy_data.o)
- .text          0x000015bc        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_clear_bss.o)
- .text          0x000015bc        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodhi4.o)
- .text          0x000015bc        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(itoa.o)
- .text          0x000015bc        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ltoa.o)
- .text          0x000015bc        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ultoa.o)
- .text          0x000015bc        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(utoa.o)
- .text          0x000015bc        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(strrev.o)
- .text          0x000015bc        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodsi4.o)
-                0x000015bc                . = ALIGN (0x2)
+                0x0000012e                __vector_2
+                0x0000090e                irDecode
+                0x0000017e                about
+                0x0000065c                volumeProcess
+                0x0000028c                oneWireRight
+ .text          0x00000af2       0xbc 24c64.o
+                0x00000b3c                eeprom_24c64_write
+                0x00000af2                eeprom_24c64_read
+                0x00000b76                eeprom_24c64_reset
+ .text          0x00000bae      0x150 ds18x20.o
+                0x00000ca6                wait_ready
+                0x00000bae                reset
+                0x00000cb0                read_scratchpad
+                0x00000bd8                read_bit
+                0x00000c06                read_byte
+                0x00000bf0                write_bit
+                0x00000c60                write_byte
+ .text          0x00000cfe       0x46 i2c_twi.o
+                0x00000d20                i2c_write
+                0x00000d0e                i2c_start
+                0x00000d1a                i2c_stop
+                0x00000d2e                i2c_read
+                0x00000cfe                i2c_init
+ .text          0x00000d44      0x302 lcd_hd44780_74hc595.o
+                0x00000e8a                LCD_INIT
+                0x00000e22                LCD_EXECUTE_DATA_LAST
+                0x00000e7a                LCD_CLEAR_CONTAIN
+                0x00000f66                LCD_DATA_ULONG
+                0x00000d82                LCD_EXECUTE_DATA
+                0x0000100e                LCD_DATA_UINT
+                0x00000efa                LCD_CGRAM_CUSTOM_SYMBOLS
+                0x00000f9e                LCD_DATA_LONG
+                0x00000d44                LCD_EXECUTE_COMMAND
+                0x00000e3c                LCD_COMMAND
+                0x00000eac                LCD_DATA_STRING
+                0x00000de4                LCD_EXECUTE_DATA_ONE
+                0x00000fd6                LCD_DATA_INT
+ .text          0x00001046       0x82 pga2310.o
+                0x00001046                PGA2310_Volume_Update
+                0x00001074                pga2310_init
+                0x0000109e                pga2310_reset
+ .text          0x000010c8      0x164 uart.o
+                0x00001184                transmitUartULong
+                0x000011bc                transmitUartInt
+                0x00001144                receiveUart
+                0x0000114c                transmitUartLong
+                0x000010c8                uart_transmit
+                0x000010f2                uart_transmit_DEC_to_BCD
+                0x0000112a                uart_init
+                0x000010ea                uart_transmit_one
+                0x0000110e                transmitUart
+                0x00001116                transmitUartString
+                0x000011f4                transmitUartUInt
+ .text          0x0000122c       0x58 spi.o
+                0x0000122c                spi_init
+                0x00001238                spi_start
+                0x00001260                spi_write_more_bytes
+                0x0000123e                spi_stop
+                0x0000127a                spi_read_more_bytes
+                0x0000124e                spi_write_two_bytes
+                0x00001242                spi_write_one_byte
+ .text          0x00001284       0xae utility.o
+                0x00001300                shiftLeftInMsbFirst
+                0x000012f2                shiftRightInLsbFirst
+                0x00001284                decToBcd
+                0x0000130e                delay_ms
+                0x000012a6                bcdToDec
+                0x000012ba                shiftRightOutLsbFirst
+                0x000012d6                shiftLeftOutMsbFirst
+ .text          0x00001332       0x98 rotation_encoder.o
+                0x00001372                rotaryEncoderVer1
+                0x000013b2                rotaryEncoderVer2
+                0x00001332                rotaryEncoderNikBarzakov
+ .text          0x000013ca       0xc0 relay_74hc595.o
+                0x00001404                relays_in1_6ch
+                0x000013fc                relays_in1_2ch
+                0x00001482                relays_out_init
+                0x0000140c                relays_in2_2ch
+                0x000013cc                RELAYS_OUT_INIT
+                0x000013ce                RELAYS_IN_CHOOSE
+                0x00001472                relays_out_6ch
+                0x0000143c                RELAYS_OUT_CHOOSE
+                0x0000147a                relays_out_off
+                0x00001424                relays_in3_6ch
+                0x0000146a                relays_out_1ch
+                0x0000142c                relays_in_off
+                0x0000141c                relays_in3_2ch
+                0x00001414                relays_in2_6ch
+                0x00001434                relays_in_init
+                0x000013ca                RELAYS_IN_INIT
+ .text          0x0000148a      0x1c0 ir_sirc.o
+                0x0000148a                GetSIRC12
+                0x00001592                GetSIRC20
+                0x0000150e                GetSIRC15
+ .text          0x0000164a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodqi4.o)
+ .text          0x0000164a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_divmodhi4.o)
+ .text          0x0000164a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
+ .text          0x0000164a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_copy_data.o)
+ .text          0x0000164a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_clear_bss.o)
+ .text          0x0000164a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodhi4.o)
+ .text          0x0000164a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(itoa.o)
+ .text          0x0000164a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ltoa.o)
+ .text          0x0000164a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ultoa.o)
+ .text          0x0000164a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(utoa.o)
+ .text          0x0000164a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(strrev.o)
+ .text          0x0000164a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodsi4.o)
+                0x0000164a                . = ALIGN (0x2)
  *(.text.*)
- .text.libgcc   0x000015bc       0x18 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodqi4.o)
-                0x000015bc                __udivmodqi4
- .text.libgcc   0x000015d4       0x26 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_divmodhi4.o)
-                0x000015d4                __divmodhi4
-                0x000015d4                _div
- .text.libgcc   0x000015fa        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
- .text.libgcc   0x000015fa        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_copy_data.o)
- .text.libgcc   0x000015fa        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_clear_bss.o)
- .text.libgcc   0x000015fa       0x28 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodhi4.o)
-                0x000015fa                __udivmodhi4
+ .text.libgcc   0x0000164a       0x18 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodqi4.o)
+                0x0000164a                __udivmodqi4
+ .text.libgcc   0x00001662       0x26 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_divmodhi4.o)
+                0x00001662                __divmodhi4
+                0x00001662                _div
+ .text.libgcc   0x00001688        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
+ .text.libgcc   0x00001688        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_copy_data.o)
+ .text.libgcc   0x00001688        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_clear_bss.o)
+ .text.libgcc   0x00001688       0x28 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodhi4.o)
+                0x00001688                __udivmodhi4
  .text.avr-libc
-                0x00001622       0x42 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(itoa.o)
-                0x00001622                itoa
+                0x000016b0       0x42 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(itoa.o)
+                0x000016b0                itoa
  .text.avr-libc
-                0x00001664       0x68 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ltoa.o)
-                0x00001664                ltoa
+                0x000016f2       0x68 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ltoa.o)
+                0x000016f2                ltoa
  .text.avr-libc
-                0x000016cc       0x4a c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ultoa.o)
-                0x000016cc                ultoa
+                0x0000175a       0x4a c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ultoa.o)
+                0x0000175a                ultoa
  .text.avr-libc
-                0x00001716       0x2c c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(utoa.o)
-                0x00001716                utoa
+                0x000017a4       0x2c c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(utoa.o)
+                0x000017a4                utoa
  .text.avr-libc
-                0x00001742       0x20 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(strrev.o)
-                0x00001742                strrev
- .text.libgcc   0x00001762       0x44 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodsi4.o)
-                0x00001762                __udivmodsi4
-                0x000017a6                . = ALIGN (0x2)
+                0x000017d0       0x20 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(strrev.o)
+                0x000017d0                strrev
+ .text.libgcc   0x000017f0       0x44 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodsi4.o)
+                0x000017f0                __udivmodsi4
+                0x00001834                . = ALIGN (0x2)
  *(.fini9)
- .fini9         0x000017a6        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
-                0x000017a6                exit
-                0x000017a6                _exit
+ .fini9         0x00001834        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
+                0x00001834                exit
+                0x00001834                _exit
  *(.fini9)
  *(.fini8)
  *(.fini8)
@@ -427,111 +427,114 @@ LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
  *(.fini1)
  *(.fini1)
  *(.fini0)
- .fini0         0x000017a6        0x4 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
+ .fini0         0x00001834        0x4 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
  *(.fini0)
-                0x000017aa                _etext = .
+                0x00001838                _etext = .
 
-.data           0x00800060      0x6d6 load address 0x000017aa
+.data           0x00800060      0x65c load address 0x00001838
                 0x00800060                PROVIDE (__data_start, .)
  *(.data)
  .data          0x00800060        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5/crtm32.o
- .data          0x00800060      0x607 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
-                0x00800653                volumeValue
- .data          0x00800667        0x0 24c64.o
- .data          0x00800667        0x0 ds18x20.o
- .data          0x00800667        0x0 i2c_twi.o
- .data          0x00800667       0x38 lcd_hd44780_74hc595.o
-                0x00800667                symbolGenerator
- .data          0x0080069f        0x0 pga2310.o
- .data          0x0080069f       0x97 uart.o
- .data          0x00800736        0x0 spi.o
- .data          0x00800736        0x0 utility.o
- .data          0x00800736        0x0 rotation_encoder.o
- .data          0x00800736        0x0 relay_74hc595.o
- .data          0x00800736        0x0 ir_sirc.o
- .data          0x00800736        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodqi4.o)
- .data          0x00800736        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_divmodhi4.o)
- .data          0x00800736        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
- .data          0x00800736        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_copy_data.o)
- .data          0x00800736        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_clear_bss.o)
- .data          0x00800736        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodhi4.o)
- .data          0x00800736        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(itoa.o)
- .data          0x00800736        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ltoa.o)
- .data          0x00800736        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ultoa.o)
- .data          0x00800736        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(utoa.o)
- .data          0x00800736        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(strrev.o)
- .data          0x00800736        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodsi4.o)
+ .data          0x00800060      0x620 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
+                0x00800678                fanSpeedStep
+                0x00800663                volumeValue
+                0x00800677                fanSpeed
+ .data          0x00800680        0x0 24c64.o
+ .data          0x00800680        0x0 ds18x20.o
+ .data          0x00800680        0x0 i2c_twi.o
+ .data          0x00800680       0x38 lcd_hd44780_74hc595.o
+                0x00800680                symbolGenerator
+ .data          0x008006b8        0x0 pga2310.o
+ .data          0x008006b8        0x3 uart.o
+ .data          0x008006bb        0x0 spi.o
+ .data          0x008006bb        0x0 utility.o
+ .data          0x008006bb        0x0 rotation_encoder.o
+ .data          0x008006bb        0x0 relay_74hc595.o
+ .data          0x008006bb        0x0 ir_sirc.o
+ .data          0x008006bb        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodqi4.o)
+ .data          0x008006bb        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_divmodhi4.o)
+ .data          0x008006bb        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
+ .data          0x008006bb        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_copy_data.o)
+ .data          0x008006bb        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_clear_bss.o)
+ .data          0x008006bb        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodhi4.o)
+ .data          0x008006bb        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(itoa.o)
+ .data          0x008006bb        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ltoa.o)
+ .data          0x008006bb        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ultoa.o)
+ .data          0x008006bb        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(utoa.o)
+ .data          0x008006bb        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(strrev.o)
+ .data          0x008006bb        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodsi4.o)
  *(.data*)
  *(.rodata)
  *(.rodata*)
  *(.gnu.linkonce.d*)
-                0x00800736                . = ALIGN (0x2)
-                0x00800736                _edata = .
-                0x00800736                PROVIDE (__data_end, .)
+                0x008006bc                . = ALIGN (0x2)
+ *fill*         0x008006bb        0x1 00
+                0x008006bc                _edata = .
+                0x008006bc                PROVIDE (__data_end, .)
 
-.bss            0x00800736       0x2b
-                0x00800736                PROVIDE (__bss_start, .)
+.bss            0x008006bc       0x2b
+                0x008006bc                PROVIDE (__bss_start, .)
  *(.bss)
- .bss           0x00800736        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5/crtm32.o
- .bss           0x00800736        0xd ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
-                0x00800738                storeTemp
-                0x00800737                volumeIndex
-                0x00800736                volumeBuffer
- .bss           0x00800743        0x0 24c64.o
- .bss           0x00800743        0xa ds18x20.o
-                0x00800743                scratchpad
- .bss           0x0080074d        0x0 i2c_twi.o
- .bss           0x0080074d        0x0 lcd_hd44780_74hc595.o
- .bss           0x0080074d        0x0 pga2310.o
- .bss           0x0080074d        0x0 uart.o
- .bss           0x0080074d        0x0 spi.o
- .bss           0x0080074d        0x0 utility.o
- .bss           0x0080074d        0x0 rotation_encoder.o
- .bss           0x0080074d        0x0 relay_74hc595.o
- .bss           0x0080074d        0x0 ir_sirc.o
- .bss           0x0080074d        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodqi4.o)
- .bss           0x0080074d        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_divmodhi4.o)
- .bss           0x0080074d        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
- .bss           0x0080074d        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_copy_data.o)
- .bss           0x0080074d        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_clear_bss.o)
- .bss           0x0080074d        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodhi4.o)
- .bss           0x0080074d        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(itoa.o)
- .bss           0x0080074d        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ltoa.o)
- .bss           0x0080074d        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ultoa.o)
- .bss           0x0080074d        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(utoa.o)
- .bss           0x0080074d        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(strrev.o)
- .bss           0x0080074d        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodsi4.o)
+ .bss           0x008006bc        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5/crtm32.o
+ .bss           0x008006bc        0xd ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
+                0x008006be                storeTemp
+                0x008006bd                volumeIndex
+                0x008006bc                volumeBuffer
+ .bss           0x008006c9        0x0 24c64.o
+ .bss           0x008006c9        0xa ds18x20.o
+                0x008006c9                scratchpad
+ .bss           0x008006d3        0x0 i2c_twi.o
+ .bss           0x008006d3        0x0 lcd_hd44780_74hc595.o
+ .bss           0x008006d3        0x0 pga2310.o
+ .bss           0x008006d3        0x0 uart.o
+ .bss           0x008006d3        0x0 spi.o
+ .bss           0x008006d3        0x0 utility.o
+ .bss           0x008006d3        0x0 rotation_encoder.o
+ .bss           0x008006d3        0x0 relay_74hc595.o
+ .bss           0x008006d3        0x0 ir_sirc.o
+ .bss           0x008006d3        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodqi4.o)
+ .bss           0x008006d3        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_divmodhi4.o)
+ .bss           0x008006d3        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
+ .bss           0x008006d3        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_copy_data.o)
+ .bss           0x008006d3        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_clear_bss.o)
+ .bss           0x008006d3        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodhi4.o)
+ .bss           0x008006d3        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(itoa.o)
+ .bss           0x008006d3        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ltoa.o)
+ .bss           0x008006d3        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(ultoa.o)
+ .bss           0x008006d3        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(utoa.o)
+ .bss           0x008006d3        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5\libc.a(strrev.o)
+ .bss           0x008006d3        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodsi4.o)
  *(.bss*)
  *(COMMON)
- COMMON         0x0080074d       0x10 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
-                0x0080074d                byte7
-                0x0080074e                byte2
-                0x0080074f                byte3
-                0x00800750                byte6
-                0x00800751                byte1
-                0x00800752                irCommand
-                0x00800753                flagStatusBits
-                0x00800755                byte0
-                0x00800756                byte4
-                0x00800757                irAddress
-                0x00800758                byte8
-                0x00800759                irExtended
-                0x0080075a                byte9
-                0x0080075b                fSB
-                0x0080075c                byte5
- COMMON         0x0080075d        0x4 lcd_hd44780_74hc595.o
-                0x0080075d                rows
-                0x0080075f                cols
-                0x00800761                PROVIDE (__bss_end, .)
-                0x000017aa                __data_load_start = LOADADDR (.data)
-                0x00001e80                __data_load_end = (__data_load_start + SIZEOF (.data))
+ COMMON         0x008006d3       0x10 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
+                0x008006d3                byte7
+                0x008006d4                byte2
+                0x008006d5                byte3
+                0x008006d6                byte6
+                0x008006d7                byte1
+                0x008006d8                irCommand
+                0x008006d9                flagStatusBits
+                0x008006db                byte0
+                0x008006dc                byte4
+                0x008006dd                irAddress
+                0x008006de                byte8
+                0x008006df                irExtended
+                0x008006e0                byte9
+                0x008006e1                fSB
+                0x008006e2                byte5
+ COMMON         0x008006e3        0x4 lcd_hd44780_74hc595.o
+                0x008006e3                rows
+                0x008006e5                cols
+                0x008006e7                PROVIDE (__bss_end, .)
+                0x00001838                __data_load_start = LOADADDR (.data)
+                0x00001e94                __data_load_end = (__data_load_start + SIZEOF (.data))
 
-.noinit         0x00800761        0x0
-                0x00800761                PROVIDE (__noinit_start, .)
+.noinit         0x008006e7        0x0
+                0x008006e7                PROVIDE (__noinit_start, .)
  *(.noinit*)
-                0x00800761                PROVIDE (__noinit_end, .)
-                0x00800761                _end = .
-                0x00800761                PROVIDE (__heap_start, .)
+                0x008006e7                PROVIDE (__noinit_end, .)
+                0x008006e7                _end = .
+                0x008006e7                PROVIDE (__heap_start, .)
 
 .eeprom         0x00810000        0x0
  *(.eeprom*)
@@ -610,50 +613,50 @@ LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
                 0x00000160       0x20 ir_sirc.o
 
 .debug_pubnames
-                0x00000000      0xa30
+                0x00000000      0xa4d
  *(.debug_pubnames)
  .debug_pubnames
-                0x00000000      0x33a ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
+                0x00000000      0x357 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
  .debug_pubnames
-                0x0000033a       0x56 24c64.o
+                0x00000357       0x56 24c64.o
  .debug_pubnames
-                0x00000390       0x86 ds18x20.o
+                0x000003ad       0x86 ds18x20.o
  .debug_pubnames
-                0x00000416       0x55 i2c_twi.o
+                0x00000433       0x55 i2c_twi.o
  .debug_pubnames
-                0x0000046b      0x144 lcd_hd44780_74hc595.o
+                0x00000488      0x144 lcd_hd44780_74hc595.o
  .debug_pubnames
-                0x000005af       0x4f pga2310.o
+                0x000005cc       0x4f pga2310.o
  .debug_pubnames
-                0x000005fe       0xf1 uart.o
+                0x0000061b       0xf1 uart.o
  .debug_pubnames
-                0x000006ef       0x9a spi.o
+                0x0000070c       0x9a spi.o
  .debug_pubnames
-                0x00000789       0x9d utility.o
+                0x000007a6       0x9d utility.o
  .debug_pubnames
-                0x00000826       0x5b rotation_encoder.o
+                0x00000843       0x5b rotation_encoder.o
  .debug_pubnames
-                0x00000881      0x148 relay_74hc595.o
+                0x0000089e      0x148 relay_74hc595.o
  .debug_pubnames
-                0x000009c9       0x67 ir_sirc.o
+                0x000009e6       0x67 ir_sirc.o
 
-.debug_info     0x00000000     0x2e44
+.debug_info     0x00000000     0x2e9e
  *(.debug_info)
- .debug_info    0x00000000      0xb2a ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
- .debug_info    0x00000b2a       0xfe 24c64.o
- .debug_info    0x00000c28      0x4a9 ds18x20.o
- .debug_info    0x000010d1       0xef i2c_twi.o
- .debug_info    0x000011c0      0xa17 lcd_hd44780_74hc595.o
- .debug_info    0x00001bd7       0xc2 pga2310.o
- .debug_info    0x00001c99      0x29c uart.o
- .debug_info    0x00001f35      0x177 spi.o
- .debug_info    0x000020ac      0x1d6 utility.o
- .debug_info    0x00002282      0x361 rotation_encoder.o
- .debug_info    0x000025e3      0x404 relay_74hc595.o
- .debug_info    0x000029e7      0x45d ir_sirc.o
+ .debug_info    0x00000000      0xb88 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
+ .debug_info    0x00000b88       0xfe 24c64.o
+ .debug_info    0x00000c86      0x4a9 ds18x20.o
+ .debug_info    0x0000112f       0xef i2c_twi.o
+ .debug_info    0x0000121e      0xa17 lcd_hd44780_74hc595.o
+ .debug_info    0x00001c35       0xc2 pga2310.o
+ .debug_info    0x00001cf7      0x298 uart.o
+ .debug_info    0x00001f8f      0x177 spi.o
+ .debug_info    0x00002106      0x1d6 utility.o
+ .debug_info    0x000022dc      0x361 rotation_encoder.o
+ .debug_info    0x0000263d      0x404 relay_74hc595.o
+ .debug_info    0x00002a41      0x45d ir_sirc.o
  *(.gnu.linkonce.wi.*)
 
-.debug_abbrev   0x00000000      0xd49
+.debug_abbrev   0x00000000      0xd5e
  *(.debug_abbrev)
  .debug_abbrev  0x00000000      0x2a2 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
  .debug_abbrev  0x000002a2       0x8e 24c64.o
@@ -661,27 +664,27 @@ LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
  .debug_abbrev  0x000004a7       0x8f i2c_twi.o
  .debug_abbrev  0x00000536      0x211 lcd_hd44780_74hc595.o
  .debug_abbrev  0x00000747       0x63 pga2310.o
- .debug_abbrev  0x000007aa      0x113 uart.o
- .debug_abbrev  0x000008bd       0xd5 spi.o
- .debug_abbrev  0x00000992       0xb6 utility.o
- .debug_abbrev  0x00000a48       0xfb rotation_encoder.o
- .debug_abbrev  0x00000b43      0x10a relay_74hc595.o
- .debug_abbrev  0x00000c4d       0xfc ir_sirc.o
+ .debug_abbrev  0x000007aa      0x128 uart.o
+ .debug_abbrev  0x000008d2       0xd5 spi.o
+ .debug_abbrev  0x000009a7       0xb6 utility.o
+ .debug_abbrev  0x00000a5d       0xfb rotation_encoder.o
+ .debug_abbrev  0x00000b58      0x10a relay_74hc595.o
+ .debug_abbrev  0x00000c62       0xfc ir_sirc.o
 
-.debug_line     0x00000000     0x2a28
+.debug_line     0x00000000     0x2a89
  *(.debug_line)
- .debug_line    0x00000000      0xe6e ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
- .debug_line    0x00000e6e      0x193 24c64.o
- .debug_line    0x00001001      0x2f2 ds18x20.o
- .debug_line    0x000012f3      0x12b i2c_twi.o
- .debug_line    0x0000141e      0x605 lcd_hd44780_74hc595.o
- .debug_line    0x00001a23      0x17f pga2310.o
- .debug_line    0x00001ba2      0x22d uart.o
- .debug_line    0x00001dcf      0x187 spi.o
- .debug_line    0x00001f56      0x193 utility.o
- .debug_line    0x000020e9      0x1b2 rotation_encoder.o
- .debug_line    0x0000229b      0x336 relay_74hc595.o
- .debug_line    0x000025d1      0x457 ir_sirc.o
+ .debug_line    0x00000000      0xeff ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
+ .debug_line    0x00000eff      0x193 24c64.o
+ .debug_line    0x00001092      0x2f2 ds18x20.o
+ .debug_line    0x00001384      0x12b i2c_twi.o
+ .debug_line    0x000014af      0x605 lcd_hd44780_74hc595.o
+ .debug_line    0x00001ab4      0x17f pga2310.o
+ .debug_line    0x00001c33      0x1fd uart.o
+ .debug_line    0x00001e30      0x187 spi.o
+ .debug_line    0x00001fb7      0x193 utility.o
+ .debug_line    0x0000214a      0x1b2 rotation_encoder.o
+ .debug_line    0x000022fc      0x336 relay_74hc595.o
+ .debug_line    0x00002632      0x457 ir_sirc.o
 
 .debug_frame    0x00000000      0x7d0
  *(.debug_frame)
@@ -698,31 +701,31 @@ LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
  .debug_frame   0x00000680      0x110 relay_74hc595.o
  .debug_frame   0x00000790       0x40 ir_sirc.o
 
-.debug_str      0x00000000      0xb5a
+.debug_str      0x00000000      0xb6f
  *(.debug_str)
- .debug_str     0x00000000      0x3d8 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
-                                0x411 (size before relaxing)
- .debug_str     0x000003d8       0xca 24c64.o
+ .debug_str     0x00000000      0x3ed ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
+                                0x426 (size before relaxing)
+ .debug_str     0x000003ed       0xca 24c64.o
                                 0x1b6 (size before relaxing)
- .debug_str     0x000004a2       0x6c ds18x20.o
+ .debug_str     0x000004b7       0x6c ds18x20.o
                                 0x1d1 (size before relaxing)
- .debug_str     0x0000050e       0x58 i2c_twi.o
+ .debug_str     0x00000523       0x58 i2c_twi.o
                                 0x144 (size before relaxing)
- .debug_str     0x00000566      0x154 lcd_hd44780_74hc595.o
+ .debug_str     0x0000057b      0x154 lcd_hd44780_74hc595.o
                                 0x2ad (size before relaxing)
- .debug_str     0x000006ba       0x70 pga2310.o
+ .debug_str     0x000006cf       0x70 pga2310.o
                                 0x157 (size before relaxing)
- .debug_str     0x0000072a       0xec uart.o
+ .debug_str     0x0000073f       0xec uart.o
                                 0x1f8 (size before relaxing)
- .debug_str     0x00000816       0x96 spi.o
+ .debug_str     0x0000082b       0x96 spi.o
                                 0x182 (size before relaxing)
- .debug_str     0x000008ac       0xa0 utility.o
+ .debug_str     0x000008c1       0xa0 utility.o
                                 0x19d (size before relaxing)
- .debug_str     0x0000094c       0x92 rotation_encoder.o
+ .debug_str     0x00000961       0x92 rotation_encoder.o
                                 0x1e6 (size before relaxing)
- .debug_str     0x000009de      0x136 relay_74hc595.o
+ .debug_str     0x000009f3      0x136 relay_74hc595.o
                                 0x285 (size before relaxing)
- .debug_str     0x00000b14       0x46 ir_sirc.o
+ .debug_str     0x00000b29       0x46 ir_sirc.o
                                 0x1b9 (size before relaxing)
 
 .debug_loc      0x00000000      0xdbe

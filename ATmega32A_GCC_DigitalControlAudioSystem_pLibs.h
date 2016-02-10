@@ -20,12 +20,12 @@
 /*******************************
 ** DEFINITION PROJECT VERSION **
 *******************************/
-#define FIRMWARE_VERSION 28
+#define FIRMWARE_VERSION 29
 
 /*******************************
 ** DEFINITION DEBUG CONSTANTS **
 *******************************/
-#define DEBUG_SETTING	1	// ENABLE/DISABLE DEBUG SETTINGS INFORMATION with comment or uncomment this row
+//#define DEBUG_SETTING	1	// ENABLE/DISABLE DEBUG SETTINGS INFORMATION with comment or uncomment this row
 #define DEBUG_INFO		1	// ENABLE/DISABLE DEBUG STATUS INFORMATION with comment or uncomment this row
 #define DEBUG_ERROR		1	// ENABLE/DISABLE DEBUG ERROR INFORMATION with comment or uncomment this row
 
@@ -115,7 +115,7 @@ void irDecode(void);
 //void timer0_init();
 void timer1_init(void);
 void timer1_on(void);
-void timer1_on_speed1(void);
+void timer1_on_speed(void);
 void timer1_off(void);
 void timer2_init(void);
 void FAN_PWM_ON(void);
