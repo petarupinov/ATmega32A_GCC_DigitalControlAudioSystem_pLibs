@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: ROTATION ENCODER (ED1112S and more)             *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: rotation_encoder.c, v0.02, 27.10.2015         *************
+*** FILE NAME: rotation_encoder.c, v0.03, 22.11.2015         *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -24,9 +24,9 @@
 /*********************************************
 ** READ/SCAN ROTARY ENCODER OF NIK BARZAKOV **
 *********************************************/
-char rotaryEncoderNikBarzakov()
+unsigned char rotaryEncoderNikBarzakov(unsigned char tempEncoder)
 {
-	char tempEncoder = 0;
+//	char tempEncoder = 0;
 	if((ENCODER_A_low()) && (ENCODER_B_low()))			// A0, B0
 	{
 		_delay_us(50);	// delay before next check bits
@@ -34,6 +34,7 @@ char rotaryEncoderNikBarzakov()
 		{
 			// ---> Clockwise; Zavartane po posoka na chasovnikovata strelka.
 // VOLUME UP
+//			tempEncoder++;
 			tempEncoder++;
 			// ---> Clockwise; Zavartane po posoka na chasovnikovata strelka.
 		}
@@ -45,6 +46,7 @@ char rotaryEncoderNikBarzakov()
 		{
 			// <--- Counter Clockwise; Zavartane po posoka obratno na chasovnikovata strelka.
 // VOLUME DOWN
+//			tempEncoder--;
 			tempEncoder--;
 		}
 	}
@@ -53,15 +55,15 @@ char rotaryEncoderNikBarzakov()
 			// do nothing
 	}
 	
-	return tempEncoder;
+	return tempEncoder;// tempEncoder;
 }
 
 /*************************************************
 ** READ/SCAN ROTARY ENCODER VERSION 1 / MODEL 1 **
 *************************************************/
-char rotaryEncoderVer1()	// Check imediate now bits in PIN register.
+unsigned char rotaryEncoderVer1(unsigned char tempEncoder)	// Check imediate now bits in PIN register.
 {
-	char tempEncoder = 0;							// A1, B1
+//	char tempEncoder = 0;							// A1, B1
 	if((ENCODER_A_low()) && (ENCODER_B_high()))			// A0, B1
 	{
 		_delay_us(50);	// delay before next check bits
@@ -95,13 +97,13 @@ char rotaryEncoderVer1()	// Check imediate now bits in PIN register.
 /*************************************************
 ** READ/SCAN ROTARY ENCODER VERSION 2 / MODEL 2 **
 *************************************************/
-char rotaryEncoderVer2()	// Read from PIN register and store 3bits to Buffres A and B, check Buffer with Encoder combination.
+unsigned char rotaryEncoderVer2(unsigned char tempEncoder)	// Read from PIN register and store 3bits to Buffres A and B, check Buffer with Encoder combination.
 {
-	char tempEncoder = 0;
+//	char tempEncoder = 0;
 	unsigned char x;
 	unsigned char bufferREGA = 0;
 	unsigned char bufferREGB = 0;	
-	unsigned char PIN_IN = 0;	//	PINA = PINA_IN;	// PIN_IN is input pin, not variable
+	unsigned char PINA_IN = 0;	//	PINA = PINA_IN;	// PIN_IN is input pin, not variable
 	
 //	DDRA &= ~(1<<ENCODER_A);	// serial pin input
 //	DDRA &= ~(1<<ENCODER_B);	// serial pin input

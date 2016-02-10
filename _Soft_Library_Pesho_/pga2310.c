@@ -81,6 +81,8 @@ void PGA2310_Volume_Update(unsigned char pgaVolumeLeft, unsigned char pgaVolumeR
 	PGA2310_U8_SPI_CS_low();	// CHIP SELECT BIT // PA7 - /SS ENABLE
 	spi_write_two_bytes(pgaVolumeLeft, pgaVolumeRight);
 	PGA2310_U8_SPI_CS_high();	// CHIP SELECT BIT // PA7 - /SS DISABLE
+
+//	return SUCCESS;
 }
 
 // OLD ARCHITECTURE

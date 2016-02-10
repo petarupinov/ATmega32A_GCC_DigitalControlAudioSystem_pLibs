@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: ROTATION ENCODER (ED1112S and more)             *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: rotation_encoder.h, v0.02, 27.10.2015         *************
+*** FILE NAME: rotation_encoder.h, v0.03, 22.11.2015         *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -29,7 +29,6 @@
 #define ENCODER_B_low()  (bit_is_clear(PINC,ENCODER_B))
 #define ENCODER_B_high() (bit_is_set(PINC,ENCODER_B))
 
-
 // char tempEncoder = 0;	// can be (+) or (-)
 
 /********************************************************************************************
@@ -39,9 +38,9 @@
 /********************************************************************************************
 ****************************** START DECLARATION OF FUNCTIONS *******************************
 ********************************************************************************************/
-char rotaryEncoderNikBarzakov();
-char rotaryEncoderVer1();
-char rotaryEncoderVer2();
+unsigned char rotaryEncoderNikBarzakov(unsigned char volume);
+unsigned char rotaryEncoderVer1(unsigned char volume);
+unsigned char rotaryEncoderVer2(unsigned char volume);
 
 /********************************************************************************************
 ************************************* END OF FUNCTIONS **************************************

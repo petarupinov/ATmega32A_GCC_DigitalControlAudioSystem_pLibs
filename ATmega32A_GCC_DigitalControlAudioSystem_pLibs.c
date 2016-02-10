@@ -26,6 +26,7 @@
 ;;**12. Edit on date 18.11.2015 - update utility lib version ******************************;;
 ;;**13. Edit on date 19.11.2015 - add functions ampliferOn/Off ****************************;;
 ;;**14. Edit on date 22.11.2015 - button power and escape works ***************************;;
+;;**15. Edit on date 23.11.2015 - add pga2310 and rotary encoder volume *******************;;
 ;;*****************************************************************************************;;
 ;;** Used library version: _Soft_Library_Pesho_v0.06 ^^lcd updated^^ **********************;;
 ;;*****************************************************************************************;;
@@ -90,9 +91,9 @@ typedef int bool;
 // - test FANS with timer and without timer
 // - test Temperature sensors DS18S20
 
-
-
-
+#define VOLUME_MAX 20
+#define VOLUME_MIN 0
+unsigned char volumeIndex = VOLUME_MIN;
 // https://en.wikipedia.org/wiki/Bit_field
 // http://stackoverflow.com/questions/24933242/when-to-use-bit-fields-in-c
 //#define flagStatusBtnOnOffBit0 0
@@ -111,7 +112,9 @@ struct flagStatusBtnOnOff
 }flagStatusBtnRegister;
 */
 
-unsigned char n = 0;
+unsigned char volumeValue [VOLUME_MAX] = { 0x00, 0x28, 0x32, 0x3C, 0x46, 0x50, 0x5A, 0x64, 0x6E, 0x78, 0x82, 0x8C, 0x96, 0xA0, 0xAA, 0xB4, 0xBE, 0xC8, 0xD2, 0xD7 };
+//       values of volume  ->	0,    40,   50,   60,   70,   80,   90,   100,  110,  120,  130,  140,  150,  160,  170,  180,  190,  200,  210,  215	<-	values of volume
+// index of values of volume    0      1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19
 
 /********************************************************************************************
 *********************************** START OF DEFINISIONS ************************************
@@ -147,13 +150,15 @@ unsigned char n = 0;
 /********************************************************************************************
 ****************************** START DECLARATION OF FUNCTIONS *******************************
 ********************************************************************************************/
-void port_init();
-void timer2_init();
-void timer2_on();
-void timer2_off();
-void init_all();
-char ampliferOn();
-void ampliferOff();
+void port_init(void);
+void timer2_init(void);
+void timer2_on(void);
+void timer2_off(void);
+void init_all(void);
+char ampliferOn(void);
+void ampliferOff(void);
+void rotaryEncoder(void);
+
 
 /********************************************************************************************
 ******************************* END DECLARATION OF FUNCTIONS ********************************
@@ -167,7 +172,7 @@ void ampliferOff();
 /*****************************************
 ** INITIZLIZATION OF INPUT/OUTPUT PORTS **
 *****************************************/
-void port_init()
+void port_init(void)
 {	
 
 // PORT A connections
@@ -197,7 +202,7 @@ void port_init()
 /*****************************
 ** INITIZLIZATION OF TIMER2 **
 *****************************/
-void timer2_init()
+void timer2_init(void)
 {
 	SFIOR = 0b00000010;		// Prescaler Reset Timer2 (bit1 –> PSR2)
 	TCCR2 = 0b10000001;		// 0b10100001 - OC1A,OC1B - PWM;  0b10000001 - OC1A PWM, OC1B - Disabled, normal port.
@@ -215,13 +220,13 @@ void timer2_init()
 /*************************************
 ******** DEFINITIONS OF TIMER ********
 *************************************/
-void timer2_on()	// Timer2 On
+void timer2_on(void)	// Timer2 On
 {
 	TCCR2 = 0b10000001;		// 0b10100001 - OC1A,OC1B - PWM;  0b10000001 - OC1A PWM, OC1B - Disabled, normal port.
 	OCR2 = 1; // FAN PWM ON
 }
 
-void timer2_off()	// Timer2 Off
+void timer2_off(void)	// Timer2 Off
 {
 	TCCR2 = 0b00000000;		// DISABLED OCOC1A - PWM, OC1B - Disabled, normal port.
 	OCR2 = 0; // FAN PWM OFF
@@ -230,7 +235,7 @@ void timer2_off()	// Timer2 Off
 /********************
 **** AMPLIFER ON ****
 ********************/
-char ampliferOn()
+char ampliferOn(void)
 {
 	LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
 
@@ -242,12 +247,16 @@ char ampliferOn()
 	LCD_COMMAND(LCD_ON);						// LCD ON without CURSOR
 
 
+// RELAYS POWER, RELAYS INPUT, RELAYS OUTPUT ARE SWITCH ON HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 //	FAN_PWM_SPEED1();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
 //			FAN_high();		// PORTD5 - FAN ON (logic "1")	NON PWM, NON TIMER1
 
 //			volumeLeft = volumeRight = volumeValue [0];	// nulurane na volume control pri vsqko puskane
 
 //	spi_start();
+//	void PGA2310_Volume_Update(unsigned char pgaVolumeLeft, unsigned char pgaVolumeRight)
+
 //	PGA2310_U6_SPI(volumeLeft, volumeRight);
 //	spi_stop();
 
@@ -285,10 +294,10 @@ char ampliferOn()
 	return SUCCESS;
 }
 
-/********************
+/*********************
 **** AMPLIFER OFF ****
-********************/
-void ampliferOff()
+*********************/
+void ampliferOff(void)
 {
 	LCD_CLEAR_CONTAIN();
 
@@ -328,6 +337,42 @@ void ampliferOff()
 //			LCD_EXECUTE_COMMAND(LCD_OFF);			// LCD OFF
 //	LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
 }
+
+/*
+	if(volumeValue)
+	{
+		pgaVolumeLeft = pgaVolumeRight = volumeValue;
+		PGA2310_Volume_Update(unsigned char pgaVolumeLeft, unsigned char pgaVolumeRight)
+	}
+
+	
+*/
+
+/***********************
+**** ROTARY ENCODER ****
+***********************/
+void rotaryEncoder(void)
+{
+	volumeIndex = rotaryEncoderNikBarzakov(volumeIndex);	// value is global var
+	if (volumeIndex > (VOLUME_MAX - 2))
+	{
+		volumeIndex = (VOLUME_MAX - 1);
+	}
+	else if(volumeIndex < (VOLUME_MIN + 1))
+	{
+		volumeIndex = VOLUME_MIN;
+	}
+	else
+	{
+	}
+	PGA2310_Volume_Update(volumeValue[volumeIndex], volumeValue[volumeIndex]);
+	LCD_COMMAND(LCD_SELECT_4ROW);				// select row 1
+	LCD_DATA_STRING("Volume ");	// 20 symbols
+	LCD_DATA_INT(volumeValue[volumeIndex]);	// 20 symbols
+	LCD_DATA_STRING("         L ");	// 20 symbols
+}
+
+
 /********************************************************************************************
 ************************************* END OF FUNCTIONS **************************************
 ********************************************************************************************/
@@ -392,17 +437,17 @@ ISR(TIMER2_OVF_vect)
 
 void init_all()
 {
-	port_init();
+	port_init();		// IO init and configure all port
 //	timer2_init();
-	LCD_INIT();
-
+	LCD_INIT();			// LCD init and reset all lcd contain
+	pga2310_init();		// SPI init and reset all (U6, U7, U8) PGA2310 volume values to null
 }
 
 void buttons_press()
 {
 	char test = 0;
-	unsigned char pgaVolumeLeft, pgaVolumeRight;
-	pgaVolumeLeft = pgaVolumeRight = 0b00001111;
+//	unsigned char pgaVolumeLeft, pgaVolumeRight;
+//	pgaVolumeLeft = pgaVolumeRight = 0b00001111;
 
 	while(1)
 	{
@@ -455,7 +500,7 @@ void buttons_press()
 		}
 		else if(flagStatusBits->flagPower == 1)
 		{
-//			rotaryEncoderNikBarzakov();
+			rotaryEncoder();
 		}
 
 
