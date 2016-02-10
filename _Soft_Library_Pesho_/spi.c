@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: SPI / Serial Peripheral Interface               *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: spi.c, v0.01, 18.10.2015                      *************
+*** FILE NAME: spi.c, v0.02, 26.10.2015                      *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one SPI        *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -31,6 +31,7 @@ void spi_init()
 	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR1)|(1<<SPR0);	//0b01010010	// SPR0,1 = 1 - 16 000 000 / 128 = 125 000 = 125kHz	 // KAKVA KOMBINACIQ OT 4-te BITa VODI DO RAZBLOKIRANETO ???
 	SPDR = 0b00000000;
 
+	/*
 	PGA2310_U6_SPI_CS_high();	// /SS - DISABLE
 	PGA2310_U6_SPI(0b00000000, 0b00000000);
 
@@ -39,6 +40,7 @@ void spi_init()
 
 	PGA2310_U8_SPI_CS_high();	// /SS - DISABLE
 	PGA2310_U8_SPI(0b00000000, 0b00000000);
+	*/
 
 	SPCR = (0<<SPE);
 }
@@ -64,17 +66,13 @@ void spi_stop()
 *****************************************/
 void spi_write_one_byte(unsigned char data)	// void PGA2310_U7_SPI(byte volume_left, byte volume_right)	//PGA2310_U7_SPI(0b00001111);
 {
-//	PORTB = (0<<PB4);			// PB4 - /SS ENABLE
-	PGA2310_U7_SPI_CS_low();	// PB3 - ENABLE PGA2310 U7 SPI
-
+//	PORTB = (0<<PB4);			// DON'T FORGET	CHIP SELECT BIT // PB4 - NOT USED HERE
 //	SPSR = 0b00000000;			// http://www.embeddedrelated.com/groups/lpc2000/show/16257.php
+	spi_start();
 	SPDR = data;				//volume_right;
 	while(!(SPSR & (1<<SPIF)))
 	{
 	}
-
-	PGA2310_U7_SPI_CS_high();	// PB3 - DISABLE PGA2310 U7 SPI
-//	PORTB = (1<<PB4);			// PB4 - /SS DISABLE
 }
 
 /******************************************
@@ -82,10 +80,9 @@ void spi_write_one_byte(unsigned char data)	// void PGA2310_U7_SPI(byte volume_l
 ******************************************/
 void spi_write_two_bytes(unsigned char data1, unsigned char data2)	// void PGA2310_U6_SPI(byte volume_left, byte volume_right)	//PGA2310_U6_SPI(0b00001111);
 {
-//	PORTB = (0<<PB4);			// PB4 - /SS ENABLE
-	PGA2310_U6_SPI_CS_low();	// PB3 - ENABLE PGA2310 U6 SPI
-
+//	PORTB = (0<<PB4);			// DON'T FORGET	CHIP SELECT BIT // PB4 - NOT USED HERE
 //	SPSR = 0b00000000;			// http://www.embeddedrelated.com/groups/lpc2000/show/16257.php
+	spi_start();
 	SPDR = data1;				//volume_left;
 	while(!(SPSR & (1<<SPIF)))
 	{
@@ -96,9 +93,6 @@ void spi_write_two_bytes(unsigned char data1, unsigned char data2)	// void PGA23
 	while(!(SPSR & (1<<SPIF)))
 	{
 	}
-
-	PGA2310_U6_SPI_CS_high();	// PB3 - DISABLE PGA2310 U6 SPI
-//	PORTB = (1<<PB4);			// PB4 - /SS DISABLE
 }
 
 /*********************************************
@@ -106,20 +100,16 @@ void spi_write_two_bytes(unsigned char data1, unsigned char data2)	// void PGA23
 *********************************************/
 void spi_write_more_bytes(unsigned char *data)	// void PGA2310_U8_SPI(byte volume_left, byte volume_right)	//PGA2310_U8_SPI(0b00001111);
 {
-//	PORTB = (0<<PB4);			// PB4 - /SS ENABLE
-	PGA2310_U8_SPI_CS_low();	// PB3 - ENABLE PGA2310 U8 SPI
-
+//	PORTB = (0<<PB4);			// DON'T FORGET	CHIP SELECT BIT // PB4 - /SS ENABLE
 	while(*data++)
 	{
 	//	SPSR = 0b00000000;			// http://www.embeddedrelated.com/groups/lpc2000/show/16257.php
+		spi_start();
 		SPDR = *data;			//volume_left;
 		while(!(SPSR & (1<<SPIF)))
 		{
 		}
 	}
-
-	PGA2310_U8_SPI_CS_high();	// PB3 - DISABLE PGA2310 U8 SPI
-//	PORTB = (1<<PB4);			// PB4 - /SS DISABLE
 }
 
 /************************************** 	/ READ SPI NOT FINISHED
@@ -127,18 +117,13 @@ void spi_write_more_bytes(unsigned char *data)	// void PGA2310_U8_SPI(byte volum
 *************************************** 	/ READ SPI NOT FINISHED */
 unsigned char spi_read_more_bytes()	// void PGA2310_U8_SPI(byte volume_left, byte volume_right)	//PGA2310_U8_SPI(0b00001111);
 {
-//	PORTB = (0<<PB4);			// PB4 - /SS ENABLE
-	PGA2310_U8_SPI_CS_low();	// PB3 - ENABLE PGA2310 U8 SPI
-
+	unsigned char data = 0b00000000;
+	//	PORTB = (0<<PB4);			// DON'T FORGET	CHIP SELECT BIT // PB4 - NOT USED HERE
 	//	SPSR = 0b00000000;			// http://www.embeddedrelated.com/groups/lpc2000/show/16257.php
 	SPDR = data;			//volume_left;
 	while(!(SPSR & (1<<SPIF)))
 	{
 	}
-
-	PGA2310_U8_SPI_CS_high();	// PB3 - DISABLE PGA2310 U8 SPI
-//	PORTB = (1<<PB4);			// PB4 - /SS DISABLE
-
 	return data;
 }
 

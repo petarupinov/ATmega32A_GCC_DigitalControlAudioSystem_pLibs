@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: SPI / Serial Peripheral Interface               *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: spi.h, v0.01, 18.10.2015                      *************
+*** FILE NAME: spi.h, v0.02, 26.10.2015                      *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one SPI        *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************

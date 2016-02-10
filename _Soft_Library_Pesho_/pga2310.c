@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: PGA2310 / PGA2311 with SPI (Serial Peripheral Interface) ****
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: pga2310.c, v0.01, 18.10.2015                  *************
+*** FILE NAME: pga2310.c, v0.02, 26.10.2015                  *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one SPI        *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -18,9 +18,51 @@
 ************************************ START OF FUNCTIONS *************************************
 ********************************************************************************************/
 
+#define ZERO_FILL 0b00000000
+
+/**************************************
+** DEFINITION PGA2310 INITIALIZATION **
+**************************************/
+void pga2310_init()
+{
+	spi_init();
+	
+	PGA2310_U6_SPI_CS_low();	// CHIP SELECT BIT // PB3 - /SS ENABLE
+	spi_write_two_bytes(ZERO_FILL, ZERO_FILL);	// left and right channel
+	PGA2310_U6_SPI_CS_high();	// CHIP SELECT BIT // PB3 - /SS DISABLE
+
+	PGA2310_U7_SPI_CS_low();	// CHIP SELECT BIT // PA6 - /SS ENABLE
+	spi_write_two_bytes(ZERO_FILL, ZERO_FILL);	// left and right channel
+	PGA2310_U7_SPI_CS_high();	// CHIP SELECT BIT // PA6 - /SS DISABLE
+
+	PGA2310_U8_SPI_CS_low();	// CHIP SELECT BIT // PA6 - /SS ENABLE
+	spi_write_two_bytes(ZERO_FILL, ZERO_FILL);	// left and right channel
+	PGA2310_U8_SPI_CS_high();	// CHIP SELECT BIT // PA7 - /SS DISABLE
+}
+
+/*************************************
+** DEFINITION PGA2310 VOLUME UPDATE **
+*************************************/
+void PGA2310_Volume_Update(unsigned char pgaVolumeLeft, unsigned char pgaVolumeRight)
+{
+	PGA2310_U6_SPI_CS_low();	// CHIP SELECT BIT // PB3 - /SS ENABLE
+	spi_write_two_bytes(pgaVolumeLeft, pgaVolumeRight);
+	PGA2310_U6_SPI_CS_high();	// CHIP SELECT BIT // PB3 - /SS DISABLE
+
+	PGA2310_U7_SPI_CS_low();	// CHIP SELECT BIT // PA6 - /SS ENABLE
+	spi_write_two_bytes(pgaVolumeLeft, pgaVolumeRight);
+	PGA2310_U7_SPI_CS_high();	// CHIP SELECT BIT // PA6 - /SS DISABLE
+
+	PGA2310_U8_SPI_CS_low();	// CHIP SELECT BIT // PA7 - /SS ENABLE
+	spi_write_two_bytes(pgaVolumeLeft, pgaVolumeRight);
+	PGA2310_U8_SPI_CS_high();	// CHIP SELECT BIT // PA7 - /SS DISABLE
+}
+
+// OLD ARCHITECTURE
 /****************************************
 ** DEFINITION PGA2310 U6 SPI FUNCTIONS **
 ****************************************/
+/*
 void PGA2310_U6_SPI(unsigned char pgaVolumeLeft, unsigned char pgaVolumeRight)	//PGA2310_U6_SPI(0b00001111);
 {
 //	PORTB = (0<<PB4);			// PB4 - /SS ENABLE
@@ -41,10 +83,11 @@ void PGA2310_U6_SPI(unsigned char pgaVolumeLeft, unsigned char pgaVolumeRight)	/
 	PGA2310_U6_SPI_CS_high();	// PB3 - DISABLE PGA2310 U6 SPI
 //	PORTB = (1<<PB4);			// PB4 - /SS DISABLE
 }
-
+*/
 /****************************************
 ** DEFINITION PGA2310 U7 SPI FUNCTIONS **
 ****************************************/
+/*
 void PGA2310_U7_SPI(unsigned char pgaVolumeLeft, unsigned char pgaVolumeRight)	//PGA2310_U7_SPI(0b00001111);
 {
 //	PORTB = (0<<PB4);			// PB4 - /SS ENABLE
@@ -65,10 +108,11 @@ void PGA2310_U7_SPI(unsigned char pgaVolumeLeft, unsigned char pgaVolumeRight)	/
 	PGA2310_U7_SPI_CS_high();	// PB3 - DISABLE PGA2310 U7 SPI
 //	PORTB = (1<<PB4);			// PB4 - /SS DISABLE
 }
-
+*/
 /****************************************
 ** DEFINITION PGA2310 U8 SPI FUNCTIONS **
 ****************************************/
+/*
 void PGA2310_U8_SPI(unsigned char pgaVolumeLeft, unsigned char pgaVolumeRight)	//PGA2310_U8_SPI(0b00001111);
 {
 //	PORTB = (0<<PB4);			// PB4 - /SS ENABLE
@@ -89,6 +133,7 @@ void PGA2310_U8_SPI(unsigned char pgaVolumeLeft, unsigned char pgaVolumeRight)	/
 	PGA2310_U8_SPI_CS_high();	// PB3 - DISABLE PGA2310 U8 SPI
 //	PORTB = (1<<PB4);			// PB4 - /SS DISABLE
 }
+*/
 
 /********************************************************************************************
 ************************************* END OF FUNCTIONS **************************************

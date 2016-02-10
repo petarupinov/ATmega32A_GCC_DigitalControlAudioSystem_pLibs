@@ -19,6 +19,7 @@
 ;;** 5. Edit on date 16.10.2015 - update and correct LCD clear lib c h, struct with flags *;;
 ;;** 6. Edit on date 17.10.2015 - update with custom characters ***************************;;
 ;;** 7. Edit on date 18.10.2015 - update all library files ********************************;;
+;;** 8. Edit on date 26.10.2015 - update spi and pga2310 **********************************;;
 ;;*****************************************************************************************;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
@@ -39,16 +40,16 @@
 
 // Add C files to project: "ir_sirc.c", "rotation_encoder.c", "rtc.c", "spi.c", "utility.c"
 
-//#include "_Soft_Library_Pesho_/24c64.h"
-//#include "_Soft_Library_Pesho_/ds18x20.h"
-//#include "_Soft_Library_Pesho_/i2c_twi.h"
-//#include "_Soft_Library_Pesho_/ir_sirc.h"
+#include "_Soft_Library_Pesho_/24c64.h"
+#include "_Soft_Library_Pesho_/ds18x20.h"
+#include "_Soft_Library_Pesho_/i2c_twi.h"
+#include "_Soft_Library_Pesho_/ir_sirc.h"
 #include "_Soft_Library_Pesho_/lcd_hd44780_74hc595.h"
-//#include "_Soft_Library_Pesho_/pga2310.h"
-//#include "_Soft_Library_Pesho_/rotation_encoder.h"
-//#include "_Soft_Library_Pesho_/rtc.h"
-//#include "_Soft_Library_Pesho_/spi.h"
-//#include "_Soft_Library_Pesho_/uart.h"
+#include "_Soft_Library_Pesho_/pga2310.h"
+#include "_Soft_Library_Pesho_/rotation_encoder.h"
+#include "_Soft_Library_Pesho_/rtc.h"
+#include "_Soft_Library_Pesho_/spi.h"
+#include "_Soft_Library_Pesho_/uart.h"
 #include "_Soft_Library_Pesho_/utility.h"
 
 /*********************************************
@@ -278,8 +279,14 @@ void buttons_press()
 
 				LCD_CGRAM_CUSTOM_SYMBOLS();					// Generate and Store new missing characters into LCD CGRAM
 
+//				unsigned char *str_new = malloc(9);		// ALLOCATE MEMORY
+//				strcpy(str_new, "123PES9");				// str = "123PESH9";
+
 //				lcdDataString("FIRST ROW");
 				flagStatusBits->flagPower = 1;
+
+//				free(str_new);							// DEALLOCATE MEMORY
+
 				_delay_ms(200);
 			}
 			else

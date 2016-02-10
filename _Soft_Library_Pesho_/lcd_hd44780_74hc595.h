@@ -118,7 +118,133 @@
 #define LCD_CGRAM_NUMBER_CHARACTERS		7	// every symbol is one row, every row is generated symbol
 
 /*
+typedef enum
+{						//Bit:  43210 - Hex
+	value_byte0 = 0x0E,	// 0b00001110
+	value_byte1 = 0x1B,	// 0b00011011
+	value_byte2 = 0x11,	// 0b00010001
+	value_byte3 = 0x11,	// 0b00010001
+	value_byte4 = 0x11,	// 0b00010001
+	value_byte5 = 0x11,	// 0b00010001
+	value_byte6 = 0x11,	// 0b00010001
+	value_byte7 = 0x1F	// 0b00011111
+} battery0percenCharging // Battery Charging   0%
+
+typedef enum
+{						//Bit:  43210 - Hex
+	value_byte0 = 0x0E,	// 0b00001110
+	value_byte1 = 0x1B,	// 0b00011011
+	value_byte2 = 0x11,	// 0b00010001
+	value_byte3 = 0x11,	// 0b00010001
+	value_byte4 = 0x11,	// 0b00010001
+	value_byte5 = 0x11,	// 0b00010001
+	value_byte6 = 0x1F,	// 0b00011111
+	value_byte7 = 0x1F	// 0b00011111
+} battery16percenCharging // Battery Charging   16%
+
+typedef enum
+{						//Bit:  43210 - Hex
+	value_byte0 = 0x0E,	// 0b00001110
+	value_byte1 = 0x1B,	// 0b00011011
+	value_byte2 = 0x11,	// 0b00010001
+	value_byte3 = 0x11,	// 0b00010001
+	value_byte4 = 0x11,	// 0b00010001
+	value_byte5 = 0x1F,	// 0b00011111
+	value_byte6 = 0x1F,	// 0b00011111
+	value_byte7 = 0x1F	// 0b00011111
+} battery32percenCharging // Battery Charging   32%
+
+typedef enum
+{						//Bit:  43210 - Hex
+	value_byte0 = 0x0E,	// 0b00001110
+	value_byte1 = 0x1B,	// 0b00011011
+	value_byte2 = 0x11,	// 0b00010001
+	value_byte3 = 0x11,	// 0b00010001
+	value_byte4 = 0x1F,	// 0b00011111
+	value_byte5 = 0x1F,	// 0b00011111
+	value_byte6 = 0x1F,	// 0b00011111
+	value_byte7 = 0x1F	// 0b00011111
+} battery48percenCharging // Battery Charging   48%
+
+typedef enum
+{						//Bit:  43210 - Hex
+	value_byte0 = 0x0E,	// 0b00001110
+	value_byte1 = 0x1B,	// 0b00011011
+	value_byte2 = 0x11,	// 0b00010001
+	value_byte3 = 0x1F,	// 0b00011111
+	value_byte4 = 0x1F,	// 0b00011111
+	value_byte5 = 0x1F,	// 0b00011111
+	value_byte6 = 0x1F,	// 0b00011111
+	value_byte7 = 0x1F	// 0b00011111
+} battery64percenCharging // Battery Charging   64%
+
+typedef enum
+{						//Bit:  43210 - Hex
+	value_byte0 = 0x0E,	// 0b00001110
+	value_byte1 = 0x1B,	// 0b00011011
+	value_byte2 = 0x1F,	// 0b00011111
+	value_byte3 = 0x1F,	// 0b00011111
+	value_byte4 = 0x1F,	// 0b00011111
+	value_byte5 = 0x1F,	// 0b00011111
+	value_byte6 = 0x1F,	// 0b00011111
+	value_byte7 = 0x1F	// 0b00011111
+} battery80percenCharging // Battery Charging   80%
+
+typedef enum
+{						//Bit:  43210 - Hex
+	value_byte0 = 0x0E,	// 0b00001110
+	value_byte1 = 0x1F,	// 0b00011111
+	value_byte2 = 0x1F,	// 0b00011111
+	value_byte3 = 0x1F,	// 0b00011111
+	value_byte4 = 0x1F,	// 0b00011111
+	value_byte5 = 0x1F,	// 0b00011111
+	value_byte6 = 0x1F,	// 0b00011111
+	value_byte7 = 0x1F	// 0b00011111
+} battery80percenCharging // Battery Charging   100%
+
+typedef enum
+{						//Bit:  43210 - Hex ???????????????????
+	value_byte0 = 0x02,	// 0b00000010
+	value_byte1 = 0x03,	// 0b00000011
+	value_byte2 = 0x02,	// 0b00000010
+	value_byte3 = 0x02,	// 0b00000010
+	value_byte4 = 0x0E,	// 0b00001110
+	value_byte5 = 0x1E,	// 0b00011110
+	value_byte6 = 0x0C,	// 0b00000110
+	value_byte7 = 0x00	// 0b00000000
+} melodyNote // melodyNote
+
+typedef enum
+{						//Bit:  43210 - Hex
+	value_byte0 = 0x04,	// 0b00000100
+	value_byte1 = 0x0E,	// 0b00001110
+	value_byte2 = 0x0E,	// 0b00001110
+	value_byte3 = 0x0E,	// 0b00001110
+	value_byte4 = 0x1F,	// 0b00011111
+	value_byte5 = 0x0F,	// 0b00000000
+	value_byte6 = 0x04,	// 0b00000100
+	value_byte7 = 0x00	// 0b00000000
+} bell // bell
+*/
+/*
+     Bit: 4 3 2 1 0 - Hex
+    Row1: 0 0 1 0 0 - 0x04
+    Row2: 0 1 1 1 0 - 0x0E
+    Row3: 0 1 1 1 0 - 0x0E
+    Row4: 0 1 1 1 0 - 0x0E
+    Row5: 1 1 1 1 1 - 0x1F
+    Row6: 0 0 0 0 0 - 0x00
+    Row7: 0 0 1 0 0 - 0x04
+    Row8: 0 0 0 0 0 - 0x00
+
 // http://www.circuitvalley.com/2012/02/lcd-custom-character-hd44780-16x2.html
+// http://www.spikenzielabs.com/SpikenzieLabs/LCD_How_To.html
+// http://www.imagesco.com/articles/lcd/06.html
+// http://ftp1.digi.com/support/documentation/0220057_b.pdf
+// http://www.quinapalus.com/hd44780udg.html
+// http://omerk.github.io/lcdchargen/
+// http://mikeyancey.com/hamcalc/lcd_characters.php
+
 extern unsigned char symbolGenerator[][8] =	// [rows][cols=8]
 {
 	 { 0x0E, 0x1B, 0x11, 0x11, 0x11, 0x11, 0x11, 0x1F },	// Battery Charging   0%	// addr 0-7
