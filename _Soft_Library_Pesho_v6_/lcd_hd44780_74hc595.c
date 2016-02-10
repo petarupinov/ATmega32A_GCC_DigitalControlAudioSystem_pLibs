@@ -26,7 +26,6 @@
 **********************************/
 void LCD_INIT()
 {
-	LCD_EXECUTE_COMMAND(LCD_CLEAR);						// 0b00000001	// 1. Display clear
 //	_delay_us(160);	// 1.52 mS	// comment for simulation
 	LCD_EXECUTE_COMMAND(LCD_8BIT_2ROWS_FONT5X7);		// 0b00111000	// 2. Function set: 8-bit interface data (DL = 1), 2-line display (N = 1), 5 x 7 dot character font (F = 0)
 //	_delay_us(40);	// 37 uS	// comment for simulation
@@ -36,7 +35,9 @@ void LCD_INIT()
 //	_delay_us(40);	// 37 uS	// comment for simulation
 	LCD_EXECUTE_COMMAND(LCD_MOVE_FIRST);
 //	_delay_us(40);	// 37 uS	// comment for simulation
+	LCD_EXECUTE_COMMAND(LCD_CLEAR);						// 0b00000001	// 1. Display clear
 
+// old code... LCD_CLEAR can't be first command !!!
 //	LCD_EXECUTE_COMMAND(LCD_CLEAR);					// LCD_CLEAR
 //	LCD_EXECUTE_COMMAND(LCD_MOVE_FIRST);			// LCD_MOVE_FIRST
 //	LCD_EXECUTE_COMMAND(LCD_ON_BLINK_CURSOR);		// LCD_ON_BLINK_CURSOR
@@ -195,7 +196,7 @@ void LCD_EXECUTE_DATA_LAST()	// flush -> izchistvane na bufer - prinuditelno izp
 void lcdDataString(char *data)
 {
 // USE THIS: char symbols [] = "PESHO"; lcdExecuteDataString(symbols);
-	while(*data)
+	while(*data)// != '\0')	// is there or isn't there ?? String Terminator last charachter '\0'
 	{
 		unsigned char storeMSB;
 		unsigned char x;

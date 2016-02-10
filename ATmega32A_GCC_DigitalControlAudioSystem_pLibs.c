@@ -15,6 +15,7 @@
 ;;** 1. Edit on date 07.10.2015 ***************************************;;
 ;;** 2. Edit on date 14.10.2015 - bit field struct test & type bool ***;;
 ;;** 3. Edit on date 15.10.2015 - update LCD lib h ********************;;
+;;** 4. Edit on date 15.10.2015 - correct LCD init, can't be first clr ;;
 ;;*********************************************************************;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
@@ -247,6 +248,7 @@ void init_all()
 	port_init();
 	timer2_init();
 	LCD_INIT();
+	LCD_EXECUTE_COMMAND(LCD_CLEAR);
 }
 
 void buttons_press()
@@ -267,20 +269,22 @@ void buttons_press()
 
 		if(flagStatusBtnRegister->bit0 == 0)
 		{
+//			LCD_EXECUTE_COMMAND(LCD_CLEAR);
 			LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
 			// flagStatusBtnRegister->bit0 = 0;
+			//LCD_EXECUTE_DATA_ONE('A');
 			LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);
-			LCD_EXECUTE_DATA_ONE('A');
-			//lcdDataString("FIRST ROW");
+			lcdDataString("FIRST ROW");
 			_delay_ms(200);
 		}
 		else
 		{
+//			LCD_EXECUTE_COMMAND(LCD_CLEAR);
 			LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
 			// flagStatusBtnRegister->bit0 = 1;
+			//LCD_EXECUTE_DATA_ONE('B');
 			LCD_EXECUTE_COMMAND(LCD_SELECT_2ROW);
-			LCD_EXECUTE_DATA_ONE('B');
-			//lcdDataString("SECOND ROW");
+			lcdDataString("SECOND ROW");
 			_delay_ms(200);
 		}
 

@@ -47,7 +47,6 @@
 #define LCD_RCK_low()			(LCD_RCK_PORT&=~_BV(LCD_RCK_PIN))
 #define LCD_RCK_high()			(LCD_RCK_PORT|=_BV(LCD_RCK_PIN))
 
-
 /*************************************
 ** DEFINITION LCD DISPLAY CONSTANTS **
 *************************************/
