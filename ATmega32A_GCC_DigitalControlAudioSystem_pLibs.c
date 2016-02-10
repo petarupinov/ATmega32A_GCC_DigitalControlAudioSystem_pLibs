@@ -50,15 +50,28 @@
 ** VARIABLES, CONSTANTS, ARRAYS, STRUCTURES **
 *********************************************/
 
+typedef int bool;
+#define TRUE 1
+#define FALSE 0
+
 // https://en.wikipedia.org/wiki/Bit_field
 // http://stackoverflow.com/questions/24933242/when-to-use-bit-fields-in-c
-#define flagStatusBtnOnOffBit0 0
-
-struct
+//#define flagStatusBtnOnOffBit0 0
+struct flagStatusBtnOnOff
 {
-//	unsigned int bit0 : 1 = 0;	// bit0 from struct bit field
-//	unsigned int bit1 : 1 = 1;	// bit1 from struct bit field
-} flagStatusBtnOnOff;
+	unsigned int bit0 : 1;	// = 0;	// bit0 from struct bit field
+	unsigned int bit1 : 1;	// = 1;	// bit1 from struct bit field
+} *flagStatusBtnRegister;
+
+/*
+struct flagStatusBtnOnOff
+{
+	unsigned int bit0 : 1;	// = 0;	// bit0 from struct bit field
+	unsigned int bit1 : 1;	// = 1;	// bit1 from struct bit field
+}flagStatusBtnRegister;
+*/
+
+unsigned char n = 0;
 
 /********************************************************************************************
 *********************************** START OF DEFINISIONS ************************************
