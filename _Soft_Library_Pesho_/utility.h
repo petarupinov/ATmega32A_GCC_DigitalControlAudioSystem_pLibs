@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: UTILITY                                         *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: utility.h, v0.01, 18.10.2015                  *************
+*** FILE NAME: utility.h, v0.02, 18.11.2015                  *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
