@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: LCD DISPLAY HITACHI HD44780 + SHIFT REGISTER 74HC595 ********
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: lcd_hd44780_74hc595.c, v5, 16.10.2015         *************
+*** FILE NAME: lcd_hd44780_74hc595.c, v6, 16.10.2015         *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -35,7 +35,7 @@ void LCD_INIT()
 	LCD_EXECUTE_COMMAND(LCD_MOVE_FIRST);
 //	_delay_us(40);	// 37 uS	// comment for simulation
 	LCD_EXECUTE_COMMAND(LCD_CLEAR);						// 0b00000001	// 1. Display clear; // !!! ... from old code LCD_CLEAR can't be first command !!!
-//	_delay_us(1600);	// 1.53 mS	// comment for simulation
+	_delay_us(1200);	// 1.53 mS	or use this _delay_ms(2); LCD_EXECUTE_COMMAND() = 440us, 440+1200 = 1640 uS
 }
 
 /**************************************
@@ -44,7 +44,7 @@ void LCD_INIT()
 void LCD_CLEAR_CONTAINS()
 {
 	LCD_EXECUTE_COMMAND(LCD_CLEAR);						// 0b00000001	// 1. Display clear; // !!! ... from old code LCD_CLEAR can't be first command !!!
-	_delay_us(1600);	// 1.53 mS	or use this _delay_ms(2);
+	_delay_us(1200);	// 1.53 mS	or use this _delay_ms(2); LCD_EXECUTE_COMMAND() = 440us, 440+1200 = 1640 uS
 }
 
 /******************************************
@@ -264,6 +264,32 @@ void lcdDataInt(int data)		// void lcdDataInt(const int data)
 	lcdDataString(itoa(data, buffer, 10));	// 10 -> DECIMAL
 }
 
+/****************************************************
+** DEFINITION LCD DISPLAY GENERATOR OF NEW SYMBOLS **
+****************************************************/
+int rows, cols;
+unsigned char symbolGenerator[][LCD_CGRAM_SYMBOL_CONTAIN_8BYTES] =	// [rows][cols=8]
+{
+	 { 0x0E, 0x1B, 0x11, 0x11, 0x11, 0x11, 0x11, 0x1F },	// Battery Charging   0%	// addr 0-7
+	 { 0x0E, 0x1B, 0x11, 0x11, 0x11, 0x11, 0x1F, 0x1F },	// Battery Charging  16%	// addr 8-15
+	 { 0x0E, 0x1B, 0x11, 0x11, 0x11, 0x1F, 0x1F, 0x1F },	// Battery Charging  32%	// addr16-23
+	 { 0x0E, 0x1B, 0x11, 0x11, 0x1F, 0x1F, 0x1F, 0x1F },	// Battery Charging  48%	// addr24-31
+	 { 0x0E, 0x1B, 0x11, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F },	// Battery Charging  64%	// addr32-39
+	 { 0x0E, 0x1B, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F },	// Battery Charging  80%	// addr40-47
+	 { 0x0E, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F }		// Battery Charging 100%	// addr48-55
+};
+
+void storeNewCharsToCGRAM()
+{
+	for(rows=0; rows<7; rows++)
+	{
+		LCD_EXECUTE_COMMAND(LCD_CGRAM_STORE_ADDR_CHAR0+(rows*8));	// 0x40 = 0b0100000 SET CGRAM BASE 0 ADDRESS and OFFSET ADDRESS TO NEXT CHARACTER (LCD_CGRAM_STORE_ADDR_CHAR0+(row*8))
+		for(int cols=0; cols<LCD_CGRAM_SYMBOL_CONTAIN_8BYTES; cols++)
+		{
+			LCD_EXECUTE_DATA_ONE(symbolGenerator[rows][cols]);
+		}
+	}
+}
 /********************************************************************************************
 ************************************* END OF FUNCTIONS **************************************
 ********************************************************************************************/

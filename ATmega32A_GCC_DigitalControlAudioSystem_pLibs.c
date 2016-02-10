@@ -17,6 +17,7 @@
 ;;** 3. Edit on date 15.10.2015 - update LCD lib h ****************************************;;
 ;;** 4. Edit on date 15.10.2015 - correct LCD init, can't be first clr ********************;;
 ;;** 5. Edit on date 16.10.2015 - update and correct LCD clear lib c h, struct with flags *;;
+;;** 6. Edit on date 17.10.2015 - update with custom characters ***************************;;
 ;;*****************************************************************************************;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
@@ -37,16 +38,16 @@
 
 // Add C files to project: "ir_sirc.c", "rotation_encoder.c", "rtc.c", "spi.c", "utility.c"
 
-#include "_Soft_Library_Pesho_/24c64.h"
-#include "_Soft_Library_Pesho_/ds18x20.h"
-#include "_Soft_Library_Pesho_/i2c_twi.h"
-#include "_Soft_Library_Pesho_/ir_sirc.h"
+//#include "_Soft_Library_Pesho_/24c64.h"
+//#include "_Soft_Library_Pesho_/ds18x20.h"
+//#include "_Soft_Library_Pesho_/i2c_twi.h"
+//#include "_Soft_Library_Pesho_/ir_sirc.h"
 #include "_Soft_Library_Pesho_/lcd_hd44780_74hc595.h"
-#include "_Soft_Library_Pesho_/pga2310.h"
-#include "_Soft_Library_Pesho_/rotation_encoder.h"
-#include "_Soft_Library_Pesho_/rtc.h"
-#include "_Soft_Library_Pesho_/spi.h"
-#include "_Soft_Library_Pesho_/uart.h"
+//#include "_Soft_Library_Pesho_/pga2310.h"
+//#include "_Soft_Library_Pesho_/rotation_encoder.h"
+//#include "_Soft_Library_Pesho_/rtc.h"
+//#include "_Soft_Library_Pesho_/spi.h"
+//#include "_Soft_Library_Pesho_/uart.h"
 #include "_Soft_Library_Pesho_/utility.h"
 
 /*********************************************
@@ -103,6 +104,22 @@ unsigned char n = 0;
 #define LED_low_DISPLAYLED_high()	(LED_DISPLAYLED_PORT&=~_BV(LED_DISPLAYLED_PIN))				// LED_DISPLAYLED_PORT = (LED_DISPLAYLED_PORT) & (~_BV(LED_DISPLAYLED_PIN))
 #define LED_high_DISPLAYLED_low()	(LED_DISPLAYLED_PORT|=_BV(LED_DISPLAYLED_PIN))				// LED_DISPLAYLED_PORT = (LED_DISPLAYLED_PORT) | (_BV(LED_DISPLAYLED_PIN))
 
+//unsigned char symbolGenerator[7][8];
+
+/*
+#define LCD_CGRAM_SYMBOL_CONTAIN_8BYTES	8	// every symbol contains 8 bytes pixel pattern
+#define LCD_CGRAM_NUMBER_CHARACTERS		7	// every symbol is one row, every row is generated symbol
+unsigned char symbolGenerator[][8] =	// [rows][cols=8]
+{
+	 { 0x0E, 0x1B, 0x11, 0x11, 0x11, 0x11, 0x11, 0x1F },	// Battery Charging   0%	// addr 0-7
+	 { 0x0E, 0x1B, 0x11, 0x11, 0x11, 0x11, 0x1F, 0x1F },	// Battery Charging  16%	// addr 8-15
+	 { 0x0E, 0x1B, 0x11, 0x11, 0x11, 0x1F, 0x1F, 0x1F },	// Battery Charging  32%	// addr16-23
+	 { 0x0E, 0x1B, 0x11, 0x11, 0x1F, 0x1F, 0x1F, 0x1F },	// Battery Charging  48%	// addr24-31
+	 { 0x0E, 0x1B, 0x11, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F },	// Battery Charging  64%	// addr32-39
+	 { 0x0E, 0x1B, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F },	// Battery Charging  80%	// addr40-47
+	 { 0x0E, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F }		// Battery Charging 100%	// addr48-55
+};
+*/
 /********************************************************************************************
 ************************************ END OF DEFINISIONS *************************************
 ********************************************************************************************/
@@ -271,8 +288,11 @@ void buttons_press()
 			{
 				LED_high_DISPLAYLED_low();				// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
 				LCD_CLEAR_CONTAINS();					// CLEAR DISPLAY ALL CHARACTERS
-				LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);
-				lcdDataString("FIRST ROW");
+				LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);	// 0b0100000 SET CGRAM BASE ADDRESS
+
+				storeNewCharsToCGRAM();					// Generate and Store new missing characters into LCD CGRAM
+
+//				lcdDataString("FIRST ROW");
 				flagStatusBits->flagPower = 1;
 				_delay_ms(200);
 			}
@@ -280,8 +300,12 @@ void buttons_press()
 			{
 				LED_low_DISPLAYLED_high();				// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
 				LCD_CLEAR_CONTAINS();					// CLEAR DISPLAY ALL CHARACTERS
-				LCD_EXECUTE_COMMAND(LCD_SELECT_2ROW);
-				lcdDataString("SECOND ROW");
+				LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);
+//				lcdDataString("SECOND ROW");
+				for(int i=0; i<16; i++)
+				{
+					LCD_EXECUTE_DATA_ONE(i);		// bytes send
+				}
 				flagStatusBits->flagPower = 0;
 				_delay_ms(200);
 			}
