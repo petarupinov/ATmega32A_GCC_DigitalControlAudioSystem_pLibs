@@ -20,7 +20,7 @@
 /*******************************
 ** DEFINITION PROJECT VERSION **
 *******************************/
-#define FIRMWARE_VERSION 27
+#define FIRMWARE_VERSION 28
 
 /*******************************
 ** DEFINITION DEBUG CONSTANTS **
@@ -129,6 +129,8 @@ void init_all(void);
 void ampliferOn(void);
 void ampliferOff(void);
 void volumeProcess(void);
+void volumeProcessRemote(signed char temp);
+void volumeMute(void);
 void volumeUpdate(void);
 void commonEncoder(void);
 

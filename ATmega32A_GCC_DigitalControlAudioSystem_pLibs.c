@@ -39,6 +39,7 @@
 ;;**25. Edit on date 29.11.2015 - adding fan support **************************************;;
 ;;**26. Edit on date 04.12.2015 - adding ir support ***************************************;;
 ;;**27. Edit on date 06.12.2015 - adding main header file in project **********************;;
+;;**28. Edit on date 07.12.2015 - adding remote volume and mute ***************************;;
 ;;*****************************************************************************************;;
 ;;** Used library version: _Soft_Library_Pesho_v0.07 **************************************;;
 ;;*****************************************************************************************;;
@@ -105,12 +106,13 @@ struct flagStatusBtnOnOff
 	unsigned int bit1 : 1;	// = 1;	// bit1 from struct bit field
 }flagStatusBtnRegister;
 */
+#define REMOTE_VOLUME_UP 1
+#define REMOTE_VOLUME_DOWN -1
+#define VOLUME_LIMIT_POSITIONS 20
+unsigned char volumeBuffer = 0;				// fro MUTE function
+unsigned char volumeIndex = VOLUME_MUTE;	// defined in pga2310.h
 
-#define VOLUME_MAX 20
-#define VOLUME_MIN 0
-unsigned char volumeIndex = VOLUME_MIN;
-
-unsigned char volumeValue [VOLUME_MAX] = { 0x00, 0x28, 0x32, 0x3C, 0x46, 0x50, 0x5A, 0x64, 0x6E, 0x78, 0x82, 0x8C, 0x96, 0xA0, 0xAA, 0xB4, 0xBE, 0xC8, 0xD2, 0xD7 };
+unsigned char volumeValue [VOLUME_LIMIT_POSITIONS] = { 0x00, 0x28, 0x32, 0x3C, 0x46, 0x50, 0x5A, 0x64, 0x6E, 0x78, 0x82, 0x8C, 0x96, 0xA0, 0xAA, 0xB4, 0xBE, 0xC8, 0xD2, 0xD7 };
 //       values of volume  ->	0,    40,   50,   60,   70,   80,   90,   100,  110,  120,  130,  140,  150,  160,  170,  180,  190,  200,  210,  215	<-	values of volume
 // index of values of volume    0      1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19
 
@@ -350,24 +352,23 @@ void irDecode(void)
 //		flagPower = 0;			// filter za buton OFF
 //		break;
 	}
-	else if(((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_VOLUP)))// && flagStatusBits->flagPower == 1)	// Sony TV & CarAudio IR Remote Device - "VOLUME UP"
+	else if(((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_VOLUP)) && flagStatusBits->flagPower == 1)	// Sony TV & CarAudio IR Remote Device - "VOLUME UP"
 	{	// VOLUME UP
-//		volumeUp();
+		volumeProcessRemote(REMOTE_VOLUME_UP);
 //		break;
 	}
-	else if(((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_VOLDN)))// && flagStatusBits->flagPower == 1)	// Sony TV & CarAudio IR Remote Device - "VOLUME DOWN"
+	else if(((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_VOLDN)) && flagStatusBits->flagPower == 1)	// Sony TV & CarAudio IR Remote Device - "VOLUME DOWN"
 	{	// VOLUME DOWN
-//		volumeDown();
+		volumeProcessRemote(REMOTE_VOLUME_DOWN);
 //		break;
 	}
 
-/*	else if((((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_ATT)) && mute==0) && flagPower==1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> ON
+	else if(((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_ATT)) && flagStatusBits->flagPower == 1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> ON
 	{	// MUTE
-		muteOn();
-		mute = 1;
+		volumeMute();
 //		break;
 	}
-	else if((((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_ATT)) && mute==1) && flagPower==1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> OFF
+/*	else if((((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_ATT)) && mute==1) && flagPower==1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> OFF
 	{	// UNMUTE
 		muteOff();
 		mute = 0;
@@ -495,43 +496,47 @@ void ampliferOn(void)
 {
 	flagStatusBits->flagPower = 1;		// flag for amplifer on
 
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Amplifer is on\r\n");
-#endif
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Display on and status led off\r\n");
-#endif
+// UART MESSAGE
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Amplifer is on\r\n");
+	#endif
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Display on and status led off\r\n");
+	#endif
+
+// LED OFF FUNC
 	LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
 
+// LCD FUNC & MESSAGE
 	LCD_CLEAR_CONTAIN();						// clear all contain on display
 	LCD_COMMAND(LCD_SELECT_1ROW);				// select row 1
 	LCD_DATA_STRING("    Amplifer On     ");	// 20 symbols
 	LCD_COMMAND(LCD_SELECT_2ROW);				// select row 2
 	LCD_DATA_STRING("P.UPINOV  P.STOYANOV");	// 20 symbols //	LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
 	LCD_COMMAND(LCD_ON);						// LCD ON without CURSOR
-
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Fan is on\r\n");
-	transmitUartString("[UART INFO] Fan is always on, it isn't sensitive to temperature, because DS18S20 is disabling\r\n");
-#endif
+// FANS FUNC & MESSAGE
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Fan is on\r\n");
+		transmitUartString("[UART INFO] Fan is always on, it isn't sensitive to temperature, because DS18S20 is disabling\r\n");
+	#endif
 	FAN_PWM_SPEED1();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
 //	FAN_high();			// PORTD5 - FAN ON (logic "1")	NON PWM, NON TIMER1
 
-// RELAYS ON
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Try to switch on relays for power 220V\r\n");		// uart debug information string
-#endif
-//	REL_POWER_high();// RELAY POWER ON TRAFs		// PESHO COMMENT 14.08.2015, 21:10
-//	_delay_ms(4000);								// PESHO COMMENT 14.08.2015, 21:10
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Try to switch on relays in for all 6 channels\r\n");		// uart debug information string
-#endif
-//	relays_in1_6ch();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
-//	_delay_ms(700);									// PESHO COMMENT 14.08.2015, 21:10
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Try to switch on relays out for all 6 channels\r\n");		// uart debug information string
-#endif
-//	relays_out_6ch();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+// RELAYS ON FUNC & MESSAGE
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Try to switch on relays for power 220V\r\n");		// uart debug information string
+	#endif
+	REL_POWER_high();// RELAY POWER ON TRAFs		// PESHO COMMENT 14.08.2015, 21:10
+	_delay_ms(4000);								// PESHO COMMENT 14.08.2015, 21:10
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Try to switch on relays in for all 6 channels\r\n");		// uart debug information string
+	#endif
+	relays_in1_6ch();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+	_delay_ms(700);									// PESHO COMMENT 14.08.2015, 21:10
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Try to switch on relays out for all 6 channels\r\n");		// uart debug information string
+	#endif
+	relays_out_6ch();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
 	_delay_ms(1000);	// izchakvane pri natiskane za vkliuchvane i otpuskane na buton - filtar treptqsht kontakt buton
 }
 
@@ -549,47 +554,52 @@ void ampliferOff(void)
 
 //			FAN_low();		// PORTD5 - FAN OFF (logic "0")  NON PWM, NON TIMER1
 
-// RELAYS OFF
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Try to switch off relays out for all 6 channels\r\n");		// uart debug information string
-#endif
-//	relays_out_off();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
-//	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Try to switch off relays in for all 6 channels\r\n");		// uart debug information string
-#endif
-//	relays_in_off();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
-//	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Try to switch off relays for power 220V\r\n");		// uart debug information string
-#endif
-//	REL_POWER_low();// RELAY POWER OFF				// PESHO COMMENT 14.08.2015, 21:10
+// RELAYS OFF FUNC & MESSAGE
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Try to switch off relays out for all 6 channels\r\n");		// uart debug information string
+	#endif
+	relays_out_off();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Try to switch off relays in for all 6 channels\r\n");		// uart debug information string
+	#endif
+	relays_in_off();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Try to switch off relays for power 220V\r\n");		// uart debug information string
+	#endif
+	REL_POWER_low();// RELAY POWER OFF				// PESHO COMMENT 14.08.2015, 21:10
 
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Fan is off\r\n");
-#endif
+// FANS FUNC & MESSAGE
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Fan is off\r\n");
+	#endif
 	FAN_PWM_OFF();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
 
+// FANS FUNC & MESSAGE
 	LCD_CLEAR_CONTAIN();
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Display off and status led on\r\n");
-#endif
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Display off and status led on\r\n");
+	#endif
+
+// LED ON FUNC
 	LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Amplifer is off\r\n");
-#endif
+
+// UART MESSAGE
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Amplifer is off\r\n");
+	#endif
 
 	_delay_ms(500);	// izchakvane pri natiskane za izkliuchvane i otpuskane na buton - filtar treptqsht kontakt buton
 }
 
-/********************************
-**** VOLUME PROCESS FUNCTION ****
-********************************/
+/*********************************************
+**** VOLUME PROCESS FUNCTION FROM ENCODER ****
+*********************************************/
 void volumeProcess(void)
 {
 	signed char temp = 0;//, tempEnc = 0, tempRem = 0;				// zadaljitelno signed char!!! ima osobenost pri vrashtaneto na rezultat ot funkciq!!!
 	temp = rotaryEncoderNikBarzakov();
-//	tempRem = remoteVolume();
 	if(0==temp)
 	{
 		// do nothing, encoder havn't been rotated  // ne e bil zavartan
@@ -597,9 +607,9 @@ void volumeProcess(void)
 	else if(-1==temp)
 	{
 		// encoder is decrement
-		if(volumeIndex < (VOLUME_MIN + 1))
+		if(volumeIndex < (VOLUME_MUTE + 1))
 		{
-			volumeIndex = VOLUME_MIN;
+			volumeIndex = VOLUME_MUTE;
 		}
 		else
 		{
@@ -610,9 +620,9 @@ void volumeProcess(void)
 	else if(1==temp)
 	{
 		// encoder is increment
-		if (volumeIndex > (VOLUME_MAX - 2))
+		if (volumeIndex > (VOLUME_LIMIT_POSITIONS - 2))
 		{
-			volumeIndex = (VOLUME_MAX - 1);
+			volumeIndex = (VOLUME_LIMIT_POSITIONS - 1);
 		}
 		else
 		{
@@ -621,6 +631,66 @@ void volumeProcess(void)
 		volumeUpdate();
 	}
 }
+
+/********************************************
+**** VOLUME PROCESS FUNCTION FROM REMOTE ****
+********************************************/
+void volumeProcessRemote(signed char temp)
+{
+	if(-1==temp)
+	{
+		// encoder is decrement
+		if(volumeIndex < (VOLUME_MUTE + 1))
+		{
+			volumeIndex = VOLUME_MUTE;
+		}
+		else
+		{
+			volumeIndex += temp;	// sabirane s polojitelno chislo, kratak zapis na: volumeIndex = volumeIndex + temp;
+		}
+		volumeUpdate();
+	}
+	else if(1==temp)
+	{
+		// encoder is increment
+		if (volumeIndex > (VOLUME_LIMIT_POSITIONS - 2))
+		{
+			volumeIndex = (VOLUME_LIMIT_POSITIONS - 1);
+		}
+		else
+		{
+			volumeIndex += temp;	// sabirane s polojitelno chislo, kratak zapis na: volumeIndex = volumeIndex + temp;
+		}
+		volumeUpdate();
+	}
+}
+
+/************************************
+**** VOLUME MUTE/UNMUTE FUNCTION ****
+************************************/
+void volumeMute(void)
+{
+	if(flagStatusBits->flagMute == 0)
+	{
+		volumeBuffer = volumeIndex;		// strore volume volue
+		volumeIndex = VOLUME_MUTE;		// MUTE ON
+		flagStatusBits->flagMute = 1;	// MUTE ON
+		#ifdef DEBUG_INFO
+			transmitUartString("[UART INFO] Volume mute is on\r\n");
+		#endif
+	}
+	else
+	{
+		volumeIndex = volumeBuffer;		// MUTE OFF
+		volumeBuffer = VOLUME_MUTE;		// clear volume volue
+		flagStatusBits->flagMute = 0;	// MUTE OFF
+		#ifdef DEBUG_INFO
+			transmitUartString("[UART INFO] Volume mute is off\r\n");
+		#endif
+	}
+	volumeUpdate();
+}
+
 /*************************************
 **** VOLUME UPDATE and LCD UPDATE ****
 *************************************/
@@ -638,11 +708,11 @@ void volumeUpdate(void)
 		LCD_DATA_STRING("Volume: 0");	// 20 symbols
 	}
 	LCD_DATA_INT(volumeIndex);			// 20 symbols
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Volume: ");		// uart debug information string
-	transmitUartInt(volumeIndex);		// uart debug information string 
-	transmitUartString("\r\n");			// uart debug information string
-#endif
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Volume: ");		// uart debug information string
+		transmitUartInt(volumeIndex);		// uart debug information string 
+		transmitUartString("\r\n");			// uart debug information string
+	#endif
 }
 
 /**********************************************
@@ -733,13 +803,13 @@ void temperature()
 	oneWireLeft();
 	for(i=0; i<9; i++)
 	{
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] byte ");
-	transmitUartInt(i);
-	transmitUartString(" : ");
-	transmitUartInt(storeTemp[i]);
-	transmitUartString("\r\n");
-#endif
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] byte ");
+		transmitUartInt(i);
+		transmitUartString(" : ");
+		transmitUartInt(storeTemp[i]);
+		transmitUartString("\r\n");
+	#endif
 	}
 	temperMeasur(byte0, byte1, byte6, byte7);
 //lcdDataString("?? C"); // ot gornata funkciq
@@ -749,13 +819,13 @@ void temperature()
 	oneWireRight();
 	for(i=0; i<9; i++)
 	{
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] byte ");
-	transmitUartInt(i);
-	transmitUartString(" : ");
-	transmitUartInt(storeTemp[i]);
-	transmitUartString("\r\n");
-#endif
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] byte ");
+		transmitUartInt(i);
+		transmitUartString(" : ");
+		transmitUartInt(storeTemp[i]);
+		transmitUartString("\r\n");
+	#endif
 	}
 	temperMeasur(byte0, byte1, byte6, byte7);
 //lcdDataString("?? C"); // ot gornata funkciq
@@ -771,9 +841,9 @@ unsigned char oneWireLeft()
 {
 	unsigned char i;
 
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] TEMPERATURE SENSOR LEFT: 10 DB 09 A5 01 08 00 C1 \r\n");		// uart debug information string
-#endif	
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] TEMPERATURE SENSOR LEFT: 10 DB 09 A5 01 08 00 C1 \r\n");		// uart debug information string
+	#endif	
 	if(reset())				// Master issues reset pulse. DS18S20s respond with presence pulse.
 	{
 		write_byte(0x55);	// Master issues Match ROM command.
@@ -822,9 +892,9 @@ unsigned char oneWireRight()
 {
 	unsigned char i;
 
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] TEMPERATURE SENSOR RIGHT: 10 6D F4 8F 02 08 00 B1 \r\n");		// uart debug information string
-#endif	
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] TEMPERATURE SENSOR RIGHT: 10 6D F4 8F 02 08 00 B1 \r\n");		// uart debug information string
+	#endif	
 	if(reset())				// Master issues reset pulse. DS18S20s respond with presence pulse.
 	{
 		write_byte(0x55);	// Master issues Match ROM command.
@@ -888,11 +958,11 @@ char temperMeasur(unsigned char byte0, unsigned char byte1, unsigned char byte6,
 	{
 		tC = (byte0/2);
 		j = tC - k;
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Temperature: ");		// uart debug information string
-	transmitUartInt(tC);		// uart debug information string 
-	transmitUartString(".0 C\r\n");			// uart debug information string
-#endif
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Temperature: ");		// uart debug information string
+		transmitUartInt(tC);		// uart debug information string 
+		transmitUartString(".0 C\r\n");			// uart debug information string
+	#endif
 //	LCD_COMMAND(LCD_SELECT_4ROW);	// select row 4
 	LCD_DATA_INT(tC);		//
 	LCD_DATA_STRING(".0 C");		//
@@ -902,11 +972,11 @@ char temperMeasur(unsigned char byte0, unsigned char byte1, unsigned char byte6,
 		transmitUartString("+");
 		tC = (byte0/2);
 		j = tC - k;
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Temperature: ");		// uart debug information string
-	transmitUartInt(tC);		// uart debug information string 
-	transmitUartString(".0 C\r\n");			// uart debug information string
-#endif
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Temperature: ");		// uart debug information string
+		transmitUartInt(tC);		// uart debug information string 
+		transmitUartString(".0 C\r\n");			// uart debug information string
+	#endif
 //	LCD_COMMAND(LCD_SELECT_4ROW);	// select row 4
 	LCD_DATA_INT(tC);		//
 	LCD_DATA_STRING(".0 C");		//
@@ -917,11 +987,11 @@ char temperMeasur(unsigned char byte0, unsigned char byte1, unsigned char byte6,
 //		tC = ((byte0 - 255.5) / 2);		// ne e dobre obraboteno za otricatelni chisla
 		tC = ((byte0 - 255) / 2);
 		j = tC - k;
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Temperature: ");		// uart debug information string
-	transmitUartInt(tC);		// uart debug information string 
-	transmitUartString(".0 C\r\n");			// uart debug information string
-#endif
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] Temperature: ");		// uart debug information string
+		transmitUartInt(tC);		// uart debug information string 
+		transmitUartString(".0 C\r\n");			// uart debug information string
+	#endif
 //	LCD_COMMAND(LCD_SELECT_4ROW);	// select row 4
 	LCD_DATA_INT(tC);		//
 	LCD_DATA_STRING(".0 C");		//
@@ -929,9 +999,9 @@ char temperMeasur(unsigned char byte0, unsigned char byte1, unsigned char byte6,
 	else
 	{
 		//lcdDataString("ERROR!");	// ERROR not return to display!!!!
-#ifdef DEBUG_ERROR
-	transmitUartString("[UART ERROR] ERROR TEMPERATURE\r\n");		// uart debug information string
-#endif
+	#ifdef DEBUG_ERROR
+		transmitUartString("[UART ERROR] ERROR TEMPERATURE\r\n");		// uart debug information string
+	#endif
 		return 1;
 	}
 
@@ -940,20 +1010,20 @@ char temperMeasur(unsigned char byte0, unsigned char byte1, unsigned char byte6,
 
 void about(void)
 {
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] =====================================================\r\n");
-	transmitUartString("[UART INFO] \tAuthors and creators: P.Upinov and P.Stoyanov\r\n");
-	transmitUartString("[UART INFO] \tDevice name: Digital Control Audio System\r\n");
-	transmitUartString("[UART INFO] \tFirmware version beta ");
-	transmitUartInt(FIRMWARE_VERSION);
-	transmitUartString("\r\n");
-	transmitUartString("[UART INFO] =====================================================\r\n");
-	transmitUartString("[UART INFO] Da dobavq upravlenie na:\
-					\r\n[UART INFO] - FAN smart controlling			\
-					\r\n[UART INFO] - DS18S20						\
-					\r\n[UART INFO] - RTC							\
-					\r\n[UART INFO] - Memory\r\n");
-#endif
+	#ifdef DEBUG_INFO
+		transmitUartString("[UART INFO] =====================================================\r\n");
+		transmitUartString("[UART INFO] \tAuthors and creators: P.Upinov and P.Stoyanov\r\n");
+		transmitUartString("[UART INFO] \tDevice name: Digital Control Audio System\r\n");
+		transmitUartString("[UART INFO] \tFirmware version beta ");
+		transmitUartInt(FIRMWARE_VERSION);
+		transmitUartString("\r\n");
+		transmitUartString("[UART INFO] =====================================================\r\n");
+		transmitUartString("[UART INFO] Da dobavq upravlenie na:\
+						\r\n[UART INFO] - FAN smart controlling			\
+						\r\n[UART INFO] - DS18S20						\
+						\r\n[UART INFO] - RTC							\
+						\r\n[UART INFO] - Memory\r\n");
+	#endif
 }
 /********************************************************************************************
 ************************************* END OF FUNCTIONS **************************************
