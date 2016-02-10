@@ -25,8 +25,9 @@
 ;;**11. Edit on date 26.10.2015 - update rotation encoder and little bit uart *************;;
 ;;**12. Edit on date 18.11.2015 - update utility lib version ******************************;;
 ;;**13. Edit on date 19.11.2015 - add functions ampliferOn/Off ****************************;;
+;;**14. Edit on date 22.11.2015 - button power and escape works ***************************;;
 ;;*****************************************************************************************;;
-;;** Used library version: _Soft_Library_Pesho_v0.06 **************************************;;
+;;** Used library version: _Soft_Library_Pesho_v0.06 ^^lcd updated^^ **********************;;
 ;;*****************************************************************************************;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
@@ -119,9 +120,9 @@ unsigned char n = 0;
 /**************************
 ** DEFINITION OF BUTTONS **
 **************************/
-#define BUTTON_ON_OFF  PB1	// PINB1
-#define BUTTON_ESC     PB2	// PINB2
-#define BUTTON_ENCODER PD3	// PIND3
+#define BUTTON_ON_OFF  PB1	// PINB1		// FRONT PANEL DOWN LEFT POSITION	// HEADER 2 pins - CON5 (blue and white)
+#define BUTTON_ESC     PB2	// PINB2		// FRONT PANEL UP RIGHT POSITION	// HEADER 2 pins - CON8 (yellow and white) (PACO: 2/6)
+#define BUTTON_ENCODER PD3	// PIND3 (NOT WORK) // FRONT PANEL UP LEFT POSITION		// HEADER Encoder 5 pins DE (orange and white) (PACO: INPUT)
 
 #define BUTTON_ON_OFF_low()   (bit_is_clear(PINB,BUTTON_ON_OFF))
 #define BUTTON_ON_OFF_high()  (bit_is_set(PINB,BUTTON_ON_OFF))
@@ -231,44 +232,53 @@ void timer2_off()	// Timer2 Off
 ********************/
 char ampliferOn()
 {
-//	FAN_PWM_SPEED1();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
 	LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
+
+	LCD_CLEAR_CONTAIN();						// clear all contain on display
+	LCD_COMMAND(LCD_SELECT_1ROW);				// select row 1
+	LCD_DATA_STRING("    Amplifer On     ");	// 20 symbols
+	LCD_COMMAND(LCD_SELECT_2ROW);				// select row 2
+	LCD_DATA_STRING("P.UPINOV  P.STOYANOV");	// 20 symbols //	LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
+	LCD_COMMAND(LCD_ON);						// LCD ON without CURSOR
+
+
+//	FAN_PWM_SPEED1();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
 //			FAN_high();		// PORTD5 - FAN ON (logic "1")	NON PWM, NON TIMER1
 
 //			volumeLeft = volumeRight = volumeValue [0];	// nulurane na volume control pri vsqko puskane
 
-	spi_start();
+//	spi_start();
 //	PGA2310_U6_SPI(volumeLeft, volumeRight);
-	spi_stop();
+//	spi_stop();
 
-	spi_start();
+//	spi_start();
 //	PGA2310_U7_SPI(volumeLeft, volumeRight);
-	spi_stop();
+//	spi_stop();
 
-	spi_start();
+//	spi_start();
 //	PGA2310_U8_SPI(volumeLeft, volumeRight);
-	spi_stop();
+//	spi_stop();
 
-	transmitUartString("Amplifer On\r\n");
+//	transmitUartString("Amplifer On\r\n");
 //		uart_transmit("<AMPLIFER ON>\r\n", 15);	// "\r\n" - 2 symbols (not 4 symbols)
 
-	LCD_INIT();								// LCD INITIZLIZATION
-	LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);	// select row 1
+//	LCD_INIT();								// LCD INITIZLIZATION
+//	LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);	// select row 1
 //		LCD_EXECUTE_DATA(" << AMPLIFER  ON >> ",20);	// char "DATA", int 13 of chars of "DATA"
-lcdDataString("    Amplifer On");
-	LCD_EXECUTE_COMMAND(LCD_SELECT_2ROW);	// select row 2
-	LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
+//lcdDataString("    Amplifer On");
+//	LCD_EXECUTE_COMMAND(LCD_SELECT_2ROW);	// select row 2
+//	LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
 //			LCD_EXECUTE_COMMAND(LCD_SELECT_3ROW);	// select row 3
 //			LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
 //			LCD_EXECUTE_COMMAND(LCD_SELECT_4ROW);	// select row 4
 //			LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
-	LCD_EXECUTE_COMMAND(LCD_ON);			// LCD ON without CURSOR
+//	LCD_EXECUTE_COMMAND(LCD_ON);			// LCD ON without CURSOR
 
 // RELAYS ON
 //	REL_POWER_high();// RELAY POWER ON TRAFs		// PESHO COMMENT 14.08.2015, 21:10
-	_delay_ms(4000);								// PESHO COMMENT 14.08.2015, 21:10
+//	_delay_ms(4000);								// PESHO COMMENT 14.08.2015, 21:10
 //	relays_in1_6ch();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
-	_delay_ms(700);									// PESHO COMMENT 14.08.2015, 21:10
+//	_delay_ms(700);									// PESHO COMMENT 14.08.2015, 21:10
 //	relays_out_6ch();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
 
 //			PGA2310_U8_SPI(volumeLeft, volumeRight);	// 'A', 'A', 0b01111110, 0b01111110
@@ -280,35 +290,43 @@ lcdDataString("    Amplifer On");
 ********************/
 void ampliferOff()
 {
+	LCD_CLEAR_CONTAIN();
+
+	LCD_COMMAND(LCD_SELECT_1ROW);				// select row 1
+	LCD_DATA_STRING("    Amplifer Off    ");	// 20 symbols
+
+	LCD_COMMAND(LCD_OFF);						// LCD ON without CURSOR
+	LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
+
 //			FAN_low();		// PORTD5 - FAN OFF (logic "0")  NON PWM, NON TIMER1
 
 // RELAYS OFF
 //	relays_out_off();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
-	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
+//	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
 //	relays_in_off();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
-	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
+//	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
 //	REL_POWER_low();// RELAY POWER OFF				// PESHO COMMENT 14.08.2015, 21:10
 
-	transmitUartString("Standby\r\n");
+//	transmitUartString("Standby\r\n");
 //				uart_transmit("<STANDBY>\r\n", 11);		// "\r\n" - 2 symbols (not 4 symbols)
 
-	LCD_INIT();								// LCD INITIZLIZATION
-	LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);	// select row 1
-lcdDataString("       Standby");
+//	LCD_INIT();								// LCD INITIZLIZATION
+//	LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);	// select row 1
+//lcdDataString("       Standby");
 //				LCD_EXECUTE_DATA(" >>  <STANDBY>   << ",20);		// char "DATA", int 13 of chars of "DATA"
 //				_delay_ms(500);	// izchakvane - migasht efekt
 //				LCD_INIT();								// LCD INITIZLIZATION
 //				_delay_ms(250);	// izchakvane - migasht efekt, natiskane i otpuskane na buton - filtar treptqsht kontakt buton
-	LCD_EXECUTE_COMMAND(LCD_SELECT_3ROW);	// select row 1
-lcdDataString("    Amplifer Off");
+//	LCD_EXECUTE_COMMAND(LCD_SELECT_3ROW);	// select row 1
+//lcdDataString("    Amplifer Off");
 //				LCD_EXECUTE_DATA(" >> <IR STANDBY> << ",20);		// char "DATA", int 13 of chars of "DATA"
-	_delay_ms(500);	//
+//	_delay_ms(500);	//
 
-	_delay_ms(50);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
+//	_delay_ms(50);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
 
 //	FAN_PWM_OFF();
 //			LCD_EXECUTE_COMMAND(LCD_OFF);			// LCD OFF
-	LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
+//	LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
 }
 /********************************************************************************************
 ************************************* END OF FUNCTIONS **************************************
@@ -375,9 +393,9 @@ ISR(TIMER2_OVF_vect)
 void init_all()
 {
 	port_init();
-	timer2_init();
+//	timer2_init();
 	LCD_INIT();
-	LCD_EXECUTE_COMMAND(LCD_CLEAR);
+
 }
 
 void buttons_press()
@@ -401,7 +419,45 @@ void buttons_press()
 		{
 			ampliferOff();
 			flagStatusBits->flagPower = 0;			// filter za buton OFF
+			_delay_ms(500);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
+
 		}
+		else if(BUTTON_ESC_low() && flagStatusBits->flagPower == 1)
+		{
+			LCD_DATA_STRING("PRESSED BTN ESCAPE  ");	// 20 symbols
+			LCD_COMMAND(LCD_ON);
+			_delay_ms(500);
+//			volumeUp();
+//			_delay_ms(200);
+		}
+		else if(BUTTON_ENCODER_low() && flagStatusBits->flagPower == 1)
+		{
+			LCD_DATA_STRING("PRESSED BTN ENCODER ");	// 20 symbols
+			LCD_COMMAND(LCD_ON);	// LCD_COMMAND(LCD_OFF);
+			_delay_ms(500);
+//			volumeDown();
+//			_delay_ms(200);
+
+		}
+		else if(BUTTON_ESC_low() && flagStatusBits->flagPower == 0)
+		{
+//			LCD_COMMAND(LCD_ON);
+//			_delay_ms(500);
+//			setupMode();
+//			_delay_ms(1000);
+		}
+		else if(BUTTON_ENCODER_low() && flagStatusBits->flagPower == 0)
+		{
+//			LCD_COMMAND(LCD_OFF);
+//			_delay_ms(500);
+//			about();
+//			_delay_ms(1000);
+		}
+		else if(flagStatusBits->flagPower == 1)
+		{
+//			rotaryEncoderNikBarzakov();
+		}
+
 
 
 
