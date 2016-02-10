@@ -20,7 +20,7 @@
 /*******************************
 ** DEFINITION PROJECT VERSION **
 *******************************/
-#define FIRMWARE_VERSION 30
+#define FIRMWARE_VERSION 31
 
 /*******************************
 ** DEFINITION DEBUG CONSTANTS **

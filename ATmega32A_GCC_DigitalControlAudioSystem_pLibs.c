@@ -42,6 +42,7 @@
 ;;**28. Edit on date 07.12.2015 - adding remote volume and mute ***************************;;
 ;;**29. Edit on date 09.12.2015 - adding fan stepping with timer1 ORC1AL ******************;;
 ;;**30. Edit on date 09.12.2015 - change fan function names & temp sensors are works ******;;
+;;**31. Edit on date 15.12.2015 - add temp sensors array with id rom code *****************;;
 ;;*****************************************************************************************;;
 ;;** Used library version: _Soft_Library_Pesho_v0.07 **************************************;;
 ;;*****************************************************************************************;;
@@ -100,6 +101,8 @@ unsigned char volumeValue [VOLUME_LIMIT_POSITIONS] = { 0x00, 0x28, 0x32, 0x3C, 0
 
 // TEMPERATURE SENSOR
 unsigned char storeTemp [10] = {};	// data bytes massive
+unsigned char leftTempSensorRomCode[8]	= { 0x10, 0xDB, 0x09, 0xA5, 0x01, 0x08, 0x00, 0xC1 };
+unsigned char rightTempSensorRomCode[8]	= { 0x10, 0x6D, 0xF4, 0x8F, 0x02, 0x08, 0x00, 0xB1 };
 
 // FAN SPEED STEPS
 #define FAN_LIMIT_POSITIONS 8
@@ -889,8 +892,11 @@ unsigned char oneWireLeft()
 	if(reset())				// Master issues reset pulse. DS18S20s respond with presence pulse.
 	{
 		write_byte(0x55);	// Master issues Match ROM command.
-		// 64-bit ROM CODE
-		write_byte(0x10);	// Byte 0
+		for(i=0; i<8; i++)
+		{
+			write_byte(leftTempSensorRomCode[i]);	// 64-bit ROM CODE
+		}
+/*		write_byte(0x10);	// Byte 0
 		write_byte(0xDB);	// Byte 1
 		write_byte(0x09);	// Byte 2
 		write_byte(0xA5);	// Byte 3
@@ -899,13 +905,17 @@ unsigned char oneWireLeft()
 		write_byte(0x00);	// Byte 6
 		write_byte(0xC1);	// Byte 7
 		// 64-bit ROM CODE
-
+*/
 		write_byte(0x44);	// Master issues Convert T command.
 		wait_ready();		// Master applies strong pullup to DQ for the duration of the conversion (tCONV).
 		if(reset())			// Master issues reset pulse. DS18S20s respond with presence pulse.
 		{
 			write_byte(0x55);	// Master issues Match ROM command.
-			// 64-bit ROM CODE
+			for(i=0; i<8; i++)
+			{
+				write_byte(leftTempSensorRomCode[i]);	// 64-bit ROM CODE
+			}
+/*			// 64-bit ROM CODE
 			write_byte(0x10);	// Byte 0
 			write_byte(0xDB);	// Byte 1
 			write_byte(0x09);	// Byte 2
@@ -915,7 +925,7 @@ unsigned char oneWireLeft()
 			write_byte(0x00);	// Byte 6
 			write_byte(0xC1);	// Byte 7
 			// 64-bit ROM CODE
-
+*/
 			write_byte(0xBE);	// Master issues Read Scratchpad command.
 			for(i=0; i<9; i++)
 			{
@@ -940,7 +950,11 @@ unsigned char oneWireRight()
 	if(reset())				// Master issues reset pulse. DS18S20s respond with presence pulse.
 	{
 		write_byte(0x55);	// Master issues Match ROM command.
-		// 64-bit ROM CODE
+		for(i=0; i<8; i++)
+		{
+			write_byte(rightTempSensorRomCode[i]);	// 64-bit ROM CODE
+		}
+/*		// 64-bit ROM CODE
 		write_byte(0x10);	// Byte 0
 		write_byte(0x6D);	// Byte 1
 		write_byte(0xF4);	// Byte 2
@@ -950,13 +964,17 @@ unsigned char oneWireRight()
 		write_byte(0x00);	// Byte 6
 		write_byte(0xB1);	// Byte 7
 		// 64-bit ROM CODE
-
+*/
 		write_byte(0x44);	// Master issues Convert T command.
 		wait_ready();		// Master applies strong pullup to DQ for the duration of the conversion (tCONV).
 		if(reset())			// Master issues reset pulse. DS18S20s respond with presence pulse.
 		{
 			write_byte(0x55);	// Master issues Match ROM command.
-			// 64-bit ROM CODE
+			for(i=0; i<8; i++)
+			{
+				write_byte(rightTempSensorRomCode[i]);	// 64-bit ROM CODE
+			}
+/*			// 64-bit ROM CODE
 			write_byte(0x10);	// Byte 0
 			write_byte(0x6D);	// Byte 1
 			write_byte(0xF4);	// Byte 2
@@ -966,7 +984,7 @@ unsigned char oneWireRight()
 			write_byte(0x00);	// Byte 6
 			write_byte(0xB1);	// Byte 7
 			// 64-bit ROM CODE
-
+*/
 			write_byte(0xBE);	// Master issues Read Scratchpad command.
 			for(i=0; i<9; i++)
 			{
