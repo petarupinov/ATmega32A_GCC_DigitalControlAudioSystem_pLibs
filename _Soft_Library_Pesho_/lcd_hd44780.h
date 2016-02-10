@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: LCD DISPLAY HITACHI HD44780                     *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: lcd_hd44780.c, v3, 08.09.2015                 *************
+*** FILE NAME: lcd_hd44780.h, v0.01, 18.10.2015              *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -52,6 +52,15 @@
 #define LCD_MOVE_FIRST			0b00000010		// LCD DISPLAY MOVE CURSOR TO FIRST ROW AND FIRST SYMBOL (SEGMENT)
 //const byte LCD_MOVE_FIRST		= 0b00000010;
 // access 0b00001xxx
+#define LCD_ENTRY_MODE_INC_NOSHIFT		0b00000110	// LCD ENTRY MODE INCREMENT by 1 AND NO SHIFT
+//const byte LCD_ENTRY_MODE_INC_NOSHIFT	= 0b00000010;
+#define LCD_ENTRY_MODE_DEC_NOSHIFT		0b00000100	// LCD ENTRY MODE DECREMENT by 1 AND NO SHIFT
+//const byte LCD_ENTRY_MODE_DEC_NOSHIFT	= 0b00000010;
+#define LCD_ENTRY_MODE_INC_SHIFT		0b00000111	// LCD ENTRY MODE INCREMENT by 1 AND SHIFT
+//const byte LCD_ENTRY_MODE_INC_SHIFT	= 0b00000010;
+#define LCD_ENTRY_MODE_DEC_SHIFT		0b00000101	// LCD ENTRY MODE DECREMENT by 1 AND SHIFT
+//const byte LCD_ENTRY_MODE_DEC_SHIFT	= 0b00000010;
+// access 0b000001xx
 #define LCD_OFF					0b00001000		// LCD DISPLAY OFF 
 //const byte LCD_OFF			= 0b00001000;
 #define LCD_ON					0b00001100		// LCD DISPLAY ON without CURSOR
@@ -83,6 +92,76 @@
 #define LCD_SELECT_4ROW			0b11010100		// LCD DISPLAY SELECT SECOND ROW TO VISUALIZING
 //const byte LCD_SELECT_4ROW	= 0b11010100;	// 0xD4, 0xD5, 0xD6, ... 0xE7 (for 20 column)
 
+/*********************************************************************
+** DEFINITION LCD DISPLAY STORE ADDRES FOR GENERATOR OF NEW SYMBOLS **
+*********************************************************************/
+#define LCD_CGRAM_STORE_ADDR_CHAR_MIN	0b01000000	// 0x40	// ADDRESS BASE - first bit of CGRAM, Every CHAR contains 8 bytes with pattern pixels
+#define LCD_CGRAM_STORE_ADDR_CHAR0		0b01000000	// 0x40	// ADDRESS for CHAR0 - 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47
+#define LCD_CGRAM_STORE_ADDR_CHAR1		0b01001000	// 0x48	// ADDRESS for CHAR1 - 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F
+#define LCD_CGRAM_STORE_ADDR_CHAR2		0b01010000	// 0x50	// ADDRESS for CHAR2 - 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57
+#define LCD_CGRAM_STORE_ADDR_CHAR3		0b01011000	// 0x58	// ADDRESS for CHAR3 - 0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x5E, 0x5F
+#define LCD_CGRAM_STORE_ADDR_CHAR4		0b01100000	// 0x60	// ADDRESS for CHAR4 - 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67
+#define LCD_CGRAM_STORE_ADDR_CHAR5		0b01101000	// 0x68	// ADDRESS for CHAR5 - 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F
+#define LCD_CGRAM_STORE_ADDR_CHAR6		0b01110000	// 0x77	// ADDRESS for CHAR6 - 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77
+#define LCD_CGRAM_STORE_ADDR_CHAR7		0b01111000	// 0x77	// ADDRESS for CHAR7 - 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E, 0x7F
+#define LCD_CGRAM_STORE_ADDR_CHAR_MAX	0b01111111	// 0x7F	// ADDRESS END - lastest bit of CGRAM
+
+/********************************************************************
+** DEFINITION LCD DISPLAY ARRAY STORE FOR GENERATOR OF NEW SYMBOLS **
+********************************************************************/
+#define LCD_CGRAM_SYMBOL_CONTAIN_8BYTES	8	// every symbol contains 8 bytes pixel pattern
+#define LCD_CGRAM_NUMBER_CHARACTERS		7	// every symbol is one row, every row is generated symbol
+
+/*
+// http://www.circuitvalley.com/2012/02/lcd-custom-character-hd44780-16x2.html
+extern unsigned char symbolGenerator[][8] =	// [rows][cols=8]
+{
+	 { 0x0E, 0x1B, 0x11, 0x11, 0x11, 0x11, 0x11, 0x1F },	// Battery Charging   0%	// addr 0-7
+	 { 0x0E, 0x1B, 0x11, 0x11, 0x11, 0x11, 0x1F, 0x1F },	// Battery Charging  16%	// addr 8-15
+	 { 0x0E, 0x1B, 0x11, 0x11, 0x11, 0x1F, 0x1F, 0x1F },	// Battery Charging  32%	// addr16-23
+	 { 0x0E, 0x1B, 0x11, 0x11, 0x1F, 0x1F, 0x1F, 0x1F },	// Battery Charging  48%	// addr24-31
+	 { 0x0E, 0x1B, 0x11, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F },	// Battery Charging  64%	// addr32-39
+	 { 0x0E, 0x1B, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F },	// Battery Charging  80%	// addr40-47
+	 { 0x0E, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F }		// Battery Charging 100%	// addr48-55
+};
+
+// OR
+
+unsigned char *generationSymbols[BUFFER_NUMBER_OF_CHARS] =
+{
+	 0b00001110, 0b00011011, 0b00010001, 0b00010001, 0b00010001, 0b00010001, 0b00010001, 0b00011111,	// Battery Charging   0%
+	 0b00001110, 0b00011011, 0b00010001, 0b00010001, 0b00010001, 0b00010001, 0b00011111, 0b00011111,	// Battery Charging  16%
+	 0b00001110, 0b00011011, 0b00010001, 0b00010001, 0b00010001, 0b00011111, 0b00011111, 0b00011111,	// Battery Charging  32%
+	 0b00001110, 0b00011011, 0b00010001, 0b00010001, 0b00011111, 0b00011111, 0b00011111, 0b00011111,	// Battery Charging  48%
+	 0b00001110, 0b00011011, 0b00010001, 0b00011111, 0b00011111, 0b00011111, 0b00011111, 0b00011111,	// Battery Charging  64%
+	 0b00001110, 0b00011011, 0b00011111, 0b00011111, 0b00011111, 0b00011111, 0b00011111, 0b00011111,	// Battery Charging  80%
+	 0b00001110, 0b00011111, 0b00011111, 0b00011111, 0b00011111, 0b00011111, 0b00011111, 0b00011111		// Battery Charging 100%
+}
+
+	LCD_EXECUTE_COMMAND(LCD_CGRAM_STORE_ADDR_CHAR0);	// 0x40 = 0b0100000 SET CGRAM BASE 0 ADDRESS
+	// BATTERY CHARGED 0%
+	LCD_EXECUTE_DATA_ONE(0x0E);		// byte 0 send
+	LCD_EXECUTE_DATA_ONE(0x1B);		// byte 1 send
+	LCD_EXECUTE_DATA_ONE(0x11);		// byte 2 send
+	LCD_EXECUTE_DATA_ONE(0x11);		// byte 3 send
+	LCD_EXECUTE_DATA_ONE(0x11);		// byte 4 send
+	LCD_EXECUTE_DATA_ONE(0x11);		// byte 5 send
+	LCD_EXECUTE_DATA_ONE(0x11);		// byte 6 send
+	LCD_EXECUTE_DATA_ONE(0x1F);		// byte 7 send
+
+	// BATTERY CHARGED 16%
+	LCD_EXECUTE_COMMAND(LCD_CGRAM_STORE_ADDR_CHAR1);
+	LCD_EXECUTE_DATA_ONE(0x0E);		// byte 0 send
+	LCD_EXECUTE_DATA_ONE(0x1B);		// byte 1 send
+	LCD_EXECUTE_DATA_ONE(0x11);		// byte 2 send
+	LCD_EXECUTE_DATA_ONE(0x11);		// byte 3 send
+	LCD_EXECUTE_DATA_ONE(0x11);		// byte 4 send
+	LCD_EXECUTE_DATA_ONE(0x11);		// byte 5 send
+	LCD_EXECUTE_DATA_ONE(0x1F);		// byte 6 send
+	LCD_EXECUTE_DATA_ONE(0x1F);		// byte 7 send
+*/
+
+
 /********************************************************************************************
 ************************************ END OF DEFINISIONS *************************************
 ********************************************************************************************/
@@ -91,6 +170,7 @@
 ****************************** START DECLARATION OF FUNCTIONS *******************************
 ********************************************************************************************/
 void LCD_INIT();
+void LCD_CLEAR_CONTAINS();
 void LCD_EXECUTE_COMMAND(unsigned char command);
 void LCD_EXECUTE_DATA(char data [], int numsymbols);
 void LCD_EXECUTE_DATA_ONE(unsigned char data);
@@ -99,6 +179,8 @@ void LCD_EXECUTE_DATA_LAST();
 void lcdDataString(char *data);
 void lcdDataInt(int data);
 void lcdCommand(char command);
+
+void LCD_CGRAM_CUSTOM_SYMBOLS();	// store new generated chars from array 
 
 /*
 void uart_init();

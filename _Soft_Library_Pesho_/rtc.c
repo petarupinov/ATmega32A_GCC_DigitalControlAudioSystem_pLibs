@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: Real Time Clock (DS1307) with I2C Interface     *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: rtc.c, v1, 01.09.2015                         *************
+*** FILE NAME: rtc.c, v0.01, 18.10.2015                      *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one I2C / TWI  *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************

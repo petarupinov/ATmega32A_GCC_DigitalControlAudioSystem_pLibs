@@ -18,6 +18,7 @@
 ;;** 4. Edit on date 15.10.2015 - correct LCD init, can't be first clr ********************;;
 ;;** 5. Edit on date 16.10.2015 - update and correct LCD clear lib c h, struct with flags *;;
 ;;** 6. Edit on date 17.10.2015 - update with custom characters ***************************;;
+;;** 7. Edit on date 18.10.2015 - update all library files ********************************;;
 ;;*****************************************************************************************;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
@@ -104,22 +105,6 @@ unsigned char n = 0;
 #define LED_low_DISPLAYLED_high()	(LED_DISPLAYLED_PORT&=~_BV(LED_DISPLAYLED_PIN))				// LED_DISPLAYLED_PORT = (LED_DISPLAYLED_PORT) & (~_BV(LED_DISPLAYLED_PIN))
 #define LED_high_DISPLAYLED_low()	(LED_DISPLAYLED_PORT|=_BV(LED_DISPLAYLED_PIN))				// LED_DISPLAYLED_PORT = (LED_DISPLAYLED_PORT) | (_BV(LED_DISPLAYLED_PIN))
 
-//unsigned char symbolGenerator[7][8];
-
-/*
-#define LCD_CGRAM_SYMBOL_CONTAIN_8BYTES	8	// every symbol contains 8 bytes pixel pattern
-#define LCD_CGRAM_NUMBER_CHARACTERS		7	// every symbol is one row, every row is generated symbol
-unsigned char symbolGenerator[][8] =	// [rows][cols=8]
-{
-	 { 0x0E, 0x1B, 0x11, 0x11, 0x11, 0x11, 0x11, 0x1F },	// Battery Charging   0%	// addr 0-7
-	 { 0x0E, 0x1B, 0x11, 0x11, 0x11, 0x11, 0x1F, 0x1F },	// Battery Charging  16%	// addr 8-15
-	 { 0x0E, 0x1B, 0x11, 0x11, 0x11, 0x1F, 0x1F, 0x1F },	// Battery Charging  32%	// addr16-23
-	 { 0x0E, 0x1B, 0x11, 0x11, 0x1F, 0x1F, 0x1F, 0x1F },	// Battery Charging  48%	// addr24-31
-	 { 0x0E, 0x1B, 0x11, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F },	// Battery Charging  64%	// addr32-39
-	 { 0x0E, 0x1B, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F },	// Battery Charging  80%	// addr40-47
-	 { 0x0E, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F }		// Battery Charging 100%	// addr48-55
-};
-*/
 /********************************************************************************************
 ************************************ END OF DEFINISIONS *************************************
 ********************************************************************************************/
@@ -132,6 +117,7 @@ void timer2_init();
 void timer2_on();
 void timer2_off();
 void init_all();
+
 /********************************************************************************************
 ******************************* END DECLARATION OF FUNCTIONS ********************************
 ********************************************************************************************/
@@ -290,7 +276,7 @@ void buttons_press()
 				LCD_CLEAR_CONTAINS();					// CLEAR DISPLAY ALL CHARACTERS
 				LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);	// 0b0100000 SET CGRAM BASE ADDRESS
 
-				storeNewCharsToCGRAM();					// Generate and Store new missing characters into LCD CGRAM
+				LCD_CGRAM_CUSTOM_SYMBOLS();					// Generate and Store new missing characters into LCD CGRAM
 
 //				lcdDataString("FIRST ROW");
 				flagStatusBits->flagPower = 1;

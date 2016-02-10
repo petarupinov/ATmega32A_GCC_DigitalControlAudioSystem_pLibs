@@ -251,9 +251,9 @@ LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
                 0x0000051c                lcdDataString
                 0x00000462                LCD_EXECUTE_DATA
                 0x000005d6                lcdDataInt
+                0x0000056a                LCD_CGRAM_CUSTOM_SYMBOLS
                 0x000003ec                LCD_EXECUTE_COMMAND
                 0x000004c4                LCD_EXECUTE_DATA_ONE
-                0x0000056a                storeNewCharsToCGRAM
                 0x0000042a                LCD_CLEAR_CONTAINS
  .text          0x0000060e       0x36 pga2310.o
                 0x0000060e                PGA2310_U6_SPI
@@ -470,7 +470,7 @@ LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
                 0x000000c0       0x20 uart.o
 
 .debug_pubnames
-                0x00000000      0x425
+                0x00000000      0x429
  *(.debug_pubnames)
  .debug_pubnames
                 0x00000000       0xd9 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
@@ -481,32 +481,32 @@ LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
  .debug_pubnames
                 0x0000019e       0x55 i2c_twi.o
  .debug_pubnames
-                0x000001f3       0xf6 lcd_hd44780_74hc595.o
+                0x000001f3       0xfa lcd_hd44780_74hc595.o
  .debug_pubnames
-                0x000002e9       0x4b pga2310.o
+                0x000002ed       0x4b pga2310.o
  .debug_pubnames
-                0x00000334       0xf1 uart.o
+                0x00000338       0xf1 uart.o
 
-.debug_info     0x00000000     0x14c3
+.debug_info     0x00000000     0x14c2
  *(.debug_info)
- .debug_info    0x00000000      0x2c8 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
- .debug_info    0x000002c8       0xd2 24c64.o
- .debug_info    0x0000039a      0x4a2 ds18x20.o
- .debug_info    0x0000083c       0xe8 i2c_twi.o
- .debug_info    0x00000924      0x81c lcd_hd44780_74hc595.o
- .debug_info    0x00001140       0xf3 pga2310.o
- .debug_info    0x00001233      0x290 uart.o
+ .debug_info    0x00000000      0x2c7 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
+ .debug_info    0x000002c7       0xd2 24c64.o
+ .debug_info    0x00000399      0x4a2 ds18x20.o
+ .debug_info    0x0000083b       0xe8 i2c_twi.o
+ .debug_info    0x00000923      0x81c lcd_hd44780_74hc595.o
+ .debug_info    0x0000113f       0xf3 pga2310.o
+ .debug_info    0x00001232      0x290 uart.o
  *(.gnu.linkonce.wi.*)
 
-.debug_abbrev   0x00000000      0x7a4
+.debug_abbrev   0x00000000      0x78f
  *(.debug_abbrev)
- .debug_abbrev  0x00000000      0x1c3 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
- .debug_abbrev  0x000001c3       0x6c 24c64.o
- .debug_abbrev  0x0000022f      0x177 ds18x20.o
- .debug_abbrev  0x000003a6       0x8f i2c_twi.o
- .debug_abbrev  0x00000435      0x1e4 lcd_hd44780_74hc595.o
- .debug_abbrev  0x00000619       0x65 pga2310.o
- .debug_abbrev  0x0000067e      0x126 uart.o
+ .debug_abbrev  0x00000000      0x1ae ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
+ .debug_abbrev  0x000001ae       0x6c 24c64.o
+ .debug_abbrev  0x0000021a      0x177 ds18x20.o
+ .debug_abbrev  0x00000391       0x8f i2c_twi.o
+ .debug_abbrev  0x00000420      0x1e4 lcd_hd44780_74hc595.o
+ .debug_abbrev  0x00000604       0x65 pga2310.o
+ .debug_abbrev  0x00000669      0x126 uart.o
 
 .debug_line     0x00000000     0x10b7
  *(.debug_line)
@@ -528,7 +528,7 @@ LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
  .debug_frame   0x00000280       0x40 pga2310.o
  .debug_frame   0x000002c0       0xc0 uart.o
 
-.debug_str      0x00000000      0x5d5
+.debug_str      0x00000000      0x5d9
  *(.debug_str)
  .debug_str     0x00000000      0x1d4 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o
                                 0x208 (size before relaxing)
@@ -538,11 +538,11 @@ LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
                                 0x1be (size before relaxing)
  .debug_str     0x0000030f       0x58 i2c_twi.o
                                 0x131 (size before relaxing)
- .debug_str     0x00000367      0x116 lcd_hd44780_74hc595.o
-                                0x25c (size before relaxing)
- .debug_str     0x0000047d       0x6c pga2310.o
+ .debug_str     0x00000367      0x11a lcd_hd44780_74hc595.o
+                                0x260 (size before relaxing)
+ .debug_str     0x00000481       0x6c pga2310.o
                                 0x140 (size before relaxing)
- .debug_str     0x000004e9       0xec uart.o
+ .debug_str     0x000004ed       0xec uart.o
                                 0x1e5 (size before relaxing)
 
 .debug_loc      0x00000000      0x460

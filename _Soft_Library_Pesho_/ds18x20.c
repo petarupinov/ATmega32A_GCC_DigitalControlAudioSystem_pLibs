@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: 1-wire (one wire) Interface (Transmit/Receive)  *************
 *** AUTHOR:   http://www.mikrocontroller.net                 *************
-*** FILE NAME: ds18x20.c, v3, 31.08.2015                     *************
+*** FILE NAME: ds18x20.c, v0.01, 18.10.2015                  *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************

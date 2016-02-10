@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: SHIFT REGISTER 74HC595                          *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: 74hc595.h, v3, 08.09.2015                     *************
+*** FILE NAME: 74hc595.h, v0.01, 18.10.2015                  *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************

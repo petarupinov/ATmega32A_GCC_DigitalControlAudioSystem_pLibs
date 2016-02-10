@@ -11,21 +11,21 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
   3 .debug_aranges 000000e0  00000000  00000000  00000a1c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  4 .debug_pubnames 00000425  00000000  00000000  00000afc  2**0
+  4 .debug_pubnames 00000429  00000000  00000000  00000afc  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   000014c3  00000000  00000000  00000f21  2**0
+  5 .debug_info   000014c2  00000000  00000000  00000f25  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 000007a4  00000000  00000000  000023e4  2**0
+  6 .debug_abbrev 0000078f  00000000  00000000  000023e7  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   000010b7  00000000  00000000  00002b88  2**0
+  7 .debug_line   000010b7  00000000  00000000  00002b76  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000380  00000000  00000000  00003c40  2**2
+  8 .debug_frame  00000380  00000000  00000000  00003c30  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    000005d5  00000000  00000000  00003fc0  2**0
+  9 .debug_str    000005d9  00000000  00000000  00003fb0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    00000460  00000000  00000000  00004595  2**0
+ 10 .debug_loc    00000460  00000000  00000000  00004589  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 000002d0  00000000  00000000  000049f5  2**0
+ 11 .debug_ranges 000002d0  00000000  00000000  000049e9  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -316,8 +316,8 @@ _delay_loop_2(uint16_t __count)
  152:	80 e0       	ldi	r24, 0x00	; 0
  154:	0e 94 f6 01 	call	0x3ec	; 0x3ec <LCD_EXECUTE_COMMAND>
 
-				storeNewCharsToCGRAM();					// Generate and Store new missing characters into LCD CGRAM
- 158:	0e 94 b5 02 	call	0x56a	; 0x56a <storeNewCharsToCGRAM>
+				LCD_CGRAM_CUSTOM_SYMBOLS();					// Generate and Store new missing characters into LCD CGRAM
+ 158:	0e 94 b5 02 	call	0x56a	; 0x56a <LCD_CGRAM_CUSTOM_SYMBOLS>
 
 //				lcdDataString("FIRST ROW");
 				flagStatusBits->flagPower = 1;
@@ -1457,21 +1457,21 @@ void lcdDataString(char *data)
 }
  568:	08 95       	ret
 
-0000056a <storeNewCharsToCGRAM>:
+0000056a <LCD_CGRAM_CUSTOM_SYMBOLS>:
 	 { 0x0E, 0x1B, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F },	// Battery Charging  80%	// addr40-47
 	 { 0x0E, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F }		// Battery Charging 100%	// addr48-55
 };
 
-void storeNewCharsToCGRAM()
+void LCD_CGRAM_CUSTOM_SYMBOLS()
 {
  56a:	cf 93       	push	r28
  56c:	df 93       	push	r29
 	for(rows=0; rows<7; rows++)
  56e:	10 92 a6 00 	sts	0x00A6, r1
  572:	10 92 a5 00 	sts	0x00A5, r1
- 576:	25 c0       	rjmp	.+74     	; 0x5c2 <storeNewCharsToCGRAM+0x58>
+ 576:	25 c0       	rjmp	.+74     	; 0x5c2 <LCD_CGRAM_CUSTOM_SYMBOLS+0x58>
 	{
-		LCD_EXECUTE_COMMAND(LCD_CGRAM_STORE_ADDR_CHAR0+(rows*8));	// 0x40 = 0b0100000 SET CGRAM BASE 0 ADDRESS and OFFSET ADDRESS TO NEXT CHARACTER (LCD_CGRAM_STORE_ADDR_CHAR0+(row*8))
+		LCD_EXECUTE_COMMAND(LCD_CGRAM_STORE_ADDR_CHAR0+(rows*LCD_CGRAM_SYMBOL_CONTAIN_8BYTES));	// 0x40 = 0b0100000 SET CGRAM BASE 0 ADDRESS and OFFSET ADDRESS TO NEXT CHARACTER (LCD_CGRAM_STORE_ADDR_CHAR0+(row*8))
  578:	08 96       	adiw	r24, 0x08	; 8
  57a:	88 0f       	add	r24, r24
  57c:	88 0f       	add	r24, r24
@@ -1488,27 +1488,27 @@ void storeNewCharsToCGRAM()
  592:	ee 0f       	add	r30, r30
  594:	ff 1f       	adc	r31, r31
  596:	8a 95       	dec	r24
- 598:	e1 f7       	brne	.-8      	; 0x592 <storeNewCharsToCGRAM+0x28>
+ 598:	e1 f7       	brne	.-8      	; 0x592 <LCD_CGRAM_CUSTOM_SYMBOLS+0x28>
  59a:	ec 0f       	add	r30, r28
  59c:	fd 1f       	adc	r31, r29
  59e:	e0 5a       	subi	r30, 0xA0	; 160
  5a0:	ff 4f       	sbci	r31, 0xFF	; 255
  5a2:	80 81       	ld	r24, Z
  5a4:	0e 94 62 02 	call	0x4c4	; 0x4c4 <LCD_EXECUTE_DATA_ONE>
-void storeNewCharsToCGRAM()
+void LCD_CGRAM_CUSTOM_SYMBOLS()
 {
 	for(rows=0; rows<7; rows++)
 	{
-		LCD_EXECUTE_COMMAND(LCD_CGRAM_STORE_ADDR_CHAR0+(rows*8));	// 0x40 = 0b0100000 SET CGRAM BASE 0 ADDRESS and OFFSET ADDRESS TO NEXT CHARACTER (LCD_CGRAM_STORE_ADDR_CHAR0+(row*8))
+		LCD_EXECUTE_COMMAND(LCD_CGRAM_STORE_ADDR_CHAR0+(rows*LCD_CGRAM_SYMBOL_CONTAIN_8BYTES));	// 0x40 = 0b0100000 SET CGRAM BASE 0 ADDRESS and OFFSET ADDRESS TO NEXT CHARACTER (LCD_CGRAM_STORE_ADDR_CHAR0+(row*8))
 		for(int cols=0; cols<LCD_CGRAM_SYMBOL_CONTAIN_8BYTES; cols++)
  5a8:	21 96       	adiw	r28, 0x01	; 1
  5aa:	c8 30       	cpi	r28, 0x08	; 8
  5ac:	d1 05       	cpc	r29, r1
- 5ae:	61 f7       	brne	.-40     	; 0x588 <storeNewCharsToCGRAM+0x1e>
+ 5ae:	61 f7       	brne	.-40     	; 0x588 <LCD_CGRAM_CUSTOM_SYMBOLS+0x1e>
 	 { 0x0E, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F }		// Battery Charging 100%	// addr48-55
 };
 
-void storeNewCharsToCGRAM()
+void LCD_CGRAM_CUSTOM_SYMBOLS()
 {
 	for(rows=0; rows<7; rows++)
  5b0:	80 91 a5 00 	lds	r24, 0x00A5
@@ -1520,7 +1520,7 @@ void storeNewCharsToCGRAM()
  5c6:	90 91 a6 00 	lds	r25, 0x00A6
  5ca:	87 30       	cpi	r24, 0x07	; 7
  5cc:	91 05       	cpc	r25, r1
- 5ce:	a4 f2       	brlt	.-88     	; 0x578 <storeNewCharsToCGRAM+0xe>
+ 5ce:	a4 f2       	brlt	.-88     	; 0x578 <LCD_CGRAM_CUSTOM_SYMBOLS+0xe>
 		for(int cols=0; cols<LCD_CGRAM_SYMBOL_CONTAIN_8BYTES; cols++)
 		{
 			LCD_EXECUTE_DATA_ONE(symbolGenerator[rows][cols]);

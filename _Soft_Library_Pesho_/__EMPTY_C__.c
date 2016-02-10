@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: NAME (chips and more)                           *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: empty.c, v1, 31.08.2015                       *************
+*** FILE NAME: empty.c, v0.01, 18.10.2015                    *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************

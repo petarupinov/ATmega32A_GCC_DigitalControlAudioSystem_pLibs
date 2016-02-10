@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: EEPROM (24C64) with I2C Interface               *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: 24c64.c, v1, 08.09.2015                       *************
+*** FILE NAME: 24c64.c, v0.01, 18.10.2015                    *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one I2C / TWI  *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
