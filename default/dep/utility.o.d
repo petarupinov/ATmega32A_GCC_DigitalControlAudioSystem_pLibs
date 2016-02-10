@@ -9,6 +9,7 @@ utility.o: ../_Soft_Library_Pesho_/utility.c \
   c:/winavr-20100110/lib/gcc/../../avr/include/avr/version.h \
   c:/winavr-20100110/lib/gcc/../../avr/include/avr/fuse.h \
   c:/winavr-20100110/lib/gcc/../../avr/include/avr/lock.h \
+  ../_Soft_Library_Pesho_/../ATmega32A_GCC_DigitalControlAudioSystem_pLibs.h \
   ../_Soft_Library_Pesho_/uart.h ../_Soft_Library_Pesho_/utility.h
 
 c:/winavr-20100110/lib/gcc/../../avr/include/avr/io.h:
@@ -30,6 +31,8 @@ c:/winavr-20100110/lib/gcc/../../avr/include/avr/version.h:
 c:/winavr-20100110/lib/gcc/../../avr/include/avr/fuse.h:
 
 c:/winavr-20100110/lib/gcc/../../avr/include/avr/lock.h:
+
+../_Soft_Library_Pesho_/../ATmega32A_GCC_DigitalControlAudioSystem_pLibs.h:
 
 ../_Soft_Library_Pesho_/uart.h:
 

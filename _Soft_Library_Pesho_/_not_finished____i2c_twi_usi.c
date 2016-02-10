@@ -12,6 +12,7 @@
 //#include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdlib.h>			// itoa() - function
+#include "../ATmega32A_GCC_DigitalControlAudioSystem_pLibs.h"
 #include "i2c_twi_usi.h"
 #include "utility.h"		// using for debug and others
 

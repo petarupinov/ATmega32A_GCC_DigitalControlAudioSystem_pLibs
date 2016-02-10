@@ -11,6 +11,7 @@
 //#include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdlib.h>			// itoa() - function
+#include "../ATmega32A_GCC_DigitalControlAudioSystem_pLibs.h"
 #include "i2c_twi.h"		// Using for I2C communication to DS1307 !!!
 #include "utility.h"		// using for debug and others
 

@@ -38,6 +38,7 @@
 ;;**24. Edit on date 29.11.2015 - adding about and firmware version ***********************;;
 ;;**25. Edit on date 29.11.2015 - adding fan support **************************************;;
 ;;**26. Edit on date 04.12.2015 - adding ir support ***************************************;;
+;;**27. Edit on date 06.12.2015 - adding main header file in project **********************;;
 ;;*****************************************************************************************;;
 ;;** Used library version: _Soft_Library_Pesho_v0.07 **************************************;;
 ;;*****************************************************************************************;;
@@ -58,7 +59,7 @@
 ******************************************/
 
 // Add C files to project: "ir_sirc.c", "rotation_encoder.c", "rtc.c", "spi.c", "utility.c"
-
+#include "ATmega32A_GCC_DigitalControlAudioSystem_pLibs.h"
 #include "_Soft_Library_Pesho_/24c64.h"					// not using
 #include "_Soft_Library_Pesho_/ds18x20.h"				// not using
 #include "_Soft_Library_Pesho_/i2c_twi.h"				// using
@@ -72,39 +73,10 @@
 #include "_Soft_Library_Pesho_/uart.h"					// using
 #include "_Soft_Library_Pesho_/utility.h"				// using
 
-/*********************************************
-** VARIABLES, CONSTANTS, ARRAYS, STRUCTURES **
-*********************************************/
+/********************************************************************************************
+********************************* START OF INITIALIZATIONS **********************************
+********************************************************************************************/
 
-typedef int bool;
-#define TRUE 1
-#define FALSE 0
-
-// TEST SUCCESS OR FAIL FUNCTIONS
-#define SUCCESS 0
-#define FAIL -1
-
-#define ERROR -1
-#define ERR_AMP_COULD_NOT_START -2
-#define ERR_I2C_IS_NOT_WORK -3					// There is a problem, to solve it: Replace and reflash controller.
-#define ERR_I2C_RTC_NOT_WORK -4					// There is a problem, to solve it: Replace DS1307 and setup.
-#define ERR_I2C_EEPROM_MEMORY_IS_NOT_WORK -5	// There is a problem, to solve it: Replace AT24C64.
-
-// Trqbva da imam funkciq koqto da testva devaisite po platkata, koqto da se puska v opredeleni situacii, zashtoto:
-// - test EEPROM read all memmory, write to MCU RAM, fill (write) with zeroes and read all zeroes to test, vrashtane na dannite ot mcu ram v eeprom. Ot EEPROM-a ne trqbva da se zapisva vseki pat stoinost za da se proveri dali raboti eeprom-a - 
-// - test RTC and rtc memory, read and write settings to mcu ram, test and return config to rtc
-// - test PGA
-// - test all relay coils WHILE AMPLIFER IS OFF!!! test without power relays
-// - test DISPLAY
-// - test Rotary encoder - is work good ?
-// - test Buttons press button edi koi si, it is OK or other it is NOT OK
-// - test IR receiver
-// - test FANS with timer and without timer
-// - test Temperature sensors DS18S20
-
-#define VOLUME_MAX 20
-#define VOLUME_MIN 0
-unsigned char volumeIndex = VOLUME_MIN;
 // https://en.wikipedia.org/wiki/Bit_field
 // http://www.geeksforgeeks.org/bit-fields-c/
 // http://stackoverflow.com/questions/24933242/when-to-use-bit-fields-in-c
@@ -115,7 +87,6 @@ struct flagStatus	 // ako bade obqveno ime na strukturata, shte mogat da badat s
 	unsigned int flagPower	: 1;	// bit0: '0' = Power OFF, '1' = Power ON	// ne sa inicializirani
 	unsigned int flagMute	: 1;	// bit1: '0' = Mute OFF, '1' = Mute ON		// ne sa inicializirani
 } fSB, *flagStatusBits;		// sazdadeni fiksirani kam tazi struktura: strukturna promenliva (obekt) i ukazatel
-
 /*
 struct flagStatus	 // bit fields from struct
 {
@@ -135,105 +106,20 @@ struct flagStatusBtnOnOff
 }flagStatusBtnRegister;
 */
 
+#define VOLUME_MAX 20
+#define VOLUME_MIN 0
+unsigned char volumeIndex = VOLUME_MIN;
+
 unsigned char volumeValue [VOLUME_MAX] = { 0x00, 0x28, 0x32, 0x3C, 0x46, 0x50, 0x5A, 0x64, 0x6E, 0x78, 0x82, 0x8C, 0x96, 0xA0, 0xAA, 0xB4, 0xBE, 0xC8, 0xD2, 0xD7 };
 //       values of volume  ->	0,    40,   50,   60,   70,   80,   90,   100,  110,  120,  130,  140,  150,  160,  170,  180,  190,  200,  210,  215	<-	values of volume
 // index of values of volume    0      1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19
 
 // temper sensor
-unsigned char i=0;				// counter cycle
-unsigned char store [10] = {};	// data bytes massive
+//unsigned char i=0;				// counter cycle
+unsigned char storeTemp [10] = {};	// data bytes massive
 unsigned char byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9; // bytes ot temperaturen sensor
 
 
-/********************************************************************************************
-*********************************** START OF DEFINISIONS ************************************
-********************************************************************************************/
-
-/**************************
-** DEFINITION OF BUTTONS **
-**************************/
-#define BUTTON_ON_OFF  PB1	// PINB1		// FRONT PANEL DOWN LEFT POSITION	// HEADER 2 pins - CON5 (blue and white)
-#define BUTTON_ESC     PB2	// PINB2		// FRONT PANEL UP RIGHT POSITION	// HEADER 2 pins - CON8 (yellow and white) (PACO: 2/6)
-#define BUTTON_ENCODER PD3	// PIND3 (NOT WORK) // FRONT PANEL UP LEFT POSITION		// HEADER Encoder 5 pins DE (orange and white) (PACO: INPUT)
-
-#define BUTTON_ON_OFF_low()   (bit_is_clear(PINB,BUTTON_ON_OFF))
-#define BUTTON_ON_OFF_high()  (bit_is_set(PINB,BUTTON_ON_OFF))
-#define BUTTON_ESC_low()      (bit_is_clear(PINB,BUTTON_ESC))
-#define BUTTON_ESC_high()     (bit_is_set(PINB,BUTTON_ESC))
-#define BUTTON_ENCODER_low()  (bit_is_clear(PIND,BUTTON_ENCODER))
-#define BUTTON_ENCODER_high() (bit_is_set(PIND,BUTTON_ENCODER))
-
-/****************************************************
-**** DEFINITION OF LED AND DISPLAY BACKLIGHT LED ****
-****************************************************/
-#define LED_DISPLAYLED_PIN  PD4
-#define LED_DISPLAYLED_PORT PORTD
-
-#define LED_low_DISPLAYLED_high()	(LED_DISPLAYLED_PORT&=~_BV(LED_DISPLAYLED_PIN))				// LED_DISPLAYLED_PORT = (LED_DISPLAYLED_PORT) & (~_BV(LED_DISPLAYLED_PIN))
-#define LED_high_DISPLAYLED_low()	(LED_DISPLAYLED_PORT|=_BV(LED_DISPLAYLED_PIN))				// LED_DISPLAYLED_PORT = (LED_DISPLAYLED_PORT) | (_BV(LED_DISPLAYLED_PIN))
-
-/**************************
-**** DEFINITION OF FAN ****
-**************************/
-#define FAN_PIN  PD5
-#define FAN_PORT PORTD
-
-#define FAN_low()  (FAN_PORT&=~_BV(FAN_PIN))
-#define FAN_high() (FAN_PORT|=_BV(FAN_PIN))
-
-/********************************************************************************************
-************************************ END OF DEFINISIONS *************************************
-********************************************************************************************/
-
-/********************************************************************************************
-****************************** START DECLARATION OF FUNCTIONS *******************************
-********************************************************************************************/
-void port_init(void);			// initialization of all ports and pins
-
-void ext0_intrpt_init(void);	// external interrupt 0 on PD2 - initialization
-void ext0_intrpt_on(void);		// external interrupt 0 on PD2 - ENABLE new IR DETECTION
-void ext0_intrpt_off(void);		// external interrupt 0 on PD2 - DISABLE new IR DETECTION
-void ext1_intrpt_init(void);	// external interrupt 1 on PD3 - initialization
-void ext2_intrpt_init(void);	// external interrupt 2 on PB2 - initialization
-
-void irDecode(void);
-
-
-//void timer0_init();
-void timer1_init(void);
-void timer1_on(void);
-void timer1_on_speed1(void);
-void timer1_off(void);
-void timer2_init(void);
-void FAN_PWM_ON(void);
-void FAN_PWM_SPEED1(void);
-void FAN_PWM_OFF(void);
-
-void timer2_init(void);
-void timer2_on(void);
-void timer2_off(void);
-void init_all(void);
-void ampliferOn(void);
-void ampliferOff(void);
-void volumeProcess(void);
-void volumeUpdate(void);
-void commonEncoder(void);
-
-void temperature();				// temperature function
-unsigned char oneWireLeft();	// izmervane s temperaturen sensor left
-unsigned char oneWireRight();	// izmervane s temperaturen sensor right
-char temperMeasur(unsigned char byte0, unsigned char byte1, unsigned char byte6, unsigned char byte7);		// presmqtane na temperatur
-void tempDataUartSort(void);	// podrejdane na izhoda z temperatura
-
-
-/********************************************************************************************
-******************************* END DECLARATION OF FUNCTIONS ********************************
-********************************************************************************************/
-
-
-/********************************************************************************************
-********************************* START OF INITIALIZATIONS **********************************
-********************************************************************************************/
 
 /*****************************************
 ** INITIZLIZATION OF INPUT/OUTPUT PORTS **
@@ -361,6 +247,39 @@ void timer1_init()
 
 //	TIMSK = (1 << OCIE1A);
 }
+
+/*****************************
+** INITIZLIZATION OF TIMER2 **
+*****************************/
+void timer2_init(void)
+{
+	SFIOR = 0b00000010;		// Prescaler Reset Timer2 (bit1 –> PSR2)
+	TCCR2 = 0b10000001;		// 0b10100001 - OC1A,OC1B - PWM;  0b10000001 - OC1A PWM, OC1B - Disabled, normal port.
+	OCR2 = 0; // FAN PWM ON
+}
+
+/********************************************************************************************
+********************************** END OF INITIALIZATIONS ***********************************
+********************************************************************************************/
+
+/********************************************************************************************
+************************************ START OF FUNCTIONS *************************************
+********************************************************************************************/
+
+/***************************************
+******** DEFINITIONS OF TIMER 0 ********
+***************************************/
+/*
+void timer0_on()
+{
+}
+void timer0_off()
+{
+}
+*/
+/***************************************
+******** DEFINITIONS OF TIMER 1 ********
+***************************************/
 void timer1_on_speed1()
 {
 	TCCR1A = 0b10000001;		// 0b10100001 - OC1A,OC1B - PWM;  0b10000001 - OC1A PWM, OC1B - Disabled, normal port.
@@ -372,6 +291,7 @@ void timer1_on_speed1()
 //	OCR1BH = 0; // LED PWM ON
 //	OCR1BL = 1; // LED PWM ON
 }
+
 void timer1_off()
 {
 	TCCR1A = 0b00000000;		// DISABLED OCOC1A - PWM, OC1B - Disabled, normal port.
@@ -396,27 +316,9 @@ void FAN_PWM_OFF()
 	timer1_off();
 }
 
-/*****************************
-** INITIZLIZATION OF TIMER2 **
-*****************************/
-void timer2_init(void)
-{
-	SFIOR = 0b00000010;		// Prescaler Reset Timer2 (bit1 –> PSR2)
-	TCCR2 = 0b10000001;		// 0b10100001 - OC1A,OC1B - PWM;  0b10000001 - OC1A PWM, OC1B - Disabled, normal port.
-	OCR2 = 0; // FAN PWM ON
-}
-
-/********************************************************************************************
-********************************** END OF INITIALIZATIONS ***********************************
-********************************************************************************************/
-
-/********************************************************************************************
-************************************ START OF FUNCTIONS *************************************
-********************************************************************************************/
-
-/*************************************
-******** DEFINITIONS OF TIMER ********
-*************************************/
+/***************************************
+******** DEFINITIONS OF TIMER 2 ********
+***************************************/
 void timer2_on(void)	// Timer2 On
 {
 	TCCR2 = 0b10000001;		// 0b10100001 - OC1A,OC1B - PWM;  0b10000001 - OC1A PWM, OC1B - Disabled, normal port.
@@ -458,6 +360,7 @@ void irDecode(void)
 //		volumeDown();
 //		break;
 	}
+
 /*	else if((((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_ATT)) && mute==0) && flagPower==1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> ON
 	{	// MUTE
 		muteOn();
@@ -577,7 +480,8 @@ void irDecode(void)
 			flagRTC = 0;
 		}
 	}
-*/	else
+*/
+	else
 	{
 		// DO NOTING
 	}
@@ -818,6 +722,7 @@ void commonEncoder(void)	// not finished
 *****************************/
 void temperature()
 {
+	unsigned char i;
 //	LED_low_DISPLAYLED_high();
 //	LCD_INIT();								// LCD INITIZLIZATION
 	LCD_COMMAND(LCD_SELECT_1ROW);	// select row 1
@@ -828,16 +733,13 @@ void temperature()
 	oneWireLeft();
 	for(i=0; i<9; i++)
 	{
-		tempDataUartSort();
-/*
 #ifdef DEBUG_INFO
 	transmitUartString("[UART INFO] byte ");
 	transmitUartInt(i);
 	transmitUartString(" : ");
-	transmitUartInt(store[i]);
+	transmitUartInt(storeTemp[i]);
 	transmitUartString("\r\n");
 #endif
-*/
 	}
 	temperMeasur(byte0, byte1, byte6, byte7);
 //lcdDataString("?? C"); // ot gornata funkciq
@@ -847,16 +749,13 @@ void temperature()
 	oneWireRight();
 	for(i=0; i<9; i++)
 	{
-		tempDataUartSort();
-/*
 #ifdef DEBUG_INFO
 	transmitUartString("[UART INFO] byte ");
 	transmitUartInt(i);
 	transmitUartString(" : ");
-	transmitUartInt(store[i]);
+	transmitUartInt(storeTemp[i]);
 	transmitUartString("\r\n");
 #endif
-*/
 	}
 	temperMeasur(byte0, byte1, byte6, byte7);
 //lcdDataString("?? C"); // ot gornata funkciq
@@ -870,6 +769,8 @@ void temperature()
 *******************************************/
 unsigned char oneWireLeft()
 {
+	unsigned char i;
+
 #ifdef DEBUG_INFO
 	transmitUartString("[UART INFO] TEMPERATURE SENSOR LEFT: 10 DB 09 A5 01 08 00 C1 \r\n");		// uart debug information string
 #endif	
@@ -906,7 +807,7 @@ unsigned char oneWireLeft()
 			write_byte(0xBE);	// Master issues Read Scratchpad command.
 			for(i=0; i<9; i++)
 			{
-				store [i] = read_byte();	//	Master reads entire scratchpad including CRC. The master then recalculates the CRC of the first eight data bytes from the scratchpad and compares the calculated CRC with the read CRC (byte 9). If they match, the master continues; if not, the read operation is repeated.
+				storeTemp [i] = read_byte();	//	Master reads entire scratchpad including CRC. The master then recalculates the CRC of the first eight data bytes from the scratchpad and compares the calculated CRC with the read CRC (byte 9). If they match, the master continues; if not, the read operation is repeated.
 			}
 //transmitUartString("RETURN 1\r\n");
 			return 1;
@@ -919,6 +820,8 @@ unsigned char oneWireLeft()
 
 unsigned char oneWireRight()
 {
+	unsigned char i;
+
 #ifdef DEBUG_INFO
 	transmitUartString("[UART INFO] TEMPERATURE SENSOR RIGHT: 10 6D F4 8F 02 08 00 B1 \r\n");		// uart debug information string
 #endif	
@@ -955,7 +858,7 @@ unsigned char oneWireRight()
 			write_byte(0xBE);	// Master issues Read Scratchpad command.
 			for(i=0; i<9; i++)
 			{
-				store [i] = read_byte();	//	Master reads entire scratchpad including CRC. The master then recalculates the CRC of the first eight data bytes from the scratchpad and compares the calculated CRC with the read CRC (byte 9). If they match, the master continues; if not, the read operation is repeated.
+				storeTemp [i] = read_byte();	//	Master reads entire scratchpad including CRC. The master then recalculates the CRC of the first eight data bytes from the scratchpad and compares the calculated CRC with the read CRC (byte 9). If they match, the master continues; if not, the read operation is repeated.
 			}
 //transmitUartString("RETURN 1\r\n");
 			return 1;
@@ -974,10 +877,10 @@ char temperMeasur(unsigned char byte0, unsigned char byte1, unsigned char byte6,
 	double k = 0;
 	double j = 0;
 
-	byte0 = store [0];
-	byte1 = store [1];
-	byte6 = store [6];
-	byte7 = store [7];
+	byte0 = storeTemp [0];
+	byte1 = storeTemp [1];
+	byte6 = storeTemp [6];
+	byte7 = storeTemp [7];
 
 	k = ((byte7 - byte6) / byte7) + 0.25;
 
@@ -1035,17 +938,23 @@ char temperMeasur(unsigned char byte0, unsigned char byte1, unsigned char byte6,
 	return temper;
 }
 
-void tempDataUartSort(void)
+void about(void)
 {
 #ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] byte ");
-	transmitUartInt(i);
-	transmitUartString(" : ");
-	transmitUartInt(store[i]);
+	transmitUartString("[UART INFO] =====================================================\r\n");
+	transmitUartString("[UART INFO] \tAuthors and creators: P.Upinov and P.Stoyanov\r\n");
+	transmitUartString("[UART INFO] \tDevice name: Digital Control Audio System\r\n");
+	transmitUartString("[UART INFO] \tFirmware version beta ");
+	transmitUartInt(FIRMWARE_VERSION);
 	transmitUartString("\r\n");
-#endif	
+	transmitUartString("[UART INFO] =====================================================\r\n");
+	transmitUartString("[UART INFO] Da dobavq upravlenie na:\
+					\r\n[UART INFO] - FAN smart controlling			\
+					\r\n[UART INFO] - DS18S20						\
+					\r\n[UART INFO] - RTC							\
+					\r\n[UART INFO] - Memory\r\n");
+#endif
 }
-
 /********************************************************************************************
 ************************************* END OF FUNCTIONS **************************************
 ********************************************************************************************/

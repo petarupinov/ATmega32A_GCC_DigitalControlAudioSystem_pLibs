@@ -11,6 +11,7 @@ ds18x20.o: ../_Soft_Library_Pesho_/ds18x20.c \
   c:/winavr-20100110/lib/gcc/../../avr/include/avr/lock.h \
   c:/winavr-20100110/lib/gcc/../../avr/include/util/delay.h \
   c:/winavr-20100110/lib/gcc/../../avr/include/util/delay_basic.h \
+  ../_Soft_Library_Pesho_/../ATmega32A_GCC_DigitalControlAudioSystem_pLibs.h \
   ../_Soft_Library_Pesho_/ds18x20.h ../_Soft_Library_Pesho_/utility.h
 
 c:/winavr-20100110/lib/gcc/../../avr/include/avr/io.h:
@@ -36,6 +37,8 @@ c:/winavr-20100110/lib/gcc/../../avr/include/avr/lock.h:
 c:/winavr-20100110/lib/gcc/../../avr/include/util/delay.h:
 
 c:/winavr-20100110/lib/gcc/../../avr/include/util/delay_basic.h:
+
+../_Soft_Library_Pesho_/../ATmega32A_GCC_DigitalControlAudioSystem_pLibs.h:
 
 ../_Soft_Library_Pesho_/ds18x20.h:
 

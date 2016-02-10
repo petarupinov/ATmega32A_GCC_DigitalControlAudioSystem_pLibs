@@ -10,6 +10,7 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
+#include "../ATmega32A_GCC_DigitalControlAudioSystem_pLibs.h"
 #include "ds18x20.h"
 #include "utility.h"		// using for debug and others
 

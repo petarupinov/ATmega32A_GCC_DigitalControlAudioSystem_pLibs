@@ -24,12 +24,6 @@
 ** DEFINITION OF CUSTOM TYPES BYTE, WORD, DWORD (, QWORD) **
 ***********************************************************/
 
-#define FIRMWARE_VERSION 26
-
-#define DEBUG_SETTING	1	// ENABLE/DISABLE DEBUG SETTINGS INFORMATION with comment or uncomment this row
-#define DEBUG_INFO		1	// ENABLE/DISABLE DEBUG STATUS INFORMATION with comment or uncomment this row
-#define DEBUG_ERROR		1	// ENABLE/DISABLE DEBUG ERROR INFORMATION with comment or uncomment this row
-
 //typedef unsigned char  byte;	// 1 BYTE
 //typedef unsigned short word;	// 2 BYTES	// word == dword ???
 //typedef unsigned int   word;	// 2 BYTES	// word == dword ???
@@ -67,7 +61,6 @@ void shiftLeftOutMsbFirst();
 void shiftRightInLsbFirst();
 void shiftLeftInMsbFirst();
 void delay_ms(int miliSec);
-void about(void);
 
 /********************************************************************************************
 ************************************* END OF FUNCTIONS **************************************

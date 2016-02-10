@@ -11,6 +11,7 @@
 //#include <avr/interrupt.h>
 //#include <util/delay.h>
 #include <stdlib.h>			// utoa(), itoa(), ultoa(), ltoa(), - function
+#include "../ATmega32A_GCC_DigitalControlAudioSystem_pLibs.h"
 #include "uart.h"
 #include "lcd_hd44780_74hc595.h"	// print using MCU Frequency
 #include "utility.h"		// using for debug and others
@@ -31,7 +32,7 @@ enum
 /*********************************
 ** INITIZLIZATION OF UART/USART **
 *********************************/
-void uart_init()
+void uart_init(void)
 {
 	switch(F_CPU)
 	{
@@ -77,215 +78,19 @@ void uart_init()
 	LCD_DATA_ULONG(F_CPU);			// 20 symbols
 	LCD_DATA_STRING(" MHz");		// 20 symbols
 #endif
-//	debug_print();
-
 	// Razpoznavane na baudrate (skorost): 1. Izprashta se byte. 2. Poluchava se byte. 3. Sravnqva se polucheniq byte == izprateniq byte. // This is LOOP TX->RX
 	// 4. Ako byte pri sravnqvaneto e edin i sasht to skorostta e izbranata v momenta, ako byte e razlichen - da se probva sas sledvashta baudrate.
 
 	UCSRC = 0b10000110;		// URSEL = 1 (Accessing to UBRRH or UCSRC, is read as zero when reading UBRRH. The URSEL must be zero when writing the UBRRH.); UMSEL = 0 (Asynchronous Operation); UPM1 = 0, UPM0 = 0 (Parity Mode Disabled); USBS = 0 (1-Stop Bit); UCSZ2 = 0, UCSZ1 = 1, UCSZ0 = 1 (8-DataBits); UCPOL = 0 Polarity TX & RX (Rising XCK Edge -> Transmitted Data Changed (Output of TxDPin), Falling XCK Edge -> Received Data Sampled (Input on RxDPin))
-//	UCSRB = 0b10011000;		// Enable TXEN,RXEN,RXCIE	// Enable Uart/Usart TX and RX
-	UCSRB = 0b00001000;		// Enable only TXEN			// Enable Uart/Usart only TX
+	UCSRB = 0b00001000;		// Enable only TXEN	- Transmitting Uart/Usart	// UCSRB = 0b10011000;		// Enable TXEN,RXEN,RXCIE	Transmitting and Receiving Uart/Usart
 	UDR = 0b00000000;		// INITIALIZATION NULL OF UART DATA
 
 #ifdef DEBUG_INFO
 	transmitUartString("\r\n");
 #endif
 #if DEBUG_SETTING
-	transmitUartString("[UART Serial Port Settings] Baud rate: 9600, Data bits: 8 bits, Stop bits: 1 bit, Parity: None, Flow control: None or XON/XOFF\r\n");
+	transmitUartString("[UART INFO] Serial Port Settings - Baud rate: 9600, Data bits: 8 bits, Stop bits: 1 bit, Parity: None, Flow control: None or XON/XOFF\r\n");
 #endif
-}
-
-/*********************************
-** INITIZLIZATION OF UART/USART **
-*********************************/
-void uart_setup(unsigned char system_frequency_in_MHz, unsigned char baudrate, unsigned char stop_bits, unsigned char parity)
-{
-	switch(system_frequency_in_MHz)
-	{	
-		case 20:
-		{
-		}
-		case 16:
-		{
-			if(baudrate == 9600)
-			{
-				UBRRL = 103;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 14400)
-			{
-				UBRRL = 68;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 19200)
-			{
-				UBRRL = 51;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 38400)
-			{
-				UBRRL = 25;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 57600)
-			{
-				UBRRL = 16;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 76800)
-			{
-				UBRRL = 12;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 115200)
-			{
-				UBRRL = 8;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else{}
-			break;
-		}
-		case 12:
-		{
-			break;			
-		}
-		case 10:
-		{
-			break;			
-		}
-		case 8:
-		{
-			if(baudrate == 9600)
-			{
-				UBRRL = 51;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 14400)
-			{
-				UBRRL = 34;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 19200)
-			{
-				UBRRL = 25;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 38400)
-			{
-				UBRRL = 12;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 57600)
-			{
-				UBRRL = 8;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 76800)
-			{
-				UBRRL = 6;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 115200)
-			{
-				UBRRL = 3;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else{}
-			break;		
-		}
-		case 6:
-		{
-			break;			
-		}
-		case 4:
-		{
-			if(baudrate == 9600)
-			{
-				UBRRL = 25;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 14400)
-			{
-				UBRRL = 16;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 19200)
-			{
-				UBRRL = 12;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 38400)
-			{
-				UBRRL = 6;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 57600)
-			{
-				UBRRL = 3;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 76800)
-			{
-				UBRRL = 2;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 115200)
-			{
-				UBRRL = 1;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else{}
-			break;			
-		}
-		case 2:
-		{
-			if(baudrate == 9600)
-			{
-				UBRRL = 12;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 14400)
-			{
-				UBRRL = 8;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 19200)
-			{
-				UBRRL = 6;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 38400)
-			{
-				UBRRL = 2;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 57600)
-			{
-				UBRRL = 1;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 76800)
-			{
-				UBRRL = 1;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 115200)
-			{
-				UBRRL = 0;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else{}
-			break;	
-		}
-		case 1:
-		{
-			if(baudrate == 9600)
-			{
-				UBRRL = 6;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 14400)
-			{
-				UBRRL = 3;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 19200)
-			{
-				UBRRL = 2;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 38400)
-			{
-				UBRRL = 1;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else if(baudrate == 57600)
-			{
-				UBRRL = 0;// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-			}
-			else{}
-			break;	
-		}
-		default:
-		{
-			
-		}
-	}
-
-//	UBRRL = 103;			// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-	UBRRH = 0;
-
-	UCSRC = 0b10000110;		// URSEL = 1 (Accessing to UBRRH or UCSRC, is read as zero when reading UBRRH. The URSEL must be zero when writing the UBRRH.); UMSEL = 0 (Asynchronous Operation); UPM1 = 0, UPM0 = 0 (Parity Mode Disabled); USBS = 0 (1-Stop Bit); UCSZ2 = 0, UCSZ1 = 1, UCSZ0 = 1 (8-DataBits); UCPOL = 0 Polarity TX & RX (Rising XCK Edge -> Transmitted Data Changed (Output of TxDPin), Falling XCK Edge -> Received Data Sampled (Input on RxDPin))
-	UCSRB = 0b10011000;		// TXEN,RXEN,RXCIE					// Enable Uart/Usart TX and RX
-	UDR = 0b00000000;		// INITIALIZATION NULL OF UART DATA
 }
 
 /*******************************************

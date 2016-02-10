@@ -73,6 +73,7 @@ unsigned char irExtended;
 /********************************************************************************************
 ****************************** START DECLARATION OF FUNCTIONS *******************************
 ********************************************************************************************/
+
 void GetSIRC12(void);		// funkciq za dekodirane na 12-bit SIRC
 void GetSIRC15(void);		// funkciq za dekodirane na 15-bit SIRC
 void GetSIRC20(void);		// funkciq za dekodirane na 20-bit SIRC

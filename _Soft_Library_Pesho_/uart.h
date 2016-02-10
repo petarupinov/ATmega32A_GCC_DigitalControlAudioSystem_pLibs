@@ -39,8 +39,7 @@
 /********************************************************************************************
 ****************************** START DECLARATION OF FUNCTIONS *******************************
 ********************************************************************************************/
-void uart_init();
-void uart_setup(unsigned char system_frequency_in_MHz, unsigned char baudrate, unsigned char stop_bits, unsigned char parity);
+void uart_init(void);
 void uart_transmit(char uart_data [], int numsymbols);
 void uart_transmit_one(unsigned char uart_data);
 void uart_transmit_DEC_to_BCD(unsigned char rtc_data);
