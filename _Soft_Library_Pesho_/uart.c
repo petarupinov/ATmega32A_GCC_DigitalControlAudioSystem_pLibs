@@ -26,11 +26,15 @@
 *********************************/
 void uart_init()
 {
-	UBRRL = 103;			// 9600, 0, 0 (Error = 0.2%; 16MHz)
+
+	// Razpoznavane na baudrate (skorost): 1. Izprashta se byte. 2. Poluchava se byte. 3. Sravnqva se polucheniq byte == izprateniq byte. // This is LOOP TX->RX
+	// 4. Ako byte pri sravnqvaneto e edin i sasht to skorostta e izbranata v momenta, ako byte e razlichen - da se probva sas sledvashta baudrate.
+
+	UBRRL = 103;			// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
 	UBRRH = 0;
 
-	UCSRC = 0b10000110;		// URSEL = 1; UCSZ1 = 1; UCSZ0 = 1; 8-bit
-	UCSRB = 0b10011000;		// TXEN,RXEN,RXCIE
+	UCSRC = 0b10000110;		// URSEL = 1 (Accessing to UBRRH or UCSRC, is read as zero when reading UBRRH. The URSEL must be zero when writing the UBRRH.); UMSEL = 0 (Asynchronous Operation); UPM1 = 0, UPM0 = 0 (Parity Mode Disabled); USBS = 0 (1-Stop Bit); UCSZ2 = 0, UCSZ1 = 1, UCSZ0 = 1 (8-DataBits); UCPOL = 0 Polarity TX & RX (Rising XCK Edge -> Transmitted Data Changed (Output of TxDPin), Falling XCK Edge -> Received Data Sampled (Input on RxDPin))
+	UCSRB = 0b10011000;		// TXEN,RXEN,RXCIE					// Enable Uart/Usart TX and RX
 	UDR = 0b00000000;		// INITIALIZATION NULL OF UART DATA
 }
 
