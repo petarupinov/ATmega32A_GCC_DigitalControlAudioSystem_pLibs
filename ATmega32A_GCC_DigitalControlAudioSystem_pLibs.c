@@ -24,6 +24,9 @@
 ;;**10. Edit on date 26.10.2015 - update **************************************************;;
 ;;**11. Edit on date 26.10.2015 - update rotation encoder and little bit uart *************;;
 ;;**12. Edit on date 18.11.2015 - update utility lib version ******************************;;
+;;**13. Edit on date 19.11.2015 - add functions ampliferOn/Off ****************************;;
+;;*****************************************************************************************;;
+;;** Used library version: _Soft_Library_Pesho_v0.06 **************************************;;
 ;;*****************************************************************************************;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
@@ -64,6 +67,31 @@ typedef int bool;
 #define TRUE 1
 #define FALSE 0
 
+// TEST SUCCESS OR FAIL FUNCTIONS
+#define SUCCESS 0
+#define FAIL -1
+
+#define ERROR -1
+#define ERR_AMP_COULD_NOT_START -2
+#define ERR_I2C_IS_NOT_WORK -3					// There is a problem, to solve it: Replace and reflash controller.
+#define ERR_I2C_RTC_NOT_WORK -4					// There is a problem, to solve it: Replace DS1307 and setup.
+#define ERR_I2C_EEPROM_MEMORY_IS_NOT_WORK -5	// There is a problem, to solve it: Replace AT24C64.
+
+// Trqbva da imam funkciq koqto da testva devaisite po platkata, koqto da se puska v opredeleni situacii, zashtoto:
+// - test EEPROM read all memmory, write to MCU RAM, fill (write) with zeroes and read all zeroes to test, vrashtane na dannite ot mcu ram v eeprom. Ot EEPROM-a ne trqbva da se zapisva vseki pat stoinost za da se proveri dali raboti eeprom-a - 
+// - test RTC and rtc memory, read and write settings to mcu ram, test and return config to rtc
+// - test PGA
+// - test all relay coils WHILE AMPLIFER IS OFF!!! test without power relays
+// - test DISPLAY
+// - test Rotary encoder - is work good ?
+// - test Buttons press button edi koi si, it is OK or other it is NOT OK
+// - test IR receiver
+// - test FANS with timer and without timer
+// - test Temperature sensors DS18S20
+
+
+
+
 // https://en.wikipedia.org/wiki/Bit_field
 // http://stackoverflow.com/questions/24933242/when-to-use-bit-fields-in-c
 //#define flagStatusBtnOnOffBit0 0
@@ -71,6 +99,7 @@ struct flagStatus	 // bit fields from struct
 {
 	unsigned int flagPower	: 1;	// bit0: '0' = Power OFF, '1' = Power ON
 	unsigned int flagMute	: 1;	// bit1: '0' = Mute OFF, '1' = Mute ON
+
 } *flagStatusBits;
 
 /*
@@ -122,6 +151,8 @@ void timer2_init();
 void timer2_on();
 void timer2_off();
 void init_all();
+char ampliferOn();
+void ampliferOff();
 
 /********************************************************************************************
 ******************************* END DECLARATION OF FUNCTIONS ********************************
@@ -195,12 +226,92 @@ void timer2_off()	// Timer2 Off
 	OCR2 = 0; // FAN PWM OFF
 }
 
+/********************
+**** AMPLIFER ON ****
+********************/
+char ampliferOn()
+{
+//	FAN_PWM_SPEED1();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
+	LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
+//			FAN_high();		// PORTD5 - FAN ON (logic "1")	NON PWM, NON TIMER1
+
+//			volumeLeft = volumeRight = volumeValue [0];	// nulurane na volume control pri vsqko puskane
+
+	spi_start();
+//	PGA2310_U6_SPI(volumeLeft, volumeRight);
+	spi_stop();
+
+	spi_start();
+//	PGA2310_U7_SPI(volumeLeft, volumeRight);
+	spi_stop();
+
+	spi_start();
+//	PGA2310_U8_SPI(volumeLeft, volumeRight);
+	spi_stop();
+
+	transmitUartString("Amplifer On\r\n");
+//		uart_transmit("<AMPLIFER ON>\r\n", 15);	// "\r\n" - 2 symbols (not 4 symbols)
+
+	LCD_INIT();								// LCD INITIZLIZATION
+	LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);	// select row 1
+//		LCD_EXECUTE_DATA(" << AMPLIFER  ON >> ",20);	// char "DATA", int 13 of chars of "DATA"
+lcdDataString("    Amplifer On");
+	LCD_EXECUTE_COMMAND(LCD_SELECT_2ROW);	// select row 2
+	LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
+//			LCD_EXECUTE_COMMAND(LCD_SELECT_3ROW);	// select row 3
+//			LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
+//			LCD_EXECUTE_COMMAND(LCD_SELECT_4ROW);	// select row 4
+//			LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
+	LCD_EXECUTE_COMMAND(LCD_ON);			// LCD ON without CURSOR
+
+// RELAYS ON
+//	REL_POWER_high();// RELAY POWER ON TRAFs		// PESHO COMMENT 14.08.2015, 21:10
+	_delay_ms(4000);								// PESHO COMMENT 14.08.2015, 21:10
+//	relays_in1_6ch();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+	_delay_ms(700);									// PESHO COMMENT 14.08.2015, 21:10
+//	relays_out_6ch();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+
+//			PGA2310_U8_SPI(volumeLeft, volumeRight);	// 'A', 'A', 0b01111110, 0b01111110
+	return SUCCESS;
+}
+
+/********************
+**** AMPLIFER OFF ****
+********************/
+void ampliferOff()
+{
+//			FAN_low();		// PORTD5 - FAN OFF (logic "0")  NON PWM, NON TIMER1
+
+// RELAYS OFF
+//	relays_out_off();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
+//	relays_in_off();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
+//	REL_POWER_low();// RELAY POWER OFF				// PESHO COMMENT 14.08.2015, 21:10
+
+	transmitUartString("Standby\r\n");
+//				uart_transmit("<STANDBY>\r\n", 11);		// "\r\n" - 2 symbols (not 4 symbols)
+
+	LCD_INIT();								// LCD INITIZLIZATION
+	LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);	// select row 1
+lcdDataString("       Standby");
+//				LCD_EXECUTE_DATA(" >>  <STANDBY>   << ",20);		// char "DATA", int 13 of chars of "DATA"
+//				_delay_ms(500);	// izchakvane - migasht efekt
+//				LCD_INIT();								// LCD INITIZLIZATION
+//				_delay_ms(250);	// izchakvane - migasht efekt, natiskane i otpuskane na buton - filtar treptqsht kontakt buton
+	LCD_EXECUTE_COMMAND(LCD_SELECT_3ROW);	// select row 1
+lcdDataString("    Amplifer Off");
+//				LCD_EXECUTE_DATA(" >> <IR STANDBY> << ",20);		// char "DATA", int 13 of chars of "DATA"
+	_delay_ms(500);	//
+
+	_delay_ms(50);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
+
+//	FAN_PWM_OFF();
+//			LCD_EXECUTE_COMMAND(LCD_OFF);			// LCD OFF
+	LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
+}
 /********************************************************************************************
 ************************************* END OF FUNCTIONS **************************************
-********************************************************************************************/
-
-/********************************************************************************************
-*********************************** START OF INTERRUPTS *************************************
 ********************************************************************************************/
 
 /********************************************************************************************
@@ -271,56 +382,47 @@ void init_all()
 
 void buttons_press()
 {
+	char test = 0;
 	unsigned char pgaVolumeLeft, pgaVolumeRight;
 	pgaVolumeLeft = pgaVolumeRight = 0b00001111;
 
 	while(1)
 	{
-		if(BUTTON_ON_OFF_low())	// obj ptr flagStatusBtnRegister from struct flagStatusBtnOnOff
+		if(BUTTON_ON_OFF_low() && flagStatusBits->flagPower == 0)	// obj ptr flagStatusBtnRegister from struct flagStatusBtnOnOff
 		{
-			if(flagStatusBits->flagPower == 0)
+			test = ampliferOn();
+			if(SUCCESS == test)
 			{
-				LED_high_DISPLAYLED_low();				// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
-				LCD_CLEAR_CONTAINS();					// CLEAR DISPLAY ALL CHARACTERS
-				LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);	// 0b0100000 SET CGRAM BASE ADDRESS
-
-				LCD_CGRAM_CUSTOM_SYMBOLS();					// Generate and Store new missing characters into LCD CGRAM
-
-				pga2310_reset();
-//				rtc_ds1307_reset();
-//				unsigned char *str_new = malloc(9);		// ALLOCATE MEMORY
-//				strcpy(str_new, "123PES9");				// str = "123PESH9";
-
-//				lcdDataString("FIRST ROW");
-				flagStatusBits->flagPower = 1;
-
-//				free(str_new);							// DEALLOCATE MEMORY
-
-				_delay_ms(200);
+				flagStatusBits->flagPower = 1;			// filter za buton ON
+				_delay_ms(1000);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
 			}
-			else
-			{
-				LED_low_DISPLAYLED_high();				// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
-				LCD_CLEAR_CONTAINS();					// CLEAR DISPLAY ALL CHARACTERS
-				LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);
-//				lcdDataString("SECOND ROW");
-				for(int i=0; i<16; i++)
-				{
-					LCD_EXECUTE_DATA_ONE(i);		// bytes send
-				}
-				PGA2310_Volume_Update(pgaVolumeLeft, pgaVolumeRight);
-//				rtc_ds1307_get();
+		}
+		else if(BUTTON_ON_OFF_low() && flagStatusBits->flagPower == 1)
+		{
+			ampliferOff();
+			flagStatusBits->flagPower = 0;			// filter za buton OFF
+		}
 
-				flagStatusBits->flagPower = 0;
-				_delay_ms(200);
-			}
+
+
+
+
+
+
+
+
+
+
+
+
+/****************************************************************************/
 
 /*			if(flagStatusBits->flagPower == 1)
 			{
 
 				_delay_ms(200);
-			}*/
-		}
+			}
+		}*/
 
 
 
@@ -380,6 +482,7 @@ int main(void)
 	sei();							// file "avr/interrupt.h"
 //	SREG = (1<<I);
 
+	LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
 	while(1)
 	{
 //		struct flagStatusBtnOnOff flagStatusBtnRegister;	// obj flagStatusBtnRegister from struct flagStatusBtnOnOff
