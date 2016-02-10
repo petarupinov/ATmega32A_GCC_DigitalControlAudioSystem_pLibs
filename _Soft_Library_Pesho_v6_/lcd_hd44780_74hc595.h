@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: LCD DISPLAY HITACHI HD44780 + SHIFT REGISTER 74HC595 ********
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: lcd_hd44780_74hc595.h, v3, 31.08.2015         *************
+*** FILE NAME: lcd_hd44780_74hc595.h, v4, 15.10.2015         *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -58,6 +58,15 @@
 #define LCD_MOVE_FIRST			0b00000010		// LCD DISPLAY MOVE CURSOR TO FIRST ROW AND FIRST SYMBOL (SEGMENT)
 //const byte LCD_MOVE_FIRST		= 0b00000010;
 // access 0b00001xxx
+#define LCD_ENTRY_MODE_INC_NOSHIFT		0b00000110	// LCD ENTRY MODE INCREMENT by 1 AND NO SHIFT
+//const byte LCD_ENTRY_MODE_INC_NOSHIFT	= 0b00000010;
+#define LCD_ENTRY_MODE_DEC_NOSHIFT		0b00000100	// LCD ENTRY MODE DECREMENT by 1 AND NO SHIFT
+//const byte LCD_ENTRY_MODE_DEC_NOSHIFT	= 0b00000010;
+#define LCD_ENTRY_MODE_INC_SHIFT		0b00000111	// LCD ENTRY MODE INCREMENT by 1 AND SHIFT
+//const byte LCD_ENTRY_MODE_INC_SHIFT	= 0b00000010;
+#define LCD_ENTRY_MODE_DEC_SHIFT		0b00000101	// LCD ENTRY MODE DECREMENT by 1 AND SHIFT
+//const byte LCD_ENTRY_MODE_DEC_SHIFT	= 0b00000010;
+// access 0b000001xx
 #define LCD_OFF					0b00001000		// LCD DISPLAY OFF 
 //const byte LCD_OFF			= 0b00001000;
 #define LCD_ON					0b00001100		// LCD DISPLAY ON without CURSOR

@@ -1,21 +1,22 @@
-/*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;***********************************************;;
-;;***********************************************;;
-;;************** Eng. Petar Upinov **************;;
-;;***************** 07.10.2015 ******************;;
-;;***********************************************;;
-;;***********************************************;;
-;;******** ATmega32 DCAS with new Library *******;;
-;;*** (ATmega32 Digital Control Audio System) ***;;
-;;***********************************************;;
-;;**************** Crystal 16MHz ****************;;
-;;*** 1. Edit Fuse bits: High 0xCA ; Low 0xFF ***;;
-;;***********************************************;;
-;;***********************************************;;
-;;** 1. Edit on date 07.10.2015 *****************;;
-;;** 2. Edit on date 07.10.2015 *****************;;
-;;***********************************************;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
+/*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;*********************************************************************;;
+;;*********************************************************************;;
+;;************** Eng. Petar Upinov ************************************;;
+;;***************** 07.10.2015 ****************************************;;
+;;*********************************************************************;;
+;;*********************************************************************;;
+;;******** ATmega32 DCAS with new Library *****************************;;
+;;*** (ATmega32 Digital Control Audio System) *************************;;
+;;*********************************************************************;;
+;;**************** Crystal 16MHz **************************************;;
+;;*** 1. Edit Fuse bits: High 0xCA ; Low 0xFF *************************;;
+;;*********************************************************************;;
+;;*********************************************************************;;
+;;** 1. Edit on date 07.10.2015 ***************************************;;
+;;** 2. Edit on date 14.10.2015 - bit field struct test & type bool ***;;
+;;** 3. Edit on date 15.10.2015 - update LCD lib h ********************;;
+;;*********************************************************************;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
 /*************************************
 ** INCLUDE INTEGRATED LIBRARY FILES **
@@ -32,7 +33,7 @@
 ** INCLUDE SPECIFIED PESHO LIBRARY FILES **
 ******************************************/
 
-// ADD to project C files: "ir_sirc.c", "rotation_encoder.c", "rtc.c", "spi.c", "utility.c"
+// Add C files to project: "ir_sirc.c", "rotation_encoder.c", "rtc.c", "spi.c", "utility.c"
 
 #include "_Soft_Library_Pesho_v6_/24c64.h"
 #include "_Soft_Library_Pesho_v6_/ds18x20.h"
@@ -97,8 +98,8 @@ unsigned char n = 0;
 #define LED_DISPLAYLED_PIN  PD4
 #define LED_DISPLAYLED_PORT PORTD
 
-#define LED_low_DISPLAYLED_high()	(LED_DISPLAYLED_PORT&=~_BV(LED_DISPLAYLED_PIN))
-#define LED_high_DISPLAYLED_low()	(LED_DISPLAYLED_PORT|=_BV(LED_DISPLAYLED_PIN))
+#define LED_low_DISPLAYLED_high()	(LED_DISPLAYLED_PORT&=~_BV(LED_DISPLAYLED_PIN))				// LED_DISPLAYLED_PORT = (LED_DISPLAYLED_PORT) & (~_BV(LED_DISPLAYLED_PIN))
+#define LED_high_DISPLAYLED_low()	(LED_DISPLAYLED_PORT|=_BV(LED_DISPLAYLED_PIN))				// LED_DISPLAYLED_PORT = (LED_DISPLAYLED_PORT) | (_BV(LED_DISPLAYLED_PIN))
 
 /********************************************************************************************
 ************************************ END OF DEFINISIONS *************************************
@@ -245,17 +246,53 @@ void init_all()
 {
 	port_init();
 	timer2_init();
-//	LCD_INIT();
+	LCD_INIT();
 }
+
 void buttons_press()
 {
 	while(1)
 	{
-		if(BUTTON_ON_OFF_low())// && flagStatusBtnOnOff.bit0==0)
+		if(BUTTON_ON_OFF_low())	// obj ptr flagStatusBtnRegister from struct flagStatusBtnOnOff
+		{
+			if(flagStatusBtnRegister->bit0 == 0)
+			{
+				flagStatusBtnRegister->bit0 = 1;
+			}
+			else
+			{
+				flagStatusBtnRegister->bit0 = 0;
+			}
+		}
+
+		if(flagStatusBtnRegister->bit0 == 0)
 		{
 			LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
-//			flagStatusBtnOnOff.bit0 = 1;
+			// flagStatusBtnRegister->bit0 = 0;
+			LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);
+			LCD_EXECUTE_DATA_ONE('A');
+			//lcdDataString("FIRST ROW");
+			_delay_ms(200);
 		}
+		else
+		{
+			LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
+			// flagStatusBtnRegister->bit0 = 1;
+			LCD_EXECUTE_COMMAND(LCD_SELECT_2ROW);
+			LCD_EXECUTE_DATA_ONE('B');
+			//lcdDataString("SECOND ROW");
+			_delay_ms(200);
+		}
+
+/*		if(flagStatusBtnRegister->bit0 == 0)
+		{
+			LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
+		}
+		else
+		{
+			LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
+		}
+*/
 /*		if(BUTTON_ON_OFF_low() && flagPower==0)			// PINB1 - BUTTON ON/OFF -> ON
 		{
 			ampliferOn();
@@ -314,6 +351,9 @@ int main(void)
 
 	while(1)
 	{
+//		struct flagStatusBtnOnOff flagStatusBtnRegister;	// obj flagStatusBtnRegister from struct flagStatusBtnOnOff
+//		flagStatusBtnRegister.bit0 = 0;
+		
 		buttons_press();	// izchakvane za natiskane na buton
 	}
 	return 1;
