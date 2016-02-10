@@ -76,7 +76,6 @@ void uart_init()
 	LCD_DATA_STRING("Freq: ");		// 20 symbols			
 	LCD_DATA_ULONG(F_CPU);			// 20 symbols
 	LCD_DATA_STRING(" MHz");		// 20 symbols
-#else
 #endif
 //	debug_print();
 
@@ -88,10 +87,11 @@ void uart_init()
 	UCSRB = 0b00001000;		// Enable only TXEN			// Enable Uart/Usart only TX
 	UDR = 0b00000000;		// INITIALIZATION NULL OF UART DATA
 
+#ifdef DEBUG_INFO
 	transmitUartString("\r\n");
-#ifdef DEBUG_SETTING
+#endif
+#if DEBUG_SETTING
 	transmitUartString("[UART Serial Port Settings] Baud rate: 9600, Data bits: 8 bits, Stop bits: 1 bit, Parity: None, Flow control: None or XON/XOFF\r\n");
-#else
 #endif
 }
 

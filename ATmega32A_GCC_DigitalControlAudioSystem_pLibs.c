@@ -34,6 +34,7 @@
 ;;**20. Edit on date 28.11.2015 - update lib rotary encoder.h and .c files ****************;;
 ;;**21. Edit on date 28.11.2015 - update lib uart.c and add uart support ******************;;
 ;;**22. Edit on date 29.11.2015 - update all libs and add debug support *******************;;
+;;**23. Edit on date 29.11.2015 - adding and formating debug messages *********************;;
 ;;*****************************************************************************************;;
 ;;** Used library version: _Soft_Library_Pesho_v0.07 **************************************;;
 ;;*****************************************************************************************;;
@@ -72,10 +73,6 @@
 /*********************************************
 ** VARIABLES, CONSTANTS, ARRAYS, STRUCTURES **
 *********************************************/
-
-//#define DEBUG_SETTING	1
-//#define DEBUG_INFO	1
-//#define DEBUG_ERROR	1
 
 typedef int bool;
 #define TRUE 1
@@ -264,9 +261,10 @@ void timer2_off(void)	// Timer2 Off
 void ampliferOn(void)
 {
 #ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Amplifer is ON\r\n");
-//	transmitUartInt(volumeIndex);		// uart debug information string 
-#else
+	transmitUartString("[UART INFO] Amplifer is on\r\n");
+#endif
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Display on and status led off\r\n");
 #endif
 	LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
 
@@ -315,10 +313,19 @@ void ampliferOn(void)
 //	LCD_EXECUTE_COMMAND(LCD_ON);			// LCD ON without CURSOR
 
 // RELAYS ON
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Try to switch on relays for power 220V\r\n");		// uart debug information string
+#endif
 	REL_POWER_high();// RELAY POWER ON TRAFs		// PESHO COMMENT 14.08.2015, 21:10
 	_delay_ms(4000);								// PESHO COMMENT 14.08.2015, 21:10
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Try to switch on relays in for all 6 channels\r\n");		// uart debug information string
+#endif
 	relays_in1_6ch();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
 	_delay_ms(700);									// PESHO COMMENT 14.08.2015, 21:10
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Try to switch on relays out for all 6 channels\r\n");		// uart debug information string
+#endif
 	relays_out_6ch();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
 
 //			PGA2310_U8_SPI(volumeLeft, volumeRight);	// 'A', 'A', 0b01111110, 0b01111110
@@ -329,12 +336,6 @@ void ampliferOn(void)
 *********************/
 void ampliferOff(void)
 {
-#ifdef DEBUG_INFO
-	transmitUartString("[UART INFO] Amplifer is OFF\r\n");
-//	transmitUartInt(volumeIndex);		// uart debug information string 
-#else
-#endif
-
 	LCD_COMMAND(LCD_SELECT_1ROW);				// select row 1
 	LCD_DATA_STRING("    Amplifer Off    ");	// 20 symbols
 
@@ -343,11 +344,21 @@ void ampliferOff(void)
 //			FAN_low();		// PORTD5 - FAN OFF (logic "0")  NON PWM, NON TIMER1
 
 // RELAYS OFF
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Try to switch off relays out for all 6 channels\r\n");		// uart debug information string
+#endif
 	relays_out_off();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
 	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Try to switch off relays in for all 6 channels\r\n");		// uart debug information string
+#endif
 	relays_in_off();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
 	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Try to switch off relays for power 220V\r\n");		// uart debug information string
+#endif
 	REL_POWER_low();// RELAY POWER OFF				// PESHO COMMENT 14.08.2015, 21:10
+
 
 //	transmitUartString("Standby\r\n");
 //				uart_transmit("<STANDBY>\r\n", 11);		// "\r\n" - 2 symbols (not 4 symbols)
@@ -369,7 +380,13 @@ void ampliferOff(void)
 //	FAN_PWM_OFF();
 //			LCD_EXECUTE_COMMAND(LCD_OFF);			// LCD OFF
 	LCD_CLEAR_CONTAIN();
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Display off and status led on\r\n");
+#endif
 	LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Amplifer is off\r\n");
+#endif
 }
 
 /*
@@ -441,7 +458,6 @@ void volumeUpdate(void)
 	transmitUartString("[UART INFO] Volume: ");		// uart debug information string
 	transmitUartInt(volumeIndex);		// uart debug information string 
 	transmitUartString("\r\n");			// uart debug information string
-#else
 #endif
 }
 
@@ -585,10 +601,10 @@ void init_all()
 	port_init();		// IO init and configure all port
 //	timer2_init();
 	LCD_INIT();			// LCD init and reset all lcd contain
+	uart_init();		// UART debug init
 	pga2310_init();		// SPI init and reset all (U6, U7, U8) PGA2310 volume values to null
 	relays_in_init();	// ?? nujno li e ?
 	relays_out_init();	// ?? nujno li e ?
-	uart_init();
 }
 
 void buttons_press()
