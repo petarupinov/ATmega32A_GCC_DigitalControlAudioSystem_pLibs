@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: ROTATION ENCODER (ED1112S and more)             *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: rotation_encoder.c, v0.01, 18.10.2015         *************
+*** FILE NAME: rotation_encoder.c, v0.02, 27.10.2015         *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -24,8 +24,9 @@
 /*********************************************
 ** READ/SCAN ROTARY ENCODER OF NIK BARZAKOV **
 *********************************************/
-char rotaryEncoderNikBarzakov(tempEncoder)
+char rotaryEncoderNikBarzakov()
 {
+	char tempEncoder = 0;
 	if((ENCODER_A_low()) && (ENCODER_B_low()))			// A0, B0
 	{
 		_delay_us(50);	// delay before next check bits
@@ -58,15 +59,17 @@ char rotaryEncoderNikBarzakov(tempEncoder)
 /*************************************************
 ** READ/SCAN ROTARY ENCODER VERSION 1 / MODEL 1 **
 *************************************************/
-void rotaryEncoderVer1()	// Check imediate now bits in PIN register.
-{														// A1, B1
+char rotaryEncoderVer1()	// Check imediate now bits in PIN register.
+{
+	char tempEncoder = 0;							// A1, B1
 	if((ENCODER_A_low()) && (ENCODER_B_high()))			// A0, B1
 	{
 		_delay_us(50);	// delay before next check bits
 		if((ENCODER_A_low()) && (ENCODER_B_low()))		// A0, B0
 		{												// A1, B0
-			volumeIndex++;
-			PORTD = volumeMassive[volumeIndex];
+			tempEncoder++;
+//			volumeIndex++;
+//			PORTD = volumeMassive[volumeIndex];
 			// ---> Clockwise; Zavartane po posoka na chasovnikovata strelka.
 		}
 
@@ -76,8 +79,9 @@ void rotaryEncoderVer1()	// Check imediate now bits in PIN register.
 		_delay_us(50);	// delay before next check bits
 		if((ENCODER_A_low()) && (ENCODER_B_low()))		// A0, B0
 		{												// A0, B1
-			volumeIndex--;
-			PORTD = volumeMassive[volumeIndex];
+			tempEncoder--;
+//			volumeIndex--;
+//			PORTD = volumeMassive[volumeIndex];
 			// <--- Counter Clockwise; Zavartane po posoka obratno na chasovnikovata strelka.
 		}
 	}
@@ -85,42 +89,47 @@ void rotaryEncoderVer1()	// Check imediate now bits in PIN register.
 	{
 			// do nothing
 	}
+	return tempEncoder;
 }
 
 /*************************************************
 ** READ/SCAN ROTARY ENCODER VERSION 2 / MODEL 2 **
 *************************************************/
-void rotaryEncoderVer2()	// Read from PIN register and store 3bits to Buffres A and B, check Buffer with Encoder combination.
+char rotaryEncoderVer2()	// Read from PIN register and store 3bits to Buffres A and B, check Buffer with Encoder combination.
 {
+	char tempEncoder = 0;
 	unsigned char x;
 	unsigned char bufferREGA = 0;
 	unsigned char bufferREGB = 0;	
-
+	unsigned char PIN_IN = 0;	//	PINA = PINA_IN;	// PIN_IN is input pin, not variable
+	
 //	DDRA &= ~(1<<ENCODER_A);	// serial pin input
 //	DDRA &= ~(1<<ENCODER_B);	// serial pin input
 
 	for(x=5; x<8; x++)		// cikal za predavane seriino na 1 byte
 	{
 		bufferREGA = bufferREGA >> 1;	// shift bufferREGA to right one bit
-		bufferREGA |= (PINA & (1<<ENCODER_A)) << (x-ENCODER_A);	// copy bit serPinA of PORTA to MSB of bufferREGA
+		bufferREGA |= (PINA_IN & (1<<ENCODER_A)) << (x-ENCODER_A);	// copy bit serPinA of PORTA to MSB of bufferREGA
 
 		bufferREGB = bufferREGB >> 1;	// shift bufferREGB to right one bit
-		bufferREGB |= (PINA & (1<<ENCODER_B)) << (x-ENCODER_B);	// copy bit serPinA of PORTA to MSB of bufferREGB
+		bufferREGB |= (PINA_IN & (1<<ENCODER_B)) << (x-ENCODER_B);	// copy bit serPinA of PORTA to MSB of bufferREGB
 		_delay_us(50);	// delay before next check bits
 	}
 
 	if((bufferREGA == 0b10000000) && (bufferREGB == 0b00000000))	// 		if((bufferREGA == 0b00100000) && (bufferREGB == 0b10000000))
 	{
-		volumeIndex++;
-		PORTD = volumeMassive[volumeIndex];
+		tempEncoder++;
+//		volumeIndex++;
+//		PORTD = volumeMassive[volumeIndex];
 
 		bufferREGA = bufferREGB = 0b00000000;
 		// ---> Clockwise; Zavartane po posoka na chasovnikovata strelka.
 	}
 	else if((bufferREGA == 0b00000000) && (bufferREGB == 0b10000000))	//		else if((bufferREGA == 0b10000000) && (bufferREGB == 0b00100000))
 	{
-		volumeIndex--;
-		PORTD = volumeMassive[volumeIndex];
+		tempEncoder--;
+//		volumeIndex--;
+//		PORTD = volumeMassive[volumeIndex];
 
 		bufferREGA = bufferREGB = 0b00000000;
 		// <--- Counter Clockwise; Zavartane po posoka obratno na chasovnikovata strelka.
@@ -129,6 +138,7 @@ void rotaryEncoderVer2()	// Read from PIN register and store 3bits to Buffres A 
 	{
 		// do nothing
 	}
+	return tempEncoder;
 }
 
 /********************************************************************************************

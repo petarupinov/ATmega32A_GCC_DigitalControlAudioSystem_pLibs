@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: UART/USART (Transmit/Receive)                   *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: uart.h, v0.01, 18.10.2015                     *************
+*** FILE NAME: uart.h, v0.02, 27.10.2015                     *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one UART/USART *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -39,6 +39,7 @@
 ****************************** START DECLARATION OF FUNCTIONS *******************************
 ********************************************************************************************/
 void uart_init();
+void uart_setup(unsigned char system_frequency_in_MHz, unsigned char baudrate, unsigned char stop_bits, unsigned char parity);
 void uart_transmit(char uart_data [], int numsymbols);
 void uart_transmit_one(unsigned char uart_data);
 void uart_transmit_DEC_to_BCD(unsigned char rtc_data);
