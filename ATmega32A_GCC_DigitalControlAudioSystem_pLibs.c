@@ -28,8 +28,9 @@
 ;;**14. Edit on date 22.11.2015 - button power and escape works ***************************;;
 ;;**15. Edit on date 23.11.2015 - add pga2310 and rotary encoder volume *******************;;
 ;;**16. Edit on date 23.11.2015 - update only rotaryEncoder() function ********************;;
+;;**17. Edit on date 23.11.2015 - finished rotary encoder and view result on lcd **********;;
 ;;*****************************************************************************************;;
-;;** Used library version: _Soft_Library_Pesho_v0.06 ^^lcd updated^^ **********************;;
+;;** Used library version: _Soft_Library_Pesho_v0.06 is last but isn't actual *************;;
 ;;*****************************************************************************************;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
@@ -156,7 +157,7 @@ void timer2_init(void);
 void timer2_on(void);
 void timer2_off(void);
 void init_all(void);
-char ampliferOn(void);
+void ampliferOn(void);
 void ampliferOff(void);
 void rotaryEncoder(void);
 
@@ -236,7 +237,7 @@ void timer2_off(void)	// Timer2 Off
 /********************
 **** AMPLIFER ON ****
 ********************/
-char ampliferOn(void)
+void ampliferOn(void)
 {
 	LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
 
@@ -292,7 +293,6 @@ char ampliferOn(void)
 //	relays_out_6ch();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
 
 //			PGA2310_U8_SPI(volumeLeft, volumeRight);	// 'A', 'A', 0b01111110, 0b01111110
-	return SUCCESS;
 }
 
 /*********************
@@ -354,39 +354,45 @@ void ampliferOff(void)
 ***********************/
 void rotaryEncoder(void)
 {
-	unsigned char temp = 2;
-	temp = rotaryEncoderNikBarzakov(temp);
-	if(2==temp)
+	unsigned char temp = 0;
+	temp = rotaryEncoderNikBarzakov();
+	if(0==temp)
 	{
 		// do nothing, encoder havn't been rotated  // ne e bil zavartan
 	}
 	else if(1==temp)
 	{
 		// encoder is decrement
-		volumeIndex--;	// vmesto tova moje da se vzema stoinostta direktno ot enkodera
+//		volumeIndex = volumeIndex - temp;	// pomesteno v else
 		if(volumeIndex < (VOLUME_MIN + 1))
 		{
 			volumeIndex = VOLUME_MIN;
 		}
+		else
+		{
+			volumeIndex = volumeIndex - temp;		
+		}
 		PGA2310_Volume_Update(volumeValue[volumeIndex], volumeValue[volumeIndex]);
-		LCD_COMMAND(LCD_SELECT_4ROW);				// select row 1
-		LCD_DATA_STRING("Volume ");	// 20 symbols
-		LCD_DATA_INT(volumeValue[volumeIndex]);	// 20 symbols
-		LCD_DATA_STRING("         L ");	// 20 symbols
+		LCD_COMMAND(LCD_SELECT_4ROW);	// select row 3
+		LCD_DATA_STRING("Volume: ");	// 20 symbols
+		LCD_DATA_INT(volumeIndex);		// 20 symbols
 	}
-	else if(3==temp)
+	else if(2==temp)
 	{
 		// encoder is increment
-		volumeIndex++;	// vmesto tova moje da se vzema stoinostta direktno ot enkodera
+//		volumeIndex = volumeIndex + temp;	// pomesteno v else
 		if (volumeIndex > (VOLUME_MAX - 2))
 		{
 			volumeIndex = (VOLUME_MAX - 1);
 		}
+		else
+		{
+			volumeIndex = volumeIndex + temp;
+		}
 		PGA2310_Volume_Update(volumeValue[volumeIndex], volumeValue[volumeIndex]);
-		LCD_COMMAND(LCD_SELECT_4ROW);				// select row 1
-		LCD_DATA_STRING("Volume ");	// 20 symbols
-		LCD_DATA_INT(volumeValue[volumeIndex]);	// 20 symbols
-		LCD_DATA_STRING("         L ");	// 20 symbols
+		LCD_COMMAND(LCD_SELECT_4ROW);	// select row 3
+		LCD_DATA_STRING("Volume: ");	// 20 symbols
+		LCD_DATA_INT(volumeIndex);		// 20 symbols
 	}
 }
 
@@ -463,7 +469,7 @@ void init_all()
 
 void buttons_press()
 {
-	char test = 0;
+//	char test = 0;
 //	unsigned char pgaVolumeLeft, pgaVolumeRight;
 //	pgaVolumeLeft = pgaVolumeRight = 0b00001111;
 
@@ -471,32 +477,28 @@ void buttons_press()
 	{
 		if(BUTTON_ON_OFF_low() && flagStatusBits->flagPower == 0)	// obj ptr flagStatusBtnRegister from struct flagStatusBtnOnOff
 		{
-			test = ampliferOn();
-			if(SUCCESS == test)
-			{
-				flagStatusBits->flagPower = 1;			// filter za buton ON
-				_delay_ms(1000);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
-			}
+			flagStatusBits->flagPower = 1;			// filter za buton ON
+			ampliferOn();
+			_delay_ms(1000);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
 		}
 		else if(BUTTON_ON_OFF_low() && flagStatusBits->flagPower == 1)
 		{
-			ampliferOff();
 			flagStatusBits->flagPower = 0;			// filter za buton OFF
+			ampliferOff();
 			_delay_ms(500);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
-
 		}
 		else if(BUTTON_ESC_low() && flagStatusBits->flagPower == 1)
 		{
-			LCD_DATA_STRING("PRESSED BTN ESCAPE  ");	// 20 symbols
-			LCD_COMMAND(LCD_ON);
+//			LCD_DATA_STRING("PRESSED BTN ESCAPE  ");	// 20 symbols
+//			LCD_COMMAND(LCD_ON);
 			_delay_ms(500);
 //			volumeUp();
 //			_delay_ms(200);
 		}
 		else if(BUTTON_ENCODER_low() && flagStatusBits->flagPower == 1)
 		{
-			LCD_DATA_STRING("PRESSED BTN ENCODER ");	// 20 symbols
-			LCD_COMMAND(LCD_ON);	// LCD_COMMAND(LCD_OFF);
+//			LCD_DATA_STRING("PRESSED BTN ENCODER ");	// 20 symbols
+//			LCD_COMMAND(LCD_ON);	// LCD_COMMAND(LCD_OFF);
 			_delay_ms(500);
 //			volumeDown();
 //			_delay_ms(200);
@@ -504,23 +506,28 @@ void buttons_press()
 		}
 		else if(BUTTON_ESC_low() && flagStatusBits->flagPower == 0)
 		{
+			LCD_CLEAR_CONTAIN();
 //			LCD_COMMAND(LCD_ON);
-//			_delay_ms(500);
+			_delay_ms(500);
 //			setupMode();
 //			_delay_ms(1000);
 		}
 		else if(BUTTON_ENCODER_low() && flagStatusBits->flagPower == 0)
 		{
 //			LCD_COMMAND(LCD_OFF);
-//			_delay_ms(500);
+			_delay_ms(500);
 //			about();
 //			_delay_ms(1000);
 		}
-		else if(flagStatusBits->flagPower == 1)
+		else //if(flagStatusBits->flagPower == 0)	// zashto ne raboti encoder-a kogato se proverqva bita flagPower?
 		{
-			rotaryEncoder();
+			rotaryEncoder();	// v momenta na zavartane na encodera flaga stava nula flagStatusBits->flagPower = 0, zashto ???
+		}						// za tova Power Button srabotva ot vtoriq pat kato za Power OFF
+/*		else if(flagStatusBits->flagPower == 1)	// zashto ne raboti encoder-a kogato se proverqva bita flagPower?
+		{
+			rotaryEncoder();	// v momenta na zavartane na encodera flaga stava nula flagStatusBits->flagPower = 0, zashto ???
 		}
-
+*/
 
 
 
