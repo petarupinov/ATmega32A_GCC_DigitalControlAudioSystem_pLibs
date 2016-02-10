@@ -20,6 +20,7 @@
 ;;** 6. Edit on date 17.10.2015 - update with custom characters ***************************;;
 ;;** 7. Edit on date 18.10.2015 - update all library files ********************************;;
 ;;** 8. Edit on date 26.10.2015 - update spi and pga2310 **********************************;;
+;;** 9. Edit on date 26.10.2015 - update i2c, rtc, 24c64 **********************************;;
 ;;*****************************************************************************************;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
@@ -46,10 +47,10 @@
 #include "_Soft_Library_Pesho_/ir_sirc.h"
 #include "_Soft_Library_Pesho_/lcd_hd44780_74hc595.h"
 #include "_Soft_Library_Pesho_/pga2310.h"
-#include "_Soft_Library_Pesho_/rotation_encoder.h"
+#include "_Soft_Library_Pesho_/rotation_encoder.h" // <---o
 #include "_Soft_Library_Pesho_/rtc.h"
 #include "_Soft_Library_Pesho_/spi.h"
-#include "_Soft_Library_Pesho_/uart.h"
+#include "_Soft_Library_Pesho_/uart.h"	// <--------------o
 #include "_Soft_Library_Pesho_/utility.h"
 
 /*********************************************

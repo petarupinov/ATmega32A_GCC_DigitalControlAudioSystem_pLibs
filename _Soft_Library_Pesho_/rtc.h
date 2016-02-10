@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: Real Time Clock (DS1307) with I2C Interface     *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: rtc.h, v0.01, 18.10.2015                      *************
+*** FILE NAME: rtc.h, v0.02, 26.10.2015                      *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one I2C / TWI  *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -57,11 +57,14 @@
 /********************************************************************************************
 ****************************** START DECLARATION OF FUNCTIONS *******************************
 ********************************************************************************************/
-void RTC_1307_GET();
-void RTC_1307_SET();
+void rtc_ds1307_get();
+void rtc_ds1307_set();
 
-void showClock();
-void setClock(unsigned char temp);
+void rtc_ds1307_init();
+void rtc_ds1307_reset();
+
+void show_clock();
+void set_clock(unsigned char temp);
 //void setClock();
 
 /********************************************************************************************

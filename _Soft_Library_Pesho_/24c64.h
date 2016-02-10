@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: EEPROM (24C64) with I2C Interface               *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: 24c64.h, v0.01, 18.10.2015                    *************
+*** FILE NAME: 24c64.h, v0.02, 26.10.2015                    *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one I2C / TWI  *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -39,10 +39,12 @@
 /**************************************
 ** DEFINITION EEPROM 24C64 CONSTANTS **
 **************************************/
-#define EEPROM_24C64_I2C_ADDRESS_READ		0xA1	// EEPROM 24C64 SLAVE ADDRESS  READ: 0xA1 = 0b10100001 = 0b 1 0 1 0 NC 0 0 R/W -> R = 1		*******-> NC connect to GND ('0') !!!!!!!!!!!
-#define EEPROM_24C64_I2C_ADDRESS_WRITE		0xA0	// EEPROM 24C64 SLAVE ADDRESS WRITE: 0xA0 = 0b10100000 = 0b 1 0 1 0 NC 0 0 R/W -> W = 0		*******-> NC connect to GND ('0') !!!!!!!!!!!
-#define EEPROM_24C64_I2C_HIGH_BYTE_ADDRESS	0x00	// | DEVICE_ADDRESS(R/W) | HIGH_BYTE_ADDRESS | LOW_BYTE_ADDRESS | DATA_BYTE_0 | DATA_BYTE_1 | .... | DATA_BYTE_N |
-#define EEPROM_24C64_I2C_LOW_BYTE_ADDRESS	0x00	// DEVICE_ADDRESS(R/W), 0bxxx00000, 0b00000000
+#define EEPROM_24C64_I2C_ADDRESS_READ			0xA1	// EEPROM 24C64 SLAVE ADDRESS  READ: 0xA1 = 0b10100001 = 0b 1 0 1 0 NC 0 0 R/W -> R = 1		*******-> NC connect to GND ('0') !!!!!!!!!!!
+#define EEPROM_24C64_I2C_ADDRESS_WRITE			0xA0	// EEPROM 24C64 SLAVE ADDRESS WRITE: 0xA0 = 0b10100000 = 0b 1 0 1 0 NC 0 0 R/W -> W = 0		*******-> NC connect to GND ('0') !!!!!!!!!!!
+#define EEPROM_24C64_I2C_LOW_BYTE_ADDRESS_MIN	0x00	// | DEVICE_ADDRESS(R/W) | HIGH_BYTE_ADDRESS | LOW_BYTE_ADDRESS | DATA_BYTE_0 | DATA_BYTE_1 | .... | DATA_BYTE_N |
+#define EEPROM_24C64_I2C_HIGH_BYTE_ADDRESS_MIN	0x00	// DEVICE_ADDRESS(R/W), 0bxxx00000, 0b00000000
+#define EEPROM_24C64_I2C_LOW_BYTE_ADDRESS_MAX	0xFF	// | DEVICE_ADDRESS(R/W) | HIGH_BYTE_ADDRESS | LOW_BYTE_ADDRESS | DATA_BYTE_0 | DATA_BYTE_1 | .... | DATA_BYTE_N |
+#define EEPROM_24C64_I2C_HIGH_BYTE_ADDRESS_MAX	0x1F	// DEVICE_ADDRESS(R/W), 0bxxx11111, 0b11111111
 
 /********************************************************************************************
 ************************************ END OF DEFINISIONS *************************************
@@ -52,8 +54,9 @@
 ****************************** START DECLARATION OF FUNCTIONS *******************************
 ********************************************************************************************/
 
-void EEPROM_24C64_READ();
-void EEPROM_24C64_WRITE();
+void eeprom_24c64_reset();
+void eeprom_24c64_read();
+void eeprom_24c64_write();
 // void i2c_init();
 // void i2c_start(void);
 // void i2c_stop();

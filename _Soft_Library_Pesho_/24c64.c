@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: EEPROM (24C64) with I2C Interface               *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: 24c64.c, v0.01, 18.10.2015                    *************
+*** FILE NAME: 24c64.c, v0.02, 26.10.2015                    *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one I2C / TWI  *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -30,10 +30,31 @@
 ** INITIZLIZATION EEPROM 24C64 **
 ********************************/
 
+
+/*************************************
+** RESET AND ZERO FILL EEPROM 24C64 **
+*************************************/
+void eeprom_24c64_reset()
+{
+	unsigned int i;	// 16 bits
+// EEPROM WRITE
+	i2c_start();
+	i2c_write(EEPROM_24C64_I2C_ADDRESS_WRITE);	// EEPROM AT24C64 ADDRESS ACCESS WRITE
+// HIGH and LOW BYTE ADDRESS
+	i2c_write(EEPROM_24C64_I2C_HIGH_BYTE_ADDRESS_MIN);	// HIGH STORE ADDRESS
+	i2c_write(EEPROM_24C64_I2C_LOW_BYTE_ADDRESS_MIN);	// LOW  STORE ADDRESS	
+// Write data
+	for(i=0; i<8191; i++)	// from 0x0000 to 0x1FFF
+	{
+		i2c_write(0b00000000);	// Data is stored: 0x00 from Address 0x00 to 0xFF
+	}
+	i2c_stop();
+}
+
 /**************************
 ** WRITE TO EEPROM 24C64 **
 **************************/
-void EEPROM_24C64_WRITE()
+void eeprom_24c64_write()
 {
 // Za da se vijda tova koeto se e zapisalo v pametta, a ne ot tozi bibliotechen fail !!!!!!!!!
 // ZA TAZI CEL TRQBVA DA IMA UKAZATEL/MASIV KOITO DA VARNE REZULTATA OT CHETENETO NA PAMETTA
@@ -43,8 +64,8 @@ void EEPROM_24C64_WRITE()
 	i2c_start();
 	i2c_write(EEPROM_24C64_I2C_ADDRESS_WRITE);	// EEPROM AT24C64 ADDRESS ACCESS WRITE
 // HIGH and LOW BYTE ADDRESS
-	i2c_write(EEPROM_24C64_I2C_HIGH_BYTE_ADDRESS);	// HIGH STORE ADDRESS
-	i2c_write(EEPROM_24C64_I2C_LOW_BYTE_ADDRESS);		// LOW  STORE ADDRESS	
+	i2c_write(EEPROM_24C64_I2C_HIGH_BYTE_ADDRESS_MIN);	// HIGH STORE ADDRESS
+	i2c_write(EEPROM_24C64_I2C_HIGH_BYTE_ADDRESS_MIN);	// LOW  STORE ADDRESS	
 // Write data
 	i2c_write(0x30);	// Data is stored: 0x30 - '0'
 	i2c_write(0x31);	// Data is stored: 0x31 - '1'
@@ -57,19 +78,19 @@ void EEPROM_24C64_WRITE()
 /***************************
 ** READ FROM EEPROM 24C64 **
 ***************************/
-void EEPROM_24C64_READ()
+void eeprom_24c64_read()
 {
 	// TOVA TRQBVA DA SE IMPLEMENTIRA TAM KADETO SE IZVIKVA READ-a v PROJECT FILE, za da se vijda tova koeto se e zapisalo v pametta, a ne ot tozi bibliotechen fail !!!!!!!!!
 	// ZA TAZI CEL TRQBVA DA IMA UKAZATEL/MASIV KOITO DA VARNE REZULTATA OT CHETENETO NA PAMETTA
 	// SAMO AKO E NUJNO DA SE VIJDA KAKVO E BILO ZAPISANO !
 	
-	byte eepromReceiveByte0, eepromReceiveByte1, eepromReceiveByte2, eepromReceiveByte3, eepromReceiveByte4;
+	byte eepromReceiveByte0, eepromReceiveByte1, eepromReceiveByte2, eepromReceiveByte3, eepromReceiveByte4, eepromReceiveByte5;
 // EEPROM READ
 	i2c_start();
 	i2c_write(EEPROM_24C64_I2C_ADDRESS_WRITE);		// EEPROM 24C64 ADDRESS ACCESS WRITE
 // HIGH and LOW BYTE ADDRESS
-	i2c_write(EEPROM_24C64_I2C_HIGH_BYTE_ADDRESS);	// HIGH STORE ADDRESS
-	i2c_write(EEPROM_24C64_I2C_LOW_BYTE_ADDRESS);	// LOW  STORE ADDRESS	
+	i2c_write(EEPROM_24C64_I2C_HIGH_BYTE_ADDRESS_MIN);	// HIGH STORE ADDRESS
+	i2c_write(EEPROM_24C64_I2C_HIGH_BYTE_ADDRESS_MIN);	// LOW  STORE ADDRESS	
 
 	i2c_start();
 	i2c_write(EEPROM_24C64_I2C_ADDRESS_READ);		// EEPROM 24C64 ADDRESS ACCESS READ
@@ -77,7 +98,8 @@ void EEPROM_24C64_READ()
 	eepromReceiveByte1	= i2c_read(0);				// EEPROM DATA READ BYTE	// i2c_read(0) parametar raven na 0 prodaljava komunikaciqta kato potvarjdava ACK
 	eepromReceiveByte2	= i2c_read(0);				// EEPROM DATA READ BYTE	// i2c_read(0) parametar raven na 0 prodaljava komunikaciqta kato potvarjdava ACK
 	eepromReceiveByte3	= i2c_read(0);				// EEPROM DATA READ BYTE	// i2c_read(0) parametar raven na 0 prodaljava komunikaciqta kato potvarjdava ACK
-	eepromReceiveByte4	= i2c_read(1);				// EEPROM DATA READ BYTE	// i2c_read(1) parametar razlichen ot 0 spira komunikaciqta NACK
+	eepromReceiveByte4	= i2c_read(0);				// EEPROM DATA READ BYTE	// i2c_read(0) parametar raven na 0 prodaljava komunikaciqta kato potvarjdava ACK
+	eepromReceiveByte5	= i2c_read(1);				// EEPROM DATA READ BYTE	// i2c_read(1) parametar razlichen ot 0 spira komunikaciqta NACK
 	i2c_stop();
 /*
 	// TOVA TRQBVA DA SE IMPLEMENTIRA TAM KADETO SE IZVIKVA READ-a v PROJECT FILE, za da se vijda tova koeto se e zapisalo v pametta, a ne ot tozi bibliotechen fail !!!!!!!!!
@@ -95,11 +117,13 @@ void EEPROM_24C64_READ()
 	uart_transmit_one(eepromReceiveByte2);
 	uart_transmit_one(eepromReceiveByte3);
 	uart_transmit_one(eepromReceiveByte4);
+	uart_transmit_one(eepromReceiveByte5);
 	LCD_EXECUTE_DATA_ONE(eepromReceiveByte0);
 	LCD_EXECUTE_DATA_ONE(eepromReceiveByte1);
 	LCD_EXECUTE_DATA_ONE(eepromReceiveByte2);
 	LCD_EXECUTE_DATA_ONE(eepromReceiveByte3);
 	LCD_EXECUTE_DATA_ONE(eepromReceiveByte4);
+	LCD_EXECUTE_DATA_ONE(eepromReceiveByte5);
 */
 }
 

@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: Real Time Clock (DS1307) with I2C Interface     *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: rtc.c, v0.01, 18.10.2015                      *************
+*** FILE NAME: rtc.c, v0.02, 26.10.2015                      *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one I2C / TWI  *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -12,6 +12,12 @@
 #include <util/delay.h>
 #include <stdlib.h>			// itoa() - function
 #include "i2c_twi.h"		// Using for I2C communication to DS1307 !!!
+
+/****************************************
+** DEFINITION RTC DS1307 CONSTANT DAYS **
+****************************************/
+// const char *dayOfWeeks [] = {"    Error  Days", "   Sunday", "   Monday", "  Tuesday", " Wednesday", "  Thursday", "   Friday", "  Saturday"};
+// const char *dayOfWeeksUart [] = {"ErD", "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
 
 /********************************************************************************************
 ************************************ START OF FUNCTIONS *************************************
@@ -24,35 +30,48 @@
 /******************************
 ** INITIZLIZATION RTC DS1307 **
 ******************************/
-void rtc_reset_clock()
+void rtc_ds1307_init()
 {
-	
+	unsigned char i;
+	i2c_start();
+	i2c_write(RTC_DS1307_I2C_ADDRESS_WRITE);	// RTC DS1307 ADDRESS ACCESS WRITE
+	i2c_write(RTC_DS1307_I2C_SECONDS);			// MINUTES ADDRESS REGISTER ACCESS
+	for(i=0; i<8; i++)
+	{
+		i2c_write(0x00);	// SECOND, MINUTE, HOUR, DAY, DATE, MONTH, YEAR, CONTROL
+	}
+	i2c_stop();
+}
+
+/*********************
+** RESET RTC DS1307 **
+*********************/
+void rtc_ds1307_reset()
+{
+	unsigned char i;
+	i2c_start();
+	i2c_write(RTC_DS1307_I2C_ADDRESS_WRITE);	// RTC DS1307 ADDRESS ACCESS WRITE
+	i2c_write(RTC_DS1307_I2C_SECONDS);			// MINUTES ADDRESS REGISTER ACCESS
+	for(i=0; i<8; i++)
+	{
+		i2c_write(0x00);	// SECOND, MINUTE, HOUR, DAY, DATE, MONTH, YEAR, CONTROL
+	}
+	i2c_stop();
 }
 
 /*********************
 ** SETUP RTC DS1307 **
 *********************/
-void RTC_1307_SET()
+void rtc_ds1307_set()
 {
 // Time: HH:MM:SS
 // Date: MM/DD/YY
 	i2c_start();
 	i2c_write(RTC_DS1307_I2C_ADDRESS_WRITE);	// RTC DS1307 ADDRESS ACCESS WRITE
-// SECONDS
 	i2c_write(RTC_DS1307_I2C_SECONDS);			// SECONDS ADDRESS REGISTER ACCESS
 	i2c_write(0b00000011);	// 0x05				// SECONDS DATA VALUE
-// MINUTES
-//	i2c_start();
-//	i2c_write(RTC_DS1307_I2C_ADDRESS_WRITE);	// RTC DS1307 ADDRESS ACCESS WRITE
-//	i2c_write(RTC_DS1307_I2C_MINUTES);			// MINUTES ADDRESS REGISTER ACCESS
 	i2c_write(0b00100000);	//0x02				// MINUTES DATA VALUE
-//	i2c_stop();
-//	i2c_start();
-//	i2c_write(RTC_DS1307_I2C_ADDRESS_WRITE);	// RTC DS1307 ADDRESS ACCESS WRITE
-// HOURS
-//	i2c_write(RTC_DS1307_I2C_HOURS);			// HOURS ADDRESS REGISTER ACCESS
-	i2c_write(0b00100010); // 21h ==> MSB 0010 = 2xh; 0001 = x1h LSB // HOURS DATA VALUE
-
+	i2c_write(0b00100010);	// 0x21				// HOURS DATA VALUE	// 21h ==> MSB 0010 = 2xh; 0001 = x1h LSB
 	i2c_stop();
 // DAY
 //	i2c_start();
@@ -60,39 +79,24 @@ void RTC_1307_SET()
 //	i2c_write(RTC_DS1307_I2C_DAY);				// DAY ADDRESS REGISTER ACCESS
 //	i2c_write(0x02);							// DAY DATA VALUE
 //	i2c_stop();
-// DATE
 	i2c_start();
 	i2c_write(RTC_DS1307_I2C_ADDRESS_WRITE);	// RTC DS1307 ADDRESS ACCESS WRITE
 	i2c_write(RTC_DS1307_I2C_DATE);				// DATE ADDRESS REGISTER ACCESS
 	i2c_write(0b00100001);						// DATE DATA VALUE
-//	i2c_stop();
-// MONTH
-//	i2c_start();
-//	i2c_write(RTC_DS1307_I2C_ADDRESS_WRITE);	// RTC DS1307 ADDRESS ACCESS WRITE
-//	i2c_write(RTC_DS1307_I2C_MONTH);			// MONTH ADDRESS REGISTER ACCESS
 	i2c_write(0b00000001);						// MONTH DATA VALUE
-//	i2c_stop();
-// YEAR
-//	i2c_start();
-//	i2c_write(RTC_DS1307_I2C_ADDRESS_WRITE);	// RTC DS1307 ADDRESS ACCESS WRITE
-//	i2c_write(RTC_DS1307_I2C_YEAR);				// YEAR ADDRESS REGISTER ACCESS
 	i2c_write(0b00010011);						// YEAR DATA VALUE	(xx13 == 2013)
-//	i2c_stop();
 // CONTROL
 //	i2c_start();
 //	i2c_write(RTC_DS1307_I2C_ADDRESS_WRITE);	// RTC DS1307 ADDRESS ACCESS WRITE
 //	i2c_write(RTC_DS1307_I2C_CONTROL);			// CONTROL ADDRESS REGISTER ACCESS
 //	i2c_write(0x0D);						// CONTROL DATA VALUE
 	i2c_stop();
-
-// Time: HH:MM:SS
-// Date: MM/DD/YY
 }
 
 /************************
 ** GET TIME RTC DS1307 **
 ************************/
-void RTC_1307_GET()
+void rtc_ds1307_get()
 {
 	byte bufferSecond, bufferMinute, bufferHour, bufferDayOfWeek, bufferDate, bufferMonth, bufferYear, bufferControl, bufferRamAddress0, bufferRamAddress1; // bufferDayOfWeek (address 0x03)
 	byte byteSecond, byteMinute, byteHour, byteDayOfWeek, byteDate, byteMonth, byteYear; // variables for convert DEC to BCD for LCD and UART for Time and Date
@@ -229,7 +233,7 @@ void RTC_1307_GET()
 /************************
 ** SET TIME RTC DS1307 **
 ************************/
-void setClock(unsigned char temp)
+void set_clock(unsigned char temp)
 {
 	byte bufferSecond, bufferMinute, bufferHour, bufferDayOfWeek, bufferDate, bufferMonth, bufferYear, bufferControl, bufferRamAddress0, bufferRamAddress1; // bufferDayOfWeek (address 0x03)
 	byte byteSecond, byteMinute, byteHour, byteDayOfWeek, byteDate, byteMonth, byteYear; // variables for convert DEC to BCD for LCD and UART for Time and Date
@@ -537,9 +541,9 @@ void setClock(unsigned char temp)
 /******************************************************
 ** SHOW DIFFERENT VIEW OF DATA/TIME/CLOCK RTC DS1307 **
 ******************************************************/
-void showClock()
+void show_clock()
 {
-	RTC_1307_GET();
+	rtc_ds1307_get();
 }
 
 /********************************************************************************************

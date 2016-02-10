@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: PGA2310 / PGA2311 with SPI (Serial Peripheral Interface) ****
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: pga2310.h, v0.02, 26.10.2015                  *************
+*** FILE NAME: pga2310.h, v0.03, 26.10.2015                  *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one SPI        *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -64,6 +64,7 @@
 ****************************** START DECLARATION OF FUNCTIONS *******************************
 ********************************************************************************************/
 void pga2310_init();
+void pga2310_reset();
 void PGA2310_Volume_Update(unsigned char pgaVolumeLeft, unsigned char pgaVolumeRight);
 
 /********************************************************************************************

@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: PGA2310 / PGA2311 with SPI (Serial Peripheral Interface) ****
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: pga2310.c, v0.02, 26.10.2015                  *************
+*** FILE NAME: pga2310.c, v0.03, 26.10.2015                  *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one SPI        *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -19,6 +19,31 @@
 ********************************************************************************************/
 
 #define ZERO_FILL 0b00000000
+
+//unsigned char volumeValue [VOLUME_MAX] = { 0x00, 0x28, 0x32, 0x3C, 0x46, 0x50, 0x5A, 0x64, 0x6E, 0x78, 0x82, 0x8C, 0x96, 0xA0, 0xAA, 0xB4, 0xBE, 0xC8, 0xD2, 0xD7 };
+//					values of volume  ->	0,    40,   50,   60,   70,   80,   90,   100,  110,  120,  130,  140,  150,  160,  170,  180,  190,  200,  210,  215	<-	values of volume
+//				index of values of volume   0      1     2     3     4     5     6      7     8     9    10    11    12    13    14    15    16    17    18    19
+
+
+/**************************************
+** DEFINITION PGA2310 INITIALIZATION **
+**************************************/
+void pga2310_reset()
+{
+	spi_init();
+	
+	PGA2310_U6_SPI_CS_low();	// CHIP SELECT BIT // PB3 - /SS ENABLE
+	spi_write_two_bytes(ZERO_FILL, ZERO_FILL);	// left and right channel
+	PGA2310_U6_SPI_CS_high();	// CHIP SELECT BIT // PB3 - /SS DISABLE
+
+	PGA2310_U7_SPI_CS_low();	// CHIP SELECT BIT // PA6 - /SS ENABLE
+	spi_write_two_bytes(ZERO_FILL, ZERO_FILL);	// left and right channel
+	PGA2310_U7_SPI_CS_high();	// CHIP SELECT BIT // PA6 - /SS DISABLE
+
+	PGA2310_U8_SPI_CS_low();	// CHIP SELECT BIT // PA6 - /SS ENABLE
+	spi_write_two_bytes(ZERO_FILL, ZERO_FILL);	// left and right channel
+	PGA2310_U8_SPI_CS_high();	// CHIP SELECT BIT // PA7 - /SS DISABLE
+}
 
 /**************************************
 ** DEFINITION PGA2310 INITIALIZATION **
