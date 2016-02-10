@@ -29,6 +29,7 @@
 ;;**15. Edit on date 23.11.2015 - add pga2310 and rotary encoder volume *******************;;
 ;;**16. Edit on date 23.11.2015 - update only rotaryEncoder() function ********************;;
 ;;**17. Edit on date 23.11.2015 - finished rotary encoder and view result on lcd **********;;
+;;**18. Edit on date 25.11.2015 - added relay_74hc595.h and .c and relay functions ********;;
 ;;*****************************************************************************************;;
 ;;** Used library version: _Soft_Library_Pesho_v0.06 is last but isn't actual *************;;
 ;;*****************************************************************************************;;
@@ -57,6 +58,7 @@
 #include "_Soft_Library_Pesho_/ir_sirc.h"
 #include "_Soft_Library_Pesho_/lcd_hd44780_74hc595.h"
 #include "_Soft_Library_Pesho_/pga2310.h"
+#include "_Soft_Library_Pesho_/relay_74hc595.h"
 #include "_Soft_Library_Pesho_/rotation_encoder.h" // <---o
 #include "_Soft_Library_Pesho_/rtc.h"
 #include "_Soft_Library_Pesho_/spi.h"
@@ -160,6 +162,7 @@ void init_all(void);
 void ampliferOn(void);
 void ampliferOff(void);
 void rotaryEncoder(void);
+
 
 
 /********************************************************************************************
@@ -286,11 +289,11 @@ void ampliferOn(void)
 //	LCD_EXECUTE_COMMAND(LCD_ON);			// LCD ON without CURSOR
 
 // RELAYS ON
-//	REL_POWER_high();// RELAY POWER ON TRAFs		// PESHO COMMENT 14.08.2015, 21:10
-//	_delay_ms(4000);								// PESHO COMMENT 14.08.2015, 21:10
-//	relays_in1_6ch();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
-//	_delay_ms(700);									// PESHO COMMENT 14.08.2015, 21:10
-//	relays_out_6ch();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+	REL_POWER_high();// RELAY POWER ON TRAFs		// PESHO COMMENT 14.08.2015, 21:10
+	_delay_ms(4000);								// PESHO COMMENT 14.08.2015, 21:10
+	relays_in1_6ch();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+	_delay_ms(700);									// PESHO COMMENT 14.08.2015, 21:10
+	relays_out_6ch();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
 
 //			PGA2310_U8_SPI(volumeLeft, volumeRight);	// 'A', 'A', 0b01111110, 0b01111110
 }
@@ -306,16 +309,15 @@ void ampliferOff(void)
 	LCD_DATA_STRING("    Amplifer Off    ");	// 20 symbols
 
 	LCD_COMMAND(LCD_OFF);						// LCD ON without CURSOR
-	LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
 
 //			FAN_low();		// PORTD5 - FAN OFF (logic "0")  NON PWM, NON TIMER1
 
 // RELAYS OFF
-//	relays_out_off();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
-//	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
-//	relays_in_off();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
-//	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
-//	REL_POWER_low();// RELAY POWER OFF				// PESHO COMMENT 14.08.2015, 21:10
+	relays_out_off();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
+	relays_in_off();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
+	REL_POWER_low();// RELAY POWER OFF				// PESHO COMMENT 14.08.2015, 21:10
 
 //	transmitUartString("Standby\r\n");
 //				uart_transmit("<STANDBY>\r\n", 11);		// "\r\n" - 2 symbols (not 4 symbols)
@@ -336,7 +338,7 @@ void ampliferOff(void)
 
 //	FAN_PWM_OFF();
 //			LCD_EXECUTE_COMMAND(LCD_OFF);			// LCD OFF
-//	LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
+	LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
 }
 
 /*
@@ -465,6 +467,8 @@ void init_all()
 //	timer2_init();
 	LCD_INIT();			// LCD init and reset all lcd contain
 	pga2310_init();		// SPI init and reset all (U6, U7, U8) PGA2310 volume values to null
+	relays_in_init();	// ?? nujno li e ?
+	relays_out_init();	// ?? nujno li e ?
 }
 
 void buttons_press()
