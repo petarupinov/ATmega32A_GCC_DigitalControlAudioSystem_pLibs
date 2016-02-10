@@ -30,6 +30,8 @@
 ;;**16. Edit on date 23.11.2015 - update only rotaryEncoder() function ********************;;
 ;;**17. Edit on date 23.11.2015 - finished rotary encoder and view result on lcd **********;;
 ;;**18. Edit on date 25.11.2015 - added relay_74hc595.h and .c and relay functions ********;;
+;;**19. Edit on date 28.11.2015 - rename rotaryEncoder() -> volumeEncoder() ***************;;
+;;**20. Edit on date 28.11.2015 - update lib rotary encoder.h and .c files ****************;;
 ;;*****************************************************************************************;;
 ;;** Used library version: _Soft_Library_Pesho_v0.06 is last but isn't actual *************;;
 ;;*****************************************************************************************;;
@@ -99,14 +101,26 @@ typedef int bool;
 #define VOLUME_MIN 0
 unsigned char volumeIndex = VOLUME_MIN;
 // https://en.wikipedia.org/wiki/Bit_field
+// http://www.geeksforgeeks.org/bit-fields-c/
 // http://stackoverflow.com/questions/24933242/when-to-use-bit-fields-in-c
+// http://stackoverflow.com/questions/8258483/accessing-bit-field-in-c-by-its-address
 //#define flagStatusBtnOnOffBit0 0
+struct flagStatus	 // ako bade obqveno ime na strukturata, shte mogat da badat sazdavani i drugi strukturni promenlivi (obekti) i ukazateli ot tazi struktura
+{
+	unsigned int flagPower	: 1;	// bit0: '0' = Power OFF, '1' = Power ON	// ne sa inicializirani
+	unsigned int flagMute	: 1;	// bit1: '0' = Mute OFF, '1' = Mute ON		// ne sa inicializirani
+} fSB, *flagStatusBits;		// sazdadeni fiksirani kam tazi struktura: strukturna promenliva (obekt) i ukazatel
+
+/*
 struct flagStatus	 // bit fields from struct
 {
 	unsigned int flagPower	: 1;	// bit0: '0' = Power OFF, '1' = Power ON
 	unsigned int flagMute	: 1;	// bit1: '0' = Mute OFF, '1' = Mute ON
 
-} *flagStatusBits;
+} *flagStatusBits;	// edin ukazatel kam strukturata, vazmojeno e sazdavane i na drugi ukazateli ili obekti
+// dostap chrez imeto na ukazatelq: flagStatusBits->flagPower
+
+*/
 
 /*
 struct flagStatusBtnOnOff
@@ -161,8 +175,8 @@ void timer2_off(void);
 void init_all(void);
 void ampliferOn(void);
 void ampliferOff(void);
-void rotaryEncoder(void);
-
+void volumeEncoder(void);
+void volumeUpdate(void);
 
 
 /********************************************************************************************
@@ -303,7 +317,7 @@ void ampliferOn(void)
 *********************/
 void ampliferOff(void)
 {
-	LCD_CLEAR_CONTAIN();
+//	LCD_CLEAR_CONTAIN();
 
 	LCD_COMMAND(LCD_SELECT_1ROW);				// select row 1
 	LCD_DATA_STRING("    Amplifer Off    ");	// 20 symbols
@@ -338,6 +352,7 @@ void ampliferOff(void)
 
 //	FAN_PWM_OFF();
 //			LCD_EXECUTE_COMMAND(LCD_OFF);			// LCD OFF
+	LCD_CLEAR_CONTAIN();
 	LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
 }
 
@@ -351,54 +366,63 @@ void ampliferOff(void)
 	
 */
 
-/***********************
-**** ROTARY ENCODER ****
-***********************/
-void rotaryEncoder(void)
+/*******************************************
+**** ROTARY ENCODER for VOLUME FUNCTION ****
+*******************************************/
+void volumeEncoder(void)
 {
-	unsigned char temp = 0;
+	signed char temp = 0;				// zadaljitelno signed char!!! ima osobenost pri vrashtaneto na rezultat ot funkciq!!!
 	temp = rotaryEncoderNikBarzakov();
 	if(0==temp)
 	{
 		// do nothing, encoder havn't been rotated  // ne e bil zavartan
 	}
-	else if(1==temp)
+	else if(-1==temp)
 	{
 		// encoder is decrement
-//		volumeIndex = volumeIndex - temp;	// pomesteno v else
 		if(volumeIndex < (VOLUME_MIN + 1))
 		{
 			volumeIndex = VOLUME_MIN;
 		}
 		else
 		{
-			volumeIndex = volumeIndex - temp;		
+			volumeIndex += temp;	// sabirane s polojitelno chislo, kratak zapis na: volumeIndex = volumeIndex + temp;
 		}
-		PGA2310_Volume_Update(volumeValue[volumeIndex], volumeValue[volumeIndex]);
-		LCD_COMMAND(LCD_SELECT_4ROW);	// select row 3
-		LCD_DATA_STRING("Volume: ");	// 20 symbols
-		LCD_DATA_INT(volumeIndex);		// 20 symbols
+		volumeUpdate();
 	}
-	else if(2==temp)
+	else if(1==temp)
 	{
 		// encoder is increment
-//		volumeIndex = volumeIndex + temp;	// pomesteno v else
 		if (volumeIndex > (VOLUME_MAX - 2))
 		{
 			volumeIndex = (VOLUME_MAX - 1);
 		}
 		else
 		{
-			volumeIndex = volumeIndex + temp;
+			volumeIndex += temp;	// sabirane s polojitelno chislo, kratak zapis na: volumeIndex = volumeIndex + temp;
 		}
-		PGA2310_Volume_Update(volumeValue[volumeIndex], volumeValue[volumeIndex]);
-		LCD_COMMAND(LCD_SELECT_4ROW);	// select row 3
-		LCD_DATA_STRING("Volume: ");	// 20 symbols
-		LCD_DATA_INT(volumeIndex);		// 20 symbols
+		volumeUpdate();
 	}
 }
 
-
+/*************************************
+**** VOLUME UPDATE and LCD UPDATE ****
+*************************************/
+void volumeUpdate(void)
+{
+	PGA2310_Volume_Update(volumeValue[volumeIndex], volumeValue[volumeIndex]);	// update volume value on all channels
+	LCD_COMMAND(LCD_SELECT_4ROW);	// select row 3								// and next is update volume lcd information
+//		LCD_DATA_STRING("Volume: ");	// 20 symbols
+	if (volumeIndex > 9)
+	{
+		LCD_DATA_STRING("Volume: ");	// 20 symbols
+	}
+	else
+	{
+		LCD_DATA_STRING("Volume: 0");	// 20 symbols			
+	}
+	LCD_DATA_INT(volumeIndex);		// 20 symbols
+}
 /********************************************************************************************
 ************************************* END OF FUNCTIONS **************************************
 ********************************************************************************************/
@@ -476,30 +500,55 @@ void buttons_press()
 //	char test = 0;
 //	unsigned char pgaVolumeLeft, pgaVolumeRight;
 //	pgaVolumeLeft = pgaVolumeRight = 0b00001111;
+/*
+struct flagStatus	 // bit fields from struct
+{
+	unsigned int flagPower;//	: 1;	// bit0: '0' = Power OFF, '1' = Power ON	// ne sa inicializirani
+	unsigned int flagMute;//	: 1;	// bit1: '0' = Mute OFF, '1' = Mute ON		// ne sa inicializirani
+} fSB, *flagStatusBits;
+*/
+	flagStatusBits = &fSB;
+	flagStatusBits->flagPower=0;	// inicializirane s nuli, no nai veroqtno poradi tova che e globalna stru
+	flagStatusBits->flagMute=0;		// inicializirane
 
+/*
+// DEBUG
+		LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
+		LCD_CLEAR_CONTAIN();						// clear all contain on display
+		LCD_COMMAND(LCD_ON);						// LCD ON without CURSOR
+
+		LCD_COMMAND(LCD_SELECT_3ROW);	// select row 3
+		LCD_DATA_STRING("flagPower = ");	// 20 symbols
+		LCD_DATA_INT(flagStatusBits->flagPower);		// 20 symbols
+		LCD_COMMAND(LCD_SELECT_4ROW);	// select row 3
+		LCD_DATA_STRING("flagMute = ");	// 20 symbols
+		LCD_DATA_INT(flagStatusBits->flagMute);		// 20 symbols
+	_delay_ms(2000);
+*/
 	while(1)
 	{
-		if(BUTTON_ON_OFF_low() && flagStatusBits->flagPower == 0)	// obj ptr flagStatusBtnRegister from struct flagStatusBtnOnOff
+		if(BUTTON_ON_OFF_low() && flagStatusBits->flagPower == 0)//fSB.flagPower == 0)//flagStatusBits->flagPower == 0)	// obj ptr flagStatusBtnRegister from struct flagStatusBtnOnOff
 		{
 			flagStatusBits->flagPower = 1;			// filter za buton ON
 			ampliferOn();
 			_delay_ms(1000);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
 		}
-		else if(BUTTON_ON_OFF_low() && flagStatusBits->flagPower == 1)
+		else if(BUTTON_ON_OFF_low() && flagStatusBits->flagPower == 1)//fSB.flagPower == 1)//flagStatusBits->flagPower == 1)
 		{
 			flagStatusBits->flagPower = 0;			// filter za buton OFF
 			ampliferOff();
 			_delay_ms(500);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
 		}
-		else if(BUTTON_ESC_low() && flagStatusBits->flagPower == 1)
+		else if(BUTTON_ESC_low() && flagStatusBits->flagPower == 1)//fSB.flagPower == 1)//flagStatusBits->flagPower == 1)
 		{
 //			LCD_DATA_STRING("PRESSED BTN ESCAPE  ");	// 20 symbols
 //			LCD_COMMAND(LCD_ON);
+			LCD_CLEAR_CONTAIN();
 			_delay_ms(500);
 //			volumeUp();
 //			_delay_ms(200);
 		}
-		else if(BUTTON_ENCODER_low() && flagStatusBits->flagPower == 1)
+		else if(BUTTON_ENCODER_low() && flagStatusBits->flagPower == 1)//fSB.flagPower == 1)//flagStatusBits->flagPower == 1)
 		{
 //			LCD_DATA_STRING("PRESSED BTN ENCODER ");	// 20 symbols
 //			LCD_COMMAND(LCD_ON);	// LCD_COMMAND(LCD_OFF);
@@ -508,30 +557,33 @@ void buttons_press()
 //			_delay_ms(200);
 
 		}
-		else if(BUTTON_ESC_low() && flagStatusBits->flagPower == 0)
+		else if(BUTTON_ESC_low() && flagStatusBits->flagPower == 0)//fSB.flagPower == 0)//flagStatusBits->flagPower == 0)
 		{
-			LCD_CLEAR_CONTAIN();
+//			LCD_CLEAR_CONTAIN();	// kogato e izkliuchen
 //			LCD_COMMAND(LCD_ON);
 			_delay_ms(500);
 //			setupMode();
 //			_delay_ms(1000);
 		}
-		else if(BUTTON_ENCODER_low() && flagStatusBits->flagPower == 0)
+		else if(BUTTON_ENCODER_low() && flagStatusBits->flagPower == 0)//fSB.flagPower == 0)//flagStatusBits->flagPower == 0)
 		{
 //			LCD_COMMAND(LCD_OFF);
 			_delay_ms(500);
 //			about();
 //			_delay_ms(1000);
 		}
-		else //if(flagStatusBits->flagPower == 0)	// zashto ne raboti encoder-a kogato se proverqva bita flagPower?
+		else if(flagStatusBits->flagPower == 1)//fSB.flagPower == 1)//flagStatusBits->flagPower == 1)	// zashto ne raboti encoder-a kogato se proverqva bita flagPower?
 		{
-			rotaryEncoder();	// v momenta na zavartane na encodera flaga stava nula flagStatusBits->flagPower = 0, zashto ???
+			volumeEncoder();	// v momenta na zavartane na encodera flaga stava nula flagStatusBits->flagPower = 0, zashto ???
 		}						// za tova Power Button srabotva ot vtoriq pat kato za Power OFF
-/*		else if(flagStatusBits->flagPower == 1)	// zashto ne raboti encoder-a kogato se proverqva bita flagPower?
+/*		else if(flagStatusBits->flagPower == 0)	// zashto ne raboti encoder-a kogato se proverqva bita flagPower?
 		{
 			rotaryEncoder();	// v momenta na zavartane na encodera flaga stava nula flagStatusBits->flagPower = 0, zashto ???
 		}
 */
+		else
+		{
+		}
 
 
 
