@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: EEPROM (24C64) with I2C Interface               *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: 24c64.c, v0.02, 26.10.2015                    *************
+*** FILE NAME: 24c64.c, v0.03, 29.11.2015                    *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one I2C / TWI  *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -14,9 +14,9 @@
 
 #include <avr/eeprom.h>		// working
 
-#include "utility.h"		// byte is custom type
 #include "i2c_twi.h"
 #include "24c64.h"
+#include "utility.h"		// using for debug and others, byte is custom defined type
 
 /********************************************************************************************
 ************************************ START OF FUNCTIONS *************************************

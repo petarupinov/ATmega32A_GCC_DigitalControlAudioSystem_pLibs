@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: SPI / Serial Peripheral Interface               *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: spi.c, v0.02, 26.10.2015                      *************
+*** FILE NAME: spi.c, v0.03, 29.11.2015                      *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one SPI        *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -12,6 +12,7 @@
 #include <util/delay.h>
 #include <stdlib.h>			// itoa() - function
 #include "spi.h"
+#include "utility.h"		// using for debug and others
 
 /********************************************************************************************
 ************************************ START OF FUNCTIONS *************************************

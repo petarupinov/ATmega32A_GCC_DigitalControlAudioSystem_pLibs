@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: I2C / IIC / ATmel Two Wire Interface            *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: i2c_twi.h, v0.01, 18.10.2015                  *************
+*** FILE NAME: i2c_twi.h, v0.02, 29.11.2015                  *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one I2C / TWI  *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************

@@ -32,8 +32,10 @@
 ;;**18. Edit on date 25.11.2015 - added relay_74hc595.h and .c and relay functions ********;;
 ;;**19. Edit on date 28.11.2015 - rename rotaryEncoder() -> volumeEncoder() ***************;;
 ;;**20. Edit on date 28.11.2015 - update lib rotary encoder.h and .c files ****************;;
+;;**21. Edit on date 28.11.2015 - update lib uart.c and add uart support ******************;;
+;;**22. Edit on date 29.11.2015 - update all libs and add debug support *******************;;
 ;;*****************************************************************************************;;
-;;** Used library version: _Soft_Library_Pesho_v0.06 is last but isn't actual *************;;
+;;** Used library version: _Soft_Library_Pesho_v0.07 **************************************;;
 ;;*****************************************************************************************;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
@@ -54,22 +56,26 @@
 
 // Add C files to project: "ir_sirc.c", "rotation_encoder.c", "rtc.c", "spi.c", "utility.c"
 
-#include "_Soft_Library_Pesho_/24c64.h"
-#include "_Soft_Library_Pesho_/ds18x20.h"
-#include "_Soft_Library_Pesho_/i2c_twi.h"
-#include "_Soft_Library_Pesho_/ir_sirc.h"
-#include "_Soft_Library_Pesho_/lcd_hd44780_74hc595.h"
-#include "_Soft_Library_Pesho_/pga2310.h"
-#include "_Soft_Library_Pesho_/relay_74hc595.h"
-#include "_Soft_Library_Pesho_/rotation_encoder.h" // <---o
-#include "_Soft_Library_Pesho_/rtc.h"
-#include "_Soft_Library_Pesho_/spi.h"
-#include "_Soft_Library_Pesho_/uart.h"	// <--------------o
-#include "_Soft_Library_Pesho_/utility.h"
+#include "_Soft_Library_Pesho_/24c64.h"					// not using
+#include "_Soft_Library_Pesho_/ds18x20.h"				// not using
+#include "_Soft_Library_Pesho_/i2c_twi.h"				// using
+#include "_Soft_Library_Pesho_/ir_sirc.h"				// not using
+#include "_Soft_Library_Pesho_/lcd_hd44780_74hc595.h"	// using
+#include "_Soft_Library_Pesho_/pga2310.h"				// using
+#include "_Soft_Library_Pesho_/relay_74hc595.h"			// using
+#include "_Soft_Library_Pesho_/rotation_encoder.h"		// using
+#include "_Soft_Library_Pesho_/rtc.h"					// not using
+#include "_Soft_Library_Pesho_/spi.h"					// using
+#include "_Soft_Library_Pesho_/uart.h"					// using
+#include "_Soft_Library_Pesho_/utility.h"				// using
 
 /*********************************************
 ** VARIABLES, CONSTANTS, ARRAYS, STRUCTURES **
 *********************************************/
+
+//#define DEBUG_SETTING	1
+//#define DEBUG_INFO	1
+//#define DEBUG_ERROR	1
 
 typedef int bool;
 #define TRUE 1
@@ -177,6 +183,7 @@ void ampliferOn(void);
 void ampliferOff(void);
 void volumeEncoder(void);
 void volumeUpdate(void);
+void commonEncoder(void);
 
 
 /********************************************************************************************
@@ -256,6 +263,11 @@ void timer2_off(void)	// Timer2 Off
 ********************/
 void ampliferOn(void)
 {
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Amplifer is ON\r\n");
+//	transmitUartInt(volumeIndex);		// uart debug information string 
+#else
+#endif
 	LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
 
 	LCD_CLEAR_CONTAIN();						// clear all contain on display
@@ -317,7 +329,11 @@ void ampliferOn(void)
 *********************/
 void ampliferOff(void)
 {
-//	LCD_CLEAR_CONTAIN();
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Amplifer is OFF\r\n");
+//	transmitUartInt(volumeIndex);		// uart debug information string 
+#else
+#endif
 
 	LCD_COMMAND(LCD_SELECT_1ROW);				// select row 1
 	LCD_DATA_STRING("    Amplifer Off    ");	// 20 symbols
@@ -404,7 +420,6 @@ void volumeEncoder(void)
 		volumeUpdate();
 	}
 }
-
 /*************************************
 **** VOLUME UPDATE and LCD UPDATE ****
 *************************************/
@@ -419,10 +434,90 @@ void volumeUpdate(void)
 	}
 	else
 	{
-		LCD_DATA_STRING("Volume: 0");	// 20 symbols			
+		LCD_DATA_STRING("Volume: 0");	// 20 symbols
 	}
-	LCD_DATA_INT(volumeIndex);		// 20 symbols
+	LCD_DATA_INT(volumeIndex);			// 20 symbols
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Volume: ");		// uart debug information string
+	transmitUartInt(volumeIndex);		// uart debug information string 
+	transmitUartString("\r\n");			// uart debug information string
+#else
+#endif
 }
+
+/**********************************************
+**** ROTARY ENCODER for ALL OTHER FUNCTION ****
+**********************************************/
+void commonEncoder(void)	// not finished
+{
+	static signed char saveValue = 0;	// zadaljitelno signed char!!! ima osobenost pri vrashtaneto na rezultat ot funkciq!!!
+	signed char temp = 0;				// zadaljitelno signed char!!! ima osobenost pri vrashtaneto na rezultat ot funkciq!!!
+	temp = rotaryEncoderNikBarzakov();
+	if(0==temp)
+	{
+		// do nothing, encoder havn't been rotated  // ne e bil zavartan
+	}
+	else if(-1==temp)
+	{
+		// encoder is decrement
+		if(saveValue < -127)
+		{
+			saveValue = 127;	// SIGNED CHAR MIN VALUE = -127
+		}
+		else
+		{
+			saveValue += temp;	// sabirane s polojitelno chislo, kratak zapis na: volumeIndex = volumeIndex + temp;
+		}
+// LCD PRINT VALUE
+	LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
+	LCD_COMMAND(LCD_ON);						// LCD ON without CURSOR
+		LCD_COMMAND(LCD_SELECT_4ROW);	// select row 3								// and next is update volume lcd information
+		if (saveValue > 99)
+		{
+			LCD_DATA_STRING("Volume: ");	// 20 symbols
+		}
+		else if (saveValue > 9)
+		{
+			LCD_DATA_STRING("Volume: 0");	// 20 symbols
+		}
+		else
+		{
+			LCD_DATA_STRING("Volume: 00");	// 20 symbols			
+		}
+		LCD_DATA_INT(saveValue);		// 20 symbols
+	}
+	else if(1==temp)
+	{
+		// encoder is increment
+		if (saveValue > 128)
+		{
+			saveValue = 128;	// SIGNED CHAR MAX VALUE = +128
+		}
+		else
+		{
+			saveValue += temp;	// sabirane s polojitelno chislo, kratak zapis na: volumeIndex = volumeIndex + temp;
+		}
+// LCD PRINT VALUE
+// LCD PRINT VALUE
+	LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
+	LCD_COMMAND(LCD_ON);						// LCD ON without CURSOR
+		LCD_COMMAND(LCD_SELECT_4ROW);	// select row 3								// and next is update volume lcd information
+		if (saveValue > 99)
+		{
+			LCD_DATA_STRING("Volume: ");	// 20 symbols
+		}
+		else if (saveValue > 9)
+		{
+			LCD_DATA_STRING("Volume: 0");	// 20 symbols
+		}
+		else
+		{
+			LCD_DATA_STRING("Volume: 00");	// 20 symbols			
+		}
+		LCD_DATA_INT(saveValue);		// 20 symbols
+	}
+}
+
 /********************************************************************************************
 ************************************* END OF FUNCTIONS **************************************
 ********************************************************************************************/
@@ -493,6 +588,7 @@ void init_all()
 	pga2310_init();		// SPI init and reset all (U6, U7, U8) PGA2310 volume values to null
 	relays_in_init();	// ?? nujno li e ?
 	relays_out_init();	// ?? nujno li e ?
+	uart_init();
 }
 
 void buttons_press()
@@ -576,11 +672,10 @@ struct flagStatus	 // bit fields from struct
 		{
 			volumeEncoder();	// v momenta na zavartane na encodera flaga stava nula flagStatusBits->flagPower = 0, zashto ???
 		}						// za tova Power Button srabotva ot vtoriq pat kato za Power OFF
-/*		else if(flagStatusBits->flagPower == 0)	// zashto ne raboti encoder-a kogato se proverqva bita flagPower?
+		else if(flagStatusBits->flagPower == 0)	// zashto ne raboti encoder-a kogato se proverqva bita flagPower?
 		{
-			rotaryEncoder();	// v momenta na zavartane na encodera flaga stava nula flagStatusBits->flagPower = 0, zashto ???
+			commonEncoder();	// v momenta na zavartane na encodera flaga stava nula flagStatusBits->flagPower = 0, zashto ???
 		}
-*/
 		else
 		{
 		}

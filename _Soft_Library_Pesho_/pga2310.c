@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: PGA2310 / PGA2311 with SPI (Serial Peripheral Interface) ****
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: pga2310.c, v0.03, 26.10.2015                  *************
+*** FILE NAME: pga2310.c, v0.04, 29.11.2015                  *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one SPI        *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -13,6 +13,7 @@
 #include <stdlib.h>			// itoa() - function
 #include "spi.h"
 #include "pga2310.h"
+#include "utility.h"		// using for debug and others
 
 /********************************************************************************************
 ************************************ START OF FUNCTIONS *************************************

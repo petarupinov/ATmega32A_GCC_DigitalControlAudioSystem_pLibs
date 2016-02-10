@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: UTILITY                                         *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: utility.h, v0.02, 18.11.2015                  *************
+*** FILE NAME: utility.h, v0.03, 29.11.2015                  *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -23,6 +23,10 @@
 /***********************************************************
 ** DEFINITION OF CUSTOM TYPES BYTE, WORD, DWORD (, QWORD) **
 ***********************************************************/
+
+#define DEBUG_SETTING	1	// ENABLE/DISABLE DEBUG SETTINGS INFORMATION with comment or uncomment this row
+#define DEBUG_INFO		1	// ENABLE/DISABLE DEBUG STATUS INFORMATION with comment or uncomment this row
+#define DEBUG_ERROR		1	// ENABLE/DISABLE DEBUG ERROR INFORMATION with comment or uncomment this row
 
 //typedef unsigned char  byte;	// 1 BYTE
 //typedef unsigned short word;	// 2 BYTES	// word == dword ???

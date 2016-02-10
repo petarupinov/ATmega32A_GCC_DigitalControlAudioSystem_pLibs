@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: SIRC - SONY INFRARED DECODER (TSOP2240 and more) ************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: ir_sirc.c, v0.01, 18.10.2015                  *************
+*** FILE NAME: ir_sirc.c, v0.02, 29.11.2015                  *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -11,8 +11,8 @@
 //#include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdlib.h>			// itoa() - function
-#include "utility.h"		// byte is custom type
 #include "ir_sirc.h"
+#include "utility.h"		// using for debug and others, byte is custom defined type
 
 /********************************************************************************************
 ************************************ START OF FUNCTIONS *************************************

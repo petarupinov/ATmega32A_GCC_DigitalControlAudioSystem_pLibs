@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: UART/USART (Transmit/Receive)                   *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: uart.c, v0.02, 27.10.2015                     *************
+*** FILE NAME: uart.c, v0.03, 29.11.2015                     *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one UART/USART *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -12,6 +12,8 @@
 //#include <util/delay.h>
 #include <stdlib.h>			// utoa(), itoa(), ultoa(), ltoa(), - function
 #include "uart.h"
+#include "lcd_hd44780_74hc595.h"	// print using MCU Frequency
+#include "utility.h"		// using for debug and others
 
 /********************************************************************************************
 ************************************ START OF FUNCTIONS *************************************
@@ -31,16 +33,66 @@ enum
 *********************************/
 void uart_init()
 {
+	switch(F_CPU)
+	{
+		case 16000000UL:
+		{
+			UBRRL = 103;	// Baudrate: 9600; (Error = 0.2%; 16MHz)
+			UBRRH = 0;
+			break;
+		}
+		case 8000000UL:
+		{
+			UBRRL = 51;		// Baudrate: 9600; (Error = 0.2%; 8MHz)
+			UBRRH = 0;
+			break;
+		}
+		case 4000000UL:
+		{
+			UBRRL = 25;		// Baudrate: 9600; (Error = 0.2%; 4MHz)
+			UBRRH = 0;		
+			break;
+		}
+		case 2000000UL:
+		{
+			UBRRL = 12;		// Baudrate: 9600; (Error = 0.2%; 2MHz)
+			UBRRH = 0;
+			break;
+		}
+		case 1000000UL:
+		{
+			UBRRL = 6;		// Baudrate: 9600; (Error = -7.0%; 1MHz)
+			UBRRH = 0;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+#ifdef DEBUG_SETTING
+	LCD_COMMAND(LCD_ON);						// LCD ON without CURSOR
+	LCD_COMMAND(LCD_SELECT_4ROW);	// select row 2								// and next is update volume lcd information
+	LCD_DATA_STRING("Freq: ");		// 20 symbols			
+	LCD_DATA_ULONG(F_CPU);			// 20 symbols
+	LCD_DATA_STRING(" MHz");		// 20 symbols
+#else
+#endif
+//	debug_print();
 
 	// Razpoznavane na baudrate (skorost): 1. Izprashta se byte. 2. Poluchava se byte. 3. Sravnqva se polucheniq byte == izprateniq byte. // This is LOOP TX->RX
 	// 4. Ako byte pri sravnqvaneto e edin i sasht to skorostta e izbranata v momenta, ako byte e razlichen - da se probva sas sledvashta baudrate.
 
-	UBRRL = 103;			// Baudrate: 9600; Parity: 0; StopBits: 1 (Error = 0.2%; 16MHz)
-	UBRRH = 0;
-
 	UCSRC = 0b10000110;		// URSEL = 1 (Accessing to UBRRH or UCSRC, is read as zero when reading UBRRH. The URSEL must be zero when writing the UBRRH.); UMSEL = 0 (Asynchronous Operation); UPM1 = 0, UPM0 = 0 (Parity Mode Disabled); USBS = 0 (1-Stop Bit); UCSZ2 = 0, UCSZ1 = 1, UCSZ0 = 1 (8-DataBits); UCPOL = 0 Polarity TX & RX (Rising XCK Edge -> Transmitted Data Changed (Output of TxDPin), Falling XCK Edge -> Received Data Sampled (Input on RxDPin))
-	UCSRB = 0b10011000;		// TXEN,RXEN,RXCIE					// Enable Uart/Usart TX and RX
+//	UCSRB = 0b10011000;		// Enable TXEN,RXEN,RXCIE	// Enable Uart/Usart TX and RX
+	UCSRB = 0b00001000;		// Enable only TXEN			// Enable Uart/Usart only TX
 	UDR = 0b00000000;		// INITIALIZATION NULL OF UART DATA
+
+	transmitUartString("\r\n");
+#ifdef DEBUG_SETTING
+	transmitUartString("[UART Serial Port Settings] Baud rate: 9600, Data bits: 8 bits, Stop bits: 1 bit, Parity: None, Flow control: None or XON/XOFF\r\n");
+#else
+#endif
 }
 
 /*********************************

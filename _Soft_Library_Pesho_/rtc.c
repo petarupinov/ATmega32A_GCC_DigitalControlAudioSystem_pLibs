@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: Real Time Clock (DS1307) with I2C Interface     *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: rtc.c, v0.02, 26.10.2015                      *************
+*** FILE NAME: rtc.c, v0.03, 29.11.2015                      *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers with one I2C / TWI  *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -12,6 +12,7 @@
 #include <util/delay.h>
 #include <stdlib.h>			// itoa() - function
 #include "i2c_twi.h"		// Using for I2C communication to DS1307 !!!
+#include "utility.h"		// using for debug and others
 
 /****************************************
 ** DEFINITION RTC DS1307 CONSTANT DAYS **

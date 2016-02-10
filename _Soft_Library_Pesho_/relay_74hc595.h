@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: RELAYS + SHIFT REGISTER 74HC595                 *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: relay_74hc595.h, v0.01, 25.11.2015            *************
+*** FILE NAME: relay_74hc595.h, v0.02, 29.11.2015            *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************

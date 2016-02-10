@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: RELAY + SHIFT REGISTER 74HC595                  *************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: relay_74hc595.c, v0.01, 25.11.2015            *************
+*** FILE NAME: relay_74hc595.c, v0.02, 29.11.2015            *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -12,6 +12,7 @@
 #include <util/delay.h>
 #include <stdlib.h>			// itoa() - function
 #include "relay_74hc595.h"
+#include "utility.h"		// using for debug and others
 
 /********************************************************************************************
 ************************************ START OF FUNCTIONS *************************************

@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: LCD DISPLAY HITACHI HD44780 + SHIFT REGISTER 74HC595 ********
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: lcd_hd44780_74hc595.c, v0.02, 22.11.2015      *************
+*** FILE NAME: lcd_hd44780_74hc595.c, v0.03, 29.11.2015      *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -10,8 +10,9 @@
 #include <avr/io.h>
 //#include <avr/interrupt.h>
 #include <util/delay.h>
-#include <stdlib.h>			// itoa() - function
+#include <stdlib.h>			// itoa() - function 
 #include "lcd_hd44780_74hc595.h"
+#include "utility.h"		// using for debug and others
 
 /********************************************************************************************
 ************************************ START OF FUNCTIONS *************************************
@@ -303,11 +304,41 @@ void LCD_DATA_STRING(char *data)
 /******************************************************
 ** WRITE/TRANSMIT MORE DATA INT BYTES TO LCD DISPLAY **
 ******************************************************/
+// USE THIS: lcdDataUInt( (unsigned int)k + 1 );
+void LCD_DATA_UINT(unsigned int data)		// void lcdDataUInt(const unsigned int data)
+{
+	char buffer[10];
+	LCD_DATA_STRING(utoa(data, buffer, 10));	// 10 -> DECIMAL
+}
+
+/******************************************************
+** WRITE/TRANSMIT MORE DATA INT BYTES TO LCD DISPLAY **
+******************************************************/
 // USE THIS: lcdDataInt( (int)k + 1 );
 void LCD_DATA_INT(int data)		// void lcdDataInt(const int data)
 {
 	char buffer[10];
 	LCD_DATA_STRING(itoa(data, buffer, 10));	// 10 -> DECIMAL
+}
+
+/*******************************************************
+** WRITE/TRANSMIT MORE DATA LONG BYTES TO LCD DISPLAY **
+*******************************************************/
+// USE THIS: lcdDataLong( (long)k + 1 );
+void LCD_DATA_LONG(long data)		// void lcdDataLong(const long data)
+{
+	char buffer[10];
+	LCD_DATA_STRING(ltoa(data, buffer, 10));	// 10 -> DECIMAL
+}
+
+/****************************************************************
+** WRITE/TRANSMIT MORE DATA UNSIGNED LONG BYTES TO LCD DISPLAY **
+****************************************************************/
+// USE THIS: lcdDataULong( (unsigned long)k + 1 );
+void LCD_DATA_ULONG(unsigned long data)		// void lcdDataULong(const unsigned long data)
+{
+	char buffer[10];
+	LCD_DATA_STRING(ultoa(data, buffer, 10));	// 10 -> DECIMAL
 }
 
 /****************************************************

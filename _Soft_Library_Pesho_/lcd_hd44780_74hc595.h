@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: LCD DISPLAY HITACHI HD44780 + SHIFT REGISTER 74HC595 ********
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: lcd_hd44780_74hc595.h, v0.02, 22.11.2015      *************
+*** FILE NAME: lcd_hd44780_74hc595.h, v0.03, 29.11.2015      *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -309,7 +309,10 @@ void LCD_EXECUTE_DATA_LAST();
 
 void LCD_COMMAND(unsigned char command);
 void LCD_DATA_STRING(char *data);
+void LCD_DATA_UINT(unsigned int data);
 void LCD_DATA_INT(int data);
+void LCD_DATA_LONG(long data);
+void LCD_DATA_ULONG(unsigned long data);
 
 void LCD_CGRAM_CUSTOM_SYMBOLS();	// store new generated chars from array 
 
