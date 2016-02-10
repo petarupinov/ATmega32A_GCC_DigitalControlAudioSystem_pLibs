@@ -24,7 +24,7 @@
 ** DEFINITION OF CUSTOM TYPES BYTE, WORD, DWORD (, QWORD) **
 ***********************************************************/
 
-#define FIRMWARE_VERSION 24
+#define FIRMWARE_VERSION 26
 
 #define DEBUG_SETTING	1	// ENABLE/DISABLE DEBUG SETTINGS INFORMATION with comment or uncomment this row
 #define DEBUG_INFO		1	// ENABLE/DISABLE DEBUG STATUS INFORMATION with comment or uncomment this row

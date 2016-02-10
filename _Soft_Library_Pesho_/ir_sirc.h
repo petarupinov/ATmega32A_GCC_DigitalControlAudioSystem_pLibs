@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: SIRC - SONY INFRARED DECODER (TSOP2240 and more) ************
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: ir_sirc.h, v0.02, 29.11.2015                  *************
+*** FILE NAME: ir_sirc.h, v0.03, 04.12.2015                  *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -26,7 +26,10 @@
 
 unsigned char irAddress;
 unsigned char irCommand;
-unsigned char irExtened;
+unsigned char irExtended;
+
+//extern flagStatusBits->flagPower=0;	// inicializirane s nuli, no nai veroqtno poradi tova che e globalna stru
+
 
 /****************************************************
 ** DEFINITION SONY REMOTE CONTROL DEVICE CONSTANTS **
@@ -70,10 +73,9 @@ unsigned char irExtened;
 /********************************************************************************************
 ****************************** START DECLARATION OF FUNCTIONS *******************************
 ********************************************************************************************/
-void IR_DECODER();		// funkciq za razpoznavane na signal po IR
-void GetSIRC12();		// funkciq za dekodirane na 12-bit SIRC
-void GetSIRC15();		// funkciq za dekodirane na 15-bit SIRC
-void GetSIRC20();		// funkciq za dekodirane na 20-bit SIRC
+void GetSIRC12(void);		// funkciq za dekodirane na 12-bit SIRC
+void GetSIRC15(void);		// funkciq za dekodirane na 15-bit SIRC
+void GetSIRC20(void);		// funkciq za dekodirane na 20-bit SIRC
 
 /********************************************************************************************
 ************************************* END OF FUNCTIONS **************************************

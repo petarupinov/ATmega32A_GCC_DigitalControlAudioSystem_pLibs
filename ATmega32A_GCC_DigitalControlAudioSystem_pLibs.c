@@ -36,6 +36,8 @@
 ;;**22. Edit on date 29.11.2015 - update all libs and add debug support *******************;;
 ;;**23. Edit on date 29.11.2015 - adding and formating debug messages *********************;;
 ;;**24. Edit on date 29.11.2015 - adding about and firmware version ***********************;;
+;;**25. Edit on date 29.11.2015 - adding fan support **************************************;;
+;;**26. Edit on date 04.12.2015 - adding ir support ***************************************;;
 ;;*****************************************************************************************;;
 ;;** Used library version: _Soft_Library_Pesho_v0.07 **************************************;;
 ;;*****************************************************************************************;;
@@ -46,7 +48,7 @@
 *************************************/
 
 #include <avr/io.h>
-#include <avr/interrupt.h>
+#include <avr/interrupt.h>	// sei();
 #include <util/delay.h>
 #include <stdlib.h>			// itoa() - function
 //#include <stdbool.h>		// type boolean true/false
@@ -137,6 +139,12 @@ unsigned char volumeValue [VOLUME_MAX] = { 0x00, 0x28, 0x32, 0x3C, 0x46, 0x50, 0
 //       values of volume  ->	0,    40,   50,   60,   70,   80,   90,   100,  110,  120,  130,  140,  150,  160,  170,  180,  190,  200,  210,  215	<-	values of volume
 // index of values of volume    0      1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19
 
+// temper sensor
+unsigned char i=0;				// counter cycle
+unsigned char store [10] = {};	// data bytes massive
+unsigned char byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9; // bytes ot temperaturen sensor
+
+
 /********************************************************************************************
 *********************************** START OF DEFINISIONS ************************************
 ********************************************************************************************/
@@ -164,6 +172,15 @@ unsigned char volumeValue [VOLUME_MAX] = { 0x00, 0x28, 0x32, 0x3C, 0x46, 0x50, 0
 #define LED_low_DISPLAYLED_high()	(LED_DISPLAYLED_PORT&=~_BV(LED_DISPLAYLED_PIN))				// LED_DISPLAYLED_PORT = (LED_DISPLAYLED_PORT) & (~_BV(LED_DISPLAYLED_PIN))
 #define LED_high_DISPLAYLED_low()	(LED_DISPLAYLED_PORT|=_BV(LED_DISPLAYLED_PIN))				// LED_DISPLAYLED_PORT = (LED_DISPLAYLED_PORT) | (_BV(LED_DISPLAYLED_PIN))
 
+/**************************
+**** DEFINITION OF FAN ****
+**************************/
+#define FAN_PIN  PD5
+#define FAN_PORT PORTD
+
+#define FAN_low()  (FAN_PORT&=~_BV(FAN_PIN))
+#define FAN_high() (FAN_PORT|=_BV(FAN_PIN))
+
 /********************************************************************************************
 ************************************ END OF DEFINISIONS *************************************
 ********************************************************************************************/
@@ -171,16 +188,42 @@ unsigned char volumeValue [VOLUME_MAX] = { 0x00, 0x28, 0x32, 0x3C, 0x46, 0x50, 0
 /********************************************************************************************
 ****************************** START DECLARATION OF FUNCTIONS *******************************
 ********************************************************************************************/
-void port_init(void);
+void port_init(void);			// initialization of all ports and pins
+
+void ext0_intrpt_init(void);	// external interrupt 0 on PD2 - initialization
+void ext0_intrpt_on(void);		// external interrupt 0 on PD2 - ENABLE new IR DETECTION
+void ext0_intrpt_off(void);		// external interrupt 0 on PD2 - DISABLE new IR DETECTION
+void ext1_intrpt_init(void);	// external interrupt 1 on PD3 - initialization
+void ext2_intrpt_init(void);	// external interrupt 2 on PB2 - initialization
+
+void irDecode(void);
+
+
+//void timer0_init();
+void timer1_init(void);
+void timer1_on(void);
+void timer1_on_speed1(void);
+void timer1_off(void);
+void timer2_init(void);
+void FAN_PWM_ON(void);
+void FAN_PWM_SPEED1(void);
+void FAN_PWM_OFF(void);
+
 void timer2_init(void);
 void timer2_on(void);
 void timer2_off(void);
 void init_all(void);
 void ampliferOn(void);
 void ampliferOff(void);
-void volumeEncoder(void);
+void volumeProcess(void);
 void volumeUpdate(void);
 void commonEncoder(void);
+
+void temperature();				// temperature function
+unsigned char oneWireLeft();	// izmervane s temperaturen sensor left
+unsigned char oneWireRight();	// izmervane s temperaturen sensor right
+char temperMeasur(unsigned char byte0, unsigned char byte1, unsigned char byte6, unsigned char byte7);		// presmqtane na temperatur
+void tempDataUartSort(void);	// podrejdane na izhoda z temperatura
 
 
 /********************************************************************************************
@@ -222,6 +265,137 @@ void port_init(void)
 
 }
 
+/*******************************************
+** INITIZLIZATION OF EXTERNAL INTERRUPT 0 **
+*******************************************/
+void ext0_intrpt_init(void)
+{
+	MCUCR = 0b00000010;	// SETUP EXT INT 0, ISC01 = 1, ISC00 = 0: Falling edge on INT0 activates the interrupt; ISC01 = 1, ISC00 = 1: Rising edge on INT0 activates the interrupt;
+
+// IN FUNCTIONS:
+//	GICR   = 0b01000000;	// INT0 = 0: Disable External Interrupt on INT0; INT0 = 1: Enable External Interrupt on INT0;
+//	GIFR   = 0b01000000;	// Clear INT0 flag.
+}
+
+/********************************
+** EXTERNAL INTERRUPT 0 ENABLE **
+********************************/
+void ext0_intrpt_on(void)		// Enable external interrupt 0 (PD0 - ENABLE new IR DETECTION)
+{
+	GICR   = 0b01000000;	// INT0 = 0: Disable External Interrupt on INT0; INT0 = 1: Enable External Interrupt on INT0;
+	GIFR   = 0b01000000;	// Clear INT0 flag.
+}
+
+/*********************************
+** EXTERNAL INTERRUPT 0 DISABLE **
+*********************************/
+void ext0_intrpt_off(void)		// Disable external interrupt 0 (PD0 - DISABLE new IR DETECTION)
+{
+	GICR   = 0b00000000;	// INT0 = 0: Disable External Interrupt on INT0; INT0 = 1: Enable External Interrupt on INT0;
+	GIFR   = 0b01000000;	// Clear INT0 flag.
+}
+
+/*******************************************
+** INITIZLIZATION OF EXTERNAL INTERRUPT 1 **
+*******************************************/
+void ext1_intrpt_init(void)
+{
+}
+
+/*******************************************
+** INITIZLIZATION OF EXTERNAL INTERRUPT 2 **
+*******************************************/
+void ext2_intrpt_init(void)
+{
+//	MCUCSR = 0b00000000;	// SETUP EXT INT 2, ISC2 = 0: Falling edge on INT2 activates the interrupt; ISC2 = 1: Rising edge on INT2 activates the interrupt;
+
+// IN FUNCTIONS:
+//	GICR   = 0b00100000;	// INT2 = 0: Disable External Interrupt on INT2; INT2 = 1: Enable External Interrupt on INT2;
+//	GIFR   = 0b00100000;	// Clear INT2 flag.
+}
+
+/*****************************
+** INITIZLIZATION OF TIMER0 **
+*****************************/
+/*void timer0_init()
+{
+
+    //8-bit timer for measuring delay between IR pulses
+//	TCCR0 = 0b00000011; //0b00000010 = CLK /8 ; //0b00000011 = CLK / 64; //0b00000101 = CLK / 1024
+//	TCNT0 = 0; //reset the timer
+
+
+	// http://extremeelectronics.co.in/avr-tutorials/avr-timers-an-introduction/
+	// http://www.electroons.com/electroons/timer_delay.html
+}*/
+
+/*****************************
+** INITIZLIZATION OF TIMER1 **
+*****************************/
+void timer1_init()
+{
+// http://www.mikroe.com/forum/viewtopic.php?f=72&t=51076
+
+	TIMSK  = 0b00000000;	// maskov registar za prekasvaniq
+	TCNT1H = 0b00000000;
+	TCNT1L = 0b00000000;
+
+// TABLE 16.4, Mode 9
+
+//	TCCR1A = 0b01010001;	// OC1A - PWM, OC1B - Disabled, normal port.
+//	TCCR1B = 0b00010000;
+
+//	TCCR1A = (1 << COM1A1) | (1 << COM1B1) | (1 << WGM10);	//	TCCR1A = 0b10100001; //0b10100001	// nastroika na 2 kanala rejim na rabota na SHIM
+//	TCCR1B = (1 << WGM12)  | (1 << CS12)   | (1 << CS10);  //  TCCR1B = 0b00000101;	// TIMER1 is OFF; 0b00000001 ; nastroika na 2 kanala rejim na rabota na SHIM i preddelitel 8
+							// nastrtoika na SHIM (trqbva da se napravi da moje da se promenq)
+							// regulirane na skorost na dvigatelq FAN i svetodioda LED
+							// CS1: 000 - Timer Stoped;          001 - Timer No Prescaling; 
+							//      010 - Timer Prescalling 8;   011 - Timer Prescalling 64;
+							//      100 - Timer Prescalling 256; 101 - Timer Prescalling 1024.
+
+//	OCR1AH = 200; //90;			// 0   = 0b00000000 (DEC = BIN)	// FAN
+//	OCR1AL = 200; //90;			// 200 = 0b11001000 (DEC = BIN)	// FAN
+
+//	OCR1BH = 100; //20;			// 0   = 0b00000000 (DEC = BIN)	// LED
+//	OCR1BL = 100; //20;			// 200 = 0b11001000 (DEC = BIN)	// LED
+
+//	TIMSK = (1 << OCIE1A);
+}
+void timer1_on_speed1()
+{
+	TCCR1A = 0b10000001;		// 0b10100001 - OC1A,OC1B - PWM;  0b10000001 - OC1A PWM, OC1B - Disabled, normal port.
+	TCCR1B = 0b00010001;
+
+	OCR1AH = 0; // FAN PWM ON
+	OCR1AL = 1; // FAN PWM ON
+
+//	OCR1BH = 0; // LED PWM ON
+//	OCR1BL = 1; // LED PWM ON
+}
+void timer1_off()
+{
+	TCCR1A = 0b00000000;		// DISABLED OCOC1A - PWM, OC1B - Disabled, normal port.
+	TCCR1B = 0b00000000;		// 
+
+	OCR1AH = 0; // FAN PWM OFF
+	OCR1AL = 0; // FAN PWM OFF
+
+//	OCR1BH = 0; // LED PWM OFF
+//	OCR1BL = 0; // LED PWM OFF
+}
+
+/***********************************
+******** DEFINITIONS OF FAN ********
+***********************************/
+void FAN_PWM_SPEED1()
+{
+	timer1_on_speed1();
+}
+void FAN_PWM_OFF()
+{
+	timer1_off();
+}
+
 /*****************************
 ** INITIZLIZATION OF TIMER2 **
 *****************************/
@@ -255,11 +429,168 @@ void timer2_off(void)	// Timer2 Off
 	OCR2 = 0; // FAN PWM OFF
 }
 
+/************************************
+** DEFINITION IR DECODER FUNCTIONS **
+************************************/
+void irDecode(void)
+{
+//	byte byteSS0, byteSS1, byteMM0, byteMM1, byteHH0, byteHH1, byteDD0, byteDD1, byteMont0, byteMont1, byteYY0, byteYY1; // variables for convert DEC to BCD for LCD and UART for Time and Date
+
+	GetSIRC12();
+	if(((irAddress == IR_REMOTE_TV_DEVICE_RM_677A && irCommand == IR_REMOTE_COMMAND_RM_677A_STANDBY) || (irAddress == IR_REMOTE_CAR_DEVICE_RM_X157 && irCommand == IR_REMOTE_COMMAND_RM_X157_OFF)) && flagStatusBits->flagPower == 0)		// IR POWER -> ON
+	{		
+		ampliferOn();
+//		_delay_ms(1000);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
+	}
+	else if(((irAddress == IR_REMOTE_TV_DEVICE_RM_677A && irCommand == IR_REMOTE_COMMAND_RM_677A_STANDBY) || (irAddress == IR_REMOTE_CAR_DEVICE_RM_X157 && irCommand == IR_REMOTE_COMMAND_RM_X157_OFF)) && flagStatusBits->flagPower == 1)	// IR POWER -> OFF
+	{
+		ampliferOff();
+//		flagPower = 0;			// filter za buton OFF
+//		break;
+	}
+	else if(((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_VOLUP)))// && flagStatusBits->flagPower == 1)	// Sony TV & CarAudio IR Remote Device - "VOLUME UP"
+	{	// VOLUME UP
+//		volumeUp();
+//		break;
+	}
+	else if(((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_VOLDN)))// && flagStatusBits->flagPower == 1)	// Sony TV & CarAudio IR Remote Device - "VOLUME DOWN"
+	{	// VOLUME DOWN
+//		volumeDown();
+//		break;
+	}
+/*	else if((((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_ATT)) && mute==0) && flagPower==1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> ON
+	{	// MUTE
+		muteOn();
+		mute = 1;
+//		break;
+	}
+	else if((((irAddress == IR_REMOTE_TV_DEVICE_RM_677A || irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_ATT)) && mute==1) && flagPower==1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> OFF
+	{	// UNMUTE
+		muteOff();
+		mute = 0;
+//		break;
+	}
+	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_SOURCE)) && (flagPower==0 || flagPower==1))						// Sony CarAudio IR Remote Device - "SOURCE"
+	{
+		setClock();
+		_delay_ms(200);	
+	}
+	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_MENU)) && (flagPower==0 || flagPower==1))						// Sony CarAudio IR Remote Device - "MENU"
+	{
+		showClock();
+		_delay_ms(200);	
+	}
+	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_DSPL)) && (flagPower==0 || flagPower==1))						// Sony CarAudio IR Remote Device - "DSPL"
+	{
+		LCD_INIT();
+		LED_high_DISPLAYLED_low();
+		_delay_ms(200);	
+	}
+	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_SCRL)) && (flagPower==0 || flagPower==1))						// Sony CarAudio IR Remote Device - "SCRL" -> TEMPERATURE
+	{
+		temperature();
+		_delay_ms(200);
+	}
+	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_MODE)) && (flagPower==0 || flagPower==1))						// Sony CarAudio IR Remote Device - "MODE"
+	{
+		setupMode();
+		_delay_ms(200);
+//		break;
+	}
+	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_LIST)) && (flagPower==0 || flagPower==1))						// Sony CarAudio IR Remote Device - "LIST"
+	{
+		about();
+		_delay_ms(200);	
+	}
+	else if((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_UP))
+	{
+		if(flagRTC == 1)
+		{
+			// HOURS INCREMENT
+			hours++;
+			if(hours > 23)		// 12, 24?
+			{
+				hours = 0;
+			}
+			LCD_INIT();								// LCD INITIZLIZATION
+			LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);	// select row 1
+			lcdDataString("Hours: ");
+			// lcdDataInt(hours);
+			byteHH0 = ('0'+ (hours>>4));			// convert DEC to BCD Hours
+			byteHH1 = ('0'+ (hours & 0x0F));		// convert DEC to BCD Hours
+			LCD_EXECUTE_DATA_ONE(byteHH0);
+			LCD_EXECUTE_DATA_ONE(byteHH1);
+		}
+		//else if(flagAny)
+		//{
+		//}
+		//else
+		//{}
+	}
+	else if((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_DOWN))
+	{
+		if(flagRTC == 1)
+		{	// HOURS DECREMENT
+			hours--;
+			if(hours < 0)
+			{
+				hours = 23;		// 12, 24?
+			}
+			LCD_INIT();								// LCD INITIZLIZATION
+			LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);	// select row 1
+			lcdDataString("Hours: ");
+			// lcdDataInt(hours);
+			byteHH0 = ('0'+ (hours>>4));			// convert DEC to BCD Hours
+			byteHH1 = ('0'+ (hours & 0x0F));		// convert DEC to BCD Hours
+			LCD_EXECUTE_DATA_ONE(byteHH0);
+			LCD_EXECUTE_DATA_ONE(byteHH1);
+		}
+		//else if(flagAny)
+		//{
+		//}
+		//else
+		//{}
+	}
+	else if((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_ENTER))
+	{	
+		if(flagRTC == 1)
+		{
+			// store variables to to rtc ds1307
+			i2c_start();
+			i2c_write(RTC_DS1307_I2C_ADDRESS_WRITE);	// RTC DS1307 ADDRESS ACCESS WRITE
+			i2c_write(RTC_DS1307_I2C_HOURS);			// HOURS ADDRESS REGISTER ACCESS
+			i2c_write(hours);							// HOURS DATA VALUE
+			i2c_stop();
+*//*
+			i2c_start();
+			i2c_write(RTC_DS1307_I2C_ADDRESS_WRITE);	// RTC DS1307 ADDRESS ACCESS WRITE
+			i2c_write(RTC_DS1307_I2C_MINUTES);			// MINUTES ADDRESS REGISTER ACCESS
+			i2c_write(minutes);							// MINUTES DATA VALUE
+			i2c_stop();
+
+			i2c_start();
+			i2c_write(RTC_DS1307_I2C_ADDRESS_WRITE);	// RTC DS1307 ADDRESS ACCESS WRITE
+			i2c_write(RTC_DS1307_I2C_SECONDS);			// SECONDS ADDRESS REGISTER ACCESS
+			i2c_write(seconds);							// SECONDS DATA VALUE
+			i2c_stop();
+*//*
+			flagRTC = 0;
+		}
+	}
+*/	else
+	{
+		// DO NOTING
+	}
+	_delay_ms(200);
+}
+
 /********************
 **** AMPLIFER ON ****
 ********************/
 void ampliferOn(void)
 {
+	flagStatusBits->flagPower = 1;		// flag for amplifer on
+
 #ifdef DEBUG_INFO
 	transmitUartString("[UART INFO] Amplifer is on\r\n");
 #endif
@@ -275,60 +606,29 @@ void ampliferOn(void)
 	LCD_DATA_STRING("P.UPINOV  P.STOYANOV");	// 20 symbols //	LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
 	LCD_COMMAND(LCD_ON);						// LCD ON without CURSOR
 
-
-// RELAYS POWER, RELAYS INPUT, RELAYS OUTPUT ARE SWITCH ON HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-//	FAN_PWM_SPEED1();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
-//			FAN_high();		// PORTD5 - FAN ON (logic "1")	NON PWM, NON TIMER1
-
-//			volumeLeft = volumeRight = volumeValue [0];	// nulurane na volume control pri vsqko puskane
-
-//	spi_start();
-//	void PGA2310_Volume_Update(unsigned char pgaVolumeLeft, unsigned char pgaVolumeRight)
-
-//	PGA2310_U6_SPI(volumeLeft, volumeRight);
-//	spi_stop();
-
-//	spi_start();
-//	PGA2310_U7_SPI(volumeLeft, volumeRight);
-//	spi_stop();
-
-//	spi_start();
-//	PGA2310_U8_SPI(volumeLeft, volumeRight);
-//	spi_stop();
-
-//	transmitUartString("Amplifer On\r\n");
-//		uart_transmit("<AMPLIFER ON>\r\n", 15);	// "\r\n" - 2 symbols (not 4 symbols)
-
-//	LCD_INIT();								// LCD INITIZLIZATION
-//	LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);	// select row 1
-//		LCD_EXECUTE_DATA(" << AMPLIFER  ON >> ",20);	// char "DATA", int 13 of chars of "DATA"
-//lcdDataString("    Amplifer On");
-//	LCD_EXECUTE_COMMAND(LCD_SELECT_2ROW);	// select row 2
-//	LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
-//			LCD_EXECUTE_COMMAND(LCD_SELECT_3ROW);	// select row 3
-//			LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
-//			LCD_EXECUTE_COMMAND(LCD_SELECT_4ROW);	// select row 4
-//			LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
-//	LCD_EXECUTE_COMMAND(LCD_ON);			// LCD ON without CURSOR
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Fan is on\r\n");
+	transmitUartString("[UART INFO] Fan is always on, it isn't sensitive to temperature, because DS18S20 is disabling\r\n");
+#endif
+	FAN_PWM_SPEED1();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
+//	FAN_high();			// PORTD5 - FAN ON (logic "1")	NON PWM, NON TIMER1
 
 // RELAYS ON
 #ifdef DEBUG_INFO
 	transmitUartString("[UART INFO] Try to switch on relays for power 220V\r\n");		// uart debug information string
 #endif
-	REL_POWER_high();// RELAY POWER ON TRAFs		// PESHO COMMENT 14.08.2015, 21:10
-	_delay_ms(4000);								// PESHO COMMENT 14.08.2015, 21:10
+//	REL_POWER_high();// RELAY POWER ON TRAFs		// PESHO COMMENT 14.08.2015, 21:10
+//	_delay_ms(4000);								// PESHO COMMENT 14.08.2015, 21:10
 #ifdef DEBUG_INFO
 	transmitUartString("[UART INFO] Try to switch on relays in for all 6 channels\r\n");		// uart debug information string
 #endif
-	relays_in1_6ch();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
-	_delay_ms(700);									// PESHO COMMENT 14.08.2015, 21:10
+//	relays_in1_6ch();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+//	_delay_ms(700);									// PESHO COMMENT 14.08.2015, 21:10
 #ifdef DEBUG_INFO
 	transmitUartString("[UART INFO] Try to switch on relays out for all 6 channels\r\n");		// uart debug information string
 #endif
-	relays_out_6ch();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
-
-//			PGA2310_U8_SPI(volumeLeft, volumeRight);	// 'A', 'A', 0b01111110, 0b01111110
+//	relays_out_6ch();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+	_delay_ms(1000);	// izchakvane pri natiskane za vkliuchvane i otpuskane na buton - filtar treptqsht kontakt buton
 }
 
 /*********************
@@ -336,6 +636,8 @@ void ampliferOn(void)
 *********************/
 void ampliferOff(void)
 {
+	flagStatusBits->flagPower = 0;		// flag for amplifer off
+
 	LCD_COMMAND(LCD_SELECT_1ROW);				// select row 1
 	LCD_DATA_STRING("    Amplifer Off    ");	// 20 symbols
 
@@ -347,38 +649,23 @@ void ampliferOff(void)
 #ifdef DEBUG_INFO
 	transmitUartString("[UART INFO] Try to switch off relays out for all 6 channels\r\n");		// uart debug information string
 #endif
-	relays_out_off();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
-	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
+//	relays_out_off();	// RELAYS OUT CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+//	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
 #ifdef DEBUG_INFO
 	transmitUartString("[UART INFO] Try to switch off relays in for all 6 channels\r\n");		// uart debug information string
 #endif
-	relays_in_off();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
-	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
+//	relays_in_off();	// RELAYS IN1 CHANNELS 6	// PESHO COMMENT 14.08.2015, 21:10
+//	_delay_ms(700);								// PESHO COMMENT 14.08.2015, 21:10
 #ifdef DEBUG_INFO
 	transmitUartString("[UART INFO] Try to switch off relays for power 220V\r\n");		// uart debug information string
 #endif
-	REL_POWER_low();// RELAY POWER OFF				// PESHO COMMENT 14.08.2015, 21:10
+//	REL_POWER_low();// RELAY POWER OFF				// PESHO COMMENT 14.08.2015, 21:10
 
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Fan is off\r\n");
+#endif
+	FAN_PWM_OFF();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
 
-//	transmitUartString("Standby\r\n");
-//				uart_transmit("<STANDBY>\r\n", 11);		// "\r\n" - 2 symbols (not 4 symbols)
-
-//	LCD_INIT();								// LCD INITIZLIZATION
-//	LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);	// select row 1
-//lcdDataString("       Standby");
-//				LCD_EXECUTE_DATA(" >>  <STANDBY>   << ",20);		// char "DATA", int 13 of chars of "DATA"
-//				_delay_ms(500);	// izchakvane - migasht efekt
-//				LCD_INIT();								// LCD INITIZLIZATION
-//				_delay_ms(250);	// izchakvane - migasht efekt, natiskane i otpuskane na buton - filtar treptqsht kontakt buton
-//	LCD_EXECUTE_COMMAND(LCD_SELECT_3ROW);	// select row 1
-//lcdDataString("    Amplifer Off");
-//				LCD_EXECUTE_DATA(" >> <IR STANDBY> << ",20);		// char "DATA", int 13 of chars of "DATA"
-//	_delay_ms(500);	//
-
-//	_delay_ms(50);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
-
-//	FAN_PWM_OFF();
-//			LCD_EXECUTE_COMMAND(LCD_OFF);			// LCD OFF
 	LCD_CLEAR_CONTAIN();
 #ifdef DEBUG_INFO
 	transmitUartString("[UART INFO] Display off and status led on\r\n");
@@ -387,25 +674,18 @@ void ampliferOff(void)
 #ifdef DEBUG_INFO
 	transmitUartString("[UART INFO] Amplifer is off\r\n");
 #endif
+
+	_delay_ms(500);	// izchakvane pri natiskane za izkliuchvane i otpuskane na buton - filtar treptqsht kontakt buton
 }
 
-/*
-	if(volumeValue)
-	{
-		pgaVolumeLeft = pgaVolumeRight = volumeValue;
-		PGA2310_Volume_Update(unsigned char pgaVolumeLeft, unsigned char pgaVolumeRight)
-	}
-
-	
-*/
-
-/*******************************************
-**** ROTARY ENCODER for VOLUME FUNCTION ****
-*******************************************/
-void volumeEncoder(void)
+/********************************
+**** VOLUME PROCESS FUNCTION ****
+********************************/
+void volumeProcess(void)
 {
-	signed char temp = 0;				// zadaljitelno signed char!!! ima osobenost pri vrashtaneto na rezultat ot funkciq!!!
+	signed char temp = 0;//, tempEnc = 0, tempRem = 0;				// zadaljitelno signed char!!! ima osobenost pri vrashtaneto na rezultat ot funkciq!!!
 	temp = rotaryEncoderNikBarzakov();
+//	tempRem = remoteVolume();
 	if(0==temp)
 	{
 		// do nothing, encoder havn't been rotated  // ne e bil zavartan
@@ -466,7 +746,7 @@ void volumeUpdate(void)
 **********************************************/
 void commonEncoder(void)	// not finished
 {
-	static signed char saveValue = 0;	// zadaljitelno signed char!!! ima osobenost pri vrashtaneto na rezultat ot funkciq!!!
+	static signed char saveValue = 0;	// zadaljitelno signed char!!! ima osobenost pri vrashtaneto na rezultat ot funkciq!!! static ???
 	signed char temp = 0;				// zadaljitelno signed char!!! ima osobenost pri vrashtaneto na rezultat ot funkciq!!!
 	temp = rotaryEncoderNikBarzakov();
 	if(0==temp)
@@ -513,8 +793,7 @@ void commonEncoder(void)	// not finished
 		{
 			saveValue += temp;	// sabirane s polojitelno chislo, kratak zapis na: volumeIndex = volumeIndex + temp;
 		}
-// LCD PRINT VALUE
-// LCD PRINT VALUE
+
 	LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
 	LCD_COMMAND(LCD_ON);						// LCD ON without CURSOR
 		LCD_COMMAND(LCD_SELECT_4ROW);	// select row 3								// and next is update volume lcd information
@@ -532,6 +811,239 @@ void commonEncoder(void)	// not finished
 		}
 		LCD_DATA_INT(saveValue);		// 20 symbols
 	}
+}
+
+/*****************************
+**** TEMPERATURE FUNCTION ****
+*****************************/
+void temperature()
+{
+//	LED_low_DISPLAYLED_high();
+//	LCD_INIT();								// LCD INITIZLIZATION
+	LCD_COMMAND(LCD_SELECT_1ROW);	// select row 1
+	LCD_DATA_STRING("    TEPERATURE    ");		//
+	LCD_COMMAND(LCD_SELECT_2ROW);	// select row 2
+	LCD_DATA_STRING("LEFT  SENSOR: ");				//
+
+	oneWireLeft();
+	for(i=0; i<9; i++)
+	{
+		tempDataUartSort();
+/*
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] byte ");
+	transmitUartInt(i);
+	transmitUartString(" : ");
+	transmitUartInt(store[i]);
+	transmitUartString("\r\n");
+#endif
+*/
+	}
+	temperMeasur(byte0, byte1, byte6, byte7);
+//lcdDataString("?? C"); // ot gornata funkciq
+
+	LCD_COMMAND(LCD_SELECT_3ROW);	// select row 3
+	LCD_DATA_STRING("RIGHT SENSOR: ");			//
+	oneWireRight();
+	for(i=0; i<9; i++)
+	{
+		tempDataUartSort();
+/*
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] byte ");
+	transmitUartInt(i);
+	transmitUartString(" : ");
+	transmitUartInt(store[i]);
+	transmitUartString("\r\n");
+#endif
+*/
+	}
+	temperMeasur(byte0, byte1, byte6, byte7);
+//lcdDataString("?? C"); // ot gornata funkciq
+
+	LCD_COMMAND(LCD_SELECT_4ROW);	// select row 4
+	LCD_DATA_STRING("             DS18x20");		//
+}
+
+/*******************************************
+**** 1-WIRE DS18x20 Temperature Sensors ****
+*******************************************/
+unsigned char oneWireLeft()
+{
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] TEMPERATURE SENSOR LEFT: 10 DB 09 A5 01 08 00 C1 \r\n");		// uart debug information string
+#endif	
+	if(reset())				// Master issues reset pulse. DS18S20s respond with presence pulse.
+	{
+		write_byte(0x55);	// Master issues Match ROM command.
+		// 64-bit ROM CODE
+		write_byte(0x10);	// Byte 0
+		write_byte(0xDB);	// Byte 1
+		write_byte(0x09);	// Byte 2
+		write_byte(0xA5);	// Byte 3
+		write_byte(0x01);	// Byte 4
+		write_byte(0x08);	// Byte 5
+		write_byte(0x00);	// Byte 6
+		write_byte(0xC1);	// Byte 7
+		// 64-bit ROM CODE
+
+		write_byte(0x44);	// Master issues Convert T command.
+		wait_ready();		// Master applies strong pullup to DQ for the duration of the conversion (tCONV).
+		if(reset())			// Master issues reset pulse. DS18S20s respond with presence pulse.
+		{
+			write_byte(0x55);	// Master issues Match ROM command.
+			// 64-bit ROM CODE
+			write_byte(0x10);	// Byte 0
+			write_byte(0xDB);	// Byte 1
+			write_byte(0x09);	// Byte 2
+			write_byte(0xA5);	// Byte 3
+			write_byte(0x01);	// Byte 4
+			write_byte(0x08);	// Byte 5
+			write_byte(0x00);	// Byte 6
+			write_byte(0xC1);	// Byte 7
+			// 64-bit ROM CODE
+
+			write_byte(0xBE);	// Master issues Read Scratchpad command.
+			for(i=0; i<9; i++)
+			{
+				store [i] = read_byte();	//	Master reads entire scratchpad including CRC. The master then recalculates the CRC of the first eight data bytes from the scratchpad and compares the calculated CRC with the read CRC (byte 9). If they match, the master continues; if not, the read operation is repeated.
+			}
+//transmitUartString("RETURN 1\r\n");
+			return 1;
+		}
+//transmitUartString("RETURN 0\r\n");
+//transmitUartString("END WORKING\r\n");
+	}
+	return 0;
+}
+
+unsigned char oneWireRight()
+{
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] TEMPERATURE SENSOR RIGHT: 10 6D F4 8F 02 08 00 B1 \r\n");		// uart debug information string
+#endif	
+	if(reset())				// Master issues reset pulse. DS18S20s respond with presence pulse.
+	{
+		write_byte(0x55);	// Master issues Match ROM command.
+		// 64-bit ROM CODE
+		write_byte(0x10);	// Byte 0
+		write_byte(0x6D);	// Byte 1
+		write_byte(0xF4);	// Byte 2
+		write_byte(0x8F);	// Byte 3
+		write_byte(0x02);	// Byte 4
+		write_byte(0x08);	// Byte 5
+		write_byte(0x00);	// Byte 6
+		write_byte(0xB1);	// Byte 7
+		// 64-bit ROM CODE
+
+		write_byte(0x44);	// Master issues Convert T command.
+		wait_ready();		// Master applies strong pullup to DQ for the duration of the conversion (tCONV).
+		if(reset())			// Master issues reset pulse. DS18S20s respond with presence pulse.
+		{
+			write_byte(0x55);	// Master issues Match ROM command.
+			// 64-bit ROM CODE
+			write_byte(0x10);	// Byte 0
+			write_byte(0x6D);	// Byte 1
+			write_byte(0xF4);	// Byte 2
+			write_byte(0x8F);	// Byte 3
+			write_byte(0x02);	// Byte 4
+			write_byte(0x08);	// Byte 5
+			write_byte(0x00);	// Byte 6
+			write_byte(0xB1);	// Byte 7
+			// 64-bit ROM CODE
+
+			write_byte(0xBE);	// Master issues Read Scratchpad command.
+			for(i=0; i<9; i++)
+			{
+				store [i] = read_byte();	//	Master reads entire scratchpad including CRC. The master then recalculates the CRC of the first eight data bytes from the scratchpad and compares the calculated CRC with the read CRC (byte 9). If they match, the master continues; if not, the read operation is repeated.
+			}
+//transmitUartString("RETURN 1\r\n");
+			return 1;
+		}
+//transmitUartString("RETURN 0\r\n");
+//transmitUartString("END WORKING\r\n");
+	}
+	return 0;
+}
+
+char temperMeasur(unsigned char byte0, unsigned char byte1, unsigned char byte6, unsigned char byte7)
+{
+
+	char tC = 0;
+	char temper = 0;
+	double k = 0;
+	double j = 0;
+
+	byte0 = store [0];
+	byte1 = store [1];
+	byte6 = store [6];
+	byte7 = store [7];
+
+	k = ((byte7 - byte6) / byte7) + 0.25;
+
+	if((byte1 == 0x00) && (byte0 == 0x00))
+	{
+		tC = (byte0/2);
+		j = tC - k;
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Temperature: ");		// uart debug information string
+	transmitUartInt(tC);		// uart debug information string 
+	transmitUartString(".0 C\r\n");			// uart debug information string
+#endif
+//	LCD_COMMAND(LCD_SELECT_4ROW);	// select row 4
+	LCD_DATA_INT(tC);		//
+	LCD_DATA_STRING(".0 C");		//
+	}
+	else if((byte1 == 0x00) && (byte0 != 0x00))
+	{
+		transmitUartString("+");
+		tC = (byte0/2);
+		j = tC - k;
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Temperature: ");		// uart debug information string
+	transmitUartInt(tC);		// uart debug information string 
+	transmitUartString(".0 C\r\n");			// uart debug information string
+#endif
+//	LCD_COMMAND(LCD_SELECT_4ROW);	// select row 4
+	LCD_DATA_INT(tC);		//
+	LCD_DATA_STRING(".0 C");		//
+	}
+	else if((byte1 == 0xFF) && (byte0 != 0x00))
+	{
+		transmitUartString("-");
+//		tC = ((byte0 - 255.5) / 2);		// ne e dobre obraboteno za otricatelni chisla
+		tC = ((byte0 - 255) / 2);
+		j = tC - k;
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Temperature: ");		// uart debug information string
+	transmitUartInt(tC);		// uart debug information string 
+	transmitUartString(".0 C\r\n");			// uart debug information string
+#endif
+//	LCD_COMMAND(LCD_SELECT_4ROW);	// select row 4
+	LCD_DATA_INT(tC);		//
+	LCD_DATA_STRING(".0 C");		//
+	}
+	else
+	{
+		//lcdDataString("ERROR!");	// ERROR not return to display!!!!
+#ifdef DEBUG_ERROR
+	transmitUartString("[UART ERROR] ERROR TEMPERATURE\r\n");		// uart debug information string
+#endif
+		return 1;
+	}
+
+	return temper;
+}
+
+void tempDataUartSort(void)
+{
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] byte ");
+	transmitUartInt(i);
+	transmitUartString(" : ");
+	transmitUartInt(store[i]);
+	transmitUartString("\r\n");
+#endif	
 }
 
 /********************************************************************************************
@@ -556,6 +1068,30 @@ ISR(RESET_vect)
 *****************************************/
 ISR(INT0_vect)
 {
+	ext0_intrpt_off();	// DISABLE new IR DETECTION
+
+// LOGIC CHECK BEGIN
+// VERIFY PRESSED IR BUTTON and switch to low line of IR pin PD2
+	unsigned char low_level = 0;
+    if(irPin == 0)
+	{		//while the pin is low which is our pulse count
+		for(unsigned char i=0; i<3; i++)
+		{
+			low_level++;	//increment every 200uS until pin is high
+			_delay_us(2);	//2uS delay
+		}
+
+		if(low_level == 3)
+		{
+			irDecode();
+		}
+		else
+		{
+		}
+    }
+// LOGIC CHECK END
+
+	ext0_intrpt_on();	// ENABLE new IR DETECTION
 }
 
 /*****************************************
@@ -605,24 +1141,14 @@ void init_all()
 	about();			// Any debug important information
 
 	pga2310_init();		// SPI init and reset all (U6, U7, U8) PGA2310 volume values to null
-	relays_in_init();	// ?? nujno li e ?
-	relays_out_init();	// ?? nujno li e ?
+//	relays_in_init();	// ?? nujno li e ?
+//	relays_out_init();	// ?? nujno li e ?
 
 
 }
 
 void buttons_press()
 {
-//	char test = 0;
-//	unsigned char pgaVolumeLeft, pgaVolumeRight;
-//	pgaVolumeLeft = pgaVolumeRight = 0b00001111;
-/*
-struct flagStatus	 // bit fields from struct
-{
-	unsigned int flagPower;//	: 1;	// bit0: '0' = Power OFF, '1' = Power ON	// ne sa inicializirani
-	unsigned int flagMute;//	: 1;	// bit1: '0' = Mute OFF, '1' = Mute ON		// ne sa inicializirani
-} fSB, *flagStatusBits;
-*/
 	flagStatusBits = &fSB;
 	flagStatusBits->flagPower=0;	// inicializirane s nuli, no nai veroqtno poradi tova che e globalna stru
 	flagStatusBits->flagMute=0;		// inicializirane
@@ -645,16 +1171,14 @@ struct flagStatus	 // bit fields from struct
 	{
 		if(BUTTON_ON_OFF_low() && flagStatusBits->flagPower == 0)//fSB.flagPower == 0)//flagStatusBits->flagPower == 0)	// obj ptr flagStatusBtnRegister from struct flagStatusBtnOnOff
 		{
-			flagStatusBits->flagPower = 1;			// filter za buton ON
-
+//			flagStatusBits->flagPower = 1;			// filter za buton ON
 			ampliferOn();
-			_delay_ms(1000);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
+//			_delay_ms(1000);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
 		}
 		else if(BUTTON_ON_OFF_low() && flagStatusBits->flagPower == 1)//fSB.flagPower == 1)//flagStatusBits->flagPower == 1)
 		{
-			flagStatusBits->flagPower = 0;			// filter za buton OFF
+//			flagStatusBits->flagPower = 0;			// filter za buton OFF
 			ampliferOff();
-			_delay_ms(500);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
 		}
 		else if(BUTTON_ESC_low() && flagStatusBits->flagPower == 1)//fSB.flagPower == 1)//flagStatusBits->flagPower == 1)
 		{
@@ -676,6 +1200,7 @@ struct flagStatus	 // bit fields from struct
 		}
 		else if(BUTTON_ESC_low() && flagStatusBits->flagPower == 0)//fSB.flagPower == 0)//flagStatusBits->flagPower == 0)
 		{
+//			temperature();
 //			LCD_CLEAR_CONTAIN();	// kogato e izkliuchen
 //			LCD_COMMAND(LCD_ON);
 			_delay_ms(500);
@@ -684,83 +1209,23 @@ struct flagStatus	 // bit fields from struct
 		}
 		else if(BUTTON_ENCODER_low() && flagStatusBits->flagPower == 0)//fSB.flagPower == 0)//flagStatusBits->flagPower == 0)
 		{
+			temperature();
 //			LCD_COMMAND(LCD_OFF);
 			_delay_ms(500);
 //			about();
 //			_delay_ms(1000);
 		}
-		else if(flagStatusBits->flagPower == 1)//fSB.flagPower == 1)//flagStatusBits->flagPower == 1)	// zashto ne raboti encoder-a kogato se proverqva bita flagPower?
+		else if(flagStatusBits->flagPower == 1)//fSB.flagPower == 1)//flagStatusBits->flagPower == 1)
 		{
-			volumeEncoder();	// v momenta na zavartane na encodera flaga stava nula flagStatusBits->flagPower = 0, zashto ???
-		}						// za tova Power Button srabotva ot vtoriq pat kato za Power OFF
-		else if(flagStatusBits->flagPower == 0)	// zashto ne raboti encoder-a kogato se proverqva bita flagPower?
+			volumeProcess();
+		}
+		else if(flagStatusBits->flagPower == 0)
 		{
-			commonEncoder();	// v momenta na zavartane na encodera flaga stava nula flagStatusBits->flagPower = 0, zashto ???
+			commonEncoder();
 		}
 		else
 		{
 		}
-
-
-
-
-
-
-
-
-
-
-
-
-
-/****************************************************************************/
-
-/*			if(flagStatusBits->flagPower == 1)
-			{
-
-				_delay_ms(200);
-			}
-		}*/
-
-
-
-/*		if(BUTTON_ON_OFF_low() && flagPower==0)			// PINB1 - BUTTON ON/OFF -> ON
-		{
-			ampliferOn();
-			flagPower = 1;			// filter za buton ON
-			_delay_ms(1000);	// izchakvane za natiskane i otpuskane na buton - filtar treptqsht kontakt buton
-		}
-		else if(BUTTON_ON_OFF_low() && flagPower==1)	// PINB1 - BUTTON ON/OFF -> OFF
-		{
-			ampliferOff();
-			flagPower = 0;			// filter za buton OFF
-		}
-		else if(BUTTON_ESC_low() && flagPower==1)
-		{
-			volumeUp();
-			_delay_ms(200);
-		}
-		else if(BUTTON_ENCODER_low() && flagPower==1)
-		{
-			volumeDown();
-			_delay_ms(200);
-
-		}
-		else if(BUTTON_ESC_low() && flagPower==0)
-		{
-			setupMode();
-			_delay_ms(1000);
-		}
-		else if(BUTTON_ENCODER_low() && flagPower==0)
-		{
-			about();
-			_delay_ms(1000);
-		}
-		else if(flagPower==1)
-		{
-			rotaryEncoderNikBarzakov();
-		}
-*/
 	}
 }
 
@@ -774,18 +1239,16 @@ struct flagStatus	 // bit fields from struct
 
 int main(void)
 {
-
 	init_all();				// inicializacia na vsichko
+	ext0_intrpt_on();		// ENABLE interrupts to access IR DETECTION as call to function "IR_DECODER()" for -> SONY IR REMOTE
+//	ext2_intrpt_on();
 
 	sei();							// file "avr/interrupt.h"
 //	SREG = (1<<I);
 
 	LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
 	while(1)
-	{
-//		struct flagStatusBtnOnOff flagStatusBtnRegister;	// obj flagStatusBtnRegister from struct flagStatusBtnOnOff
-//		flagStatusBtnRegister.bit0 = 0;
-		
+	{		
 		buttons_press();	// izchakvane za natiskane na buton
 	}
 	return 1;
