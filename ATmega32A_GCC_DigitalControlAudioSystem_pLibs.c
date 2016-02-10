@@ -1,23 +1,24 @@
-/*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;*********************************************************************;;
-;;*********************************************************************;;
-;;************** Eng. Petar Upinov ************************************;;
-;;***************** 07.10.2015 ****************************************;;
-;;*********************************************************************;;
-;;*********************************************************************;;
-;;******** ATmega32 DCAS with new Library *****************************;;
-;;*** (ATmega32 Digital Control Audio System) *************************;;
-;;*********************************************************************;;
-;;**************** Crystal 16MHz **************************************;;
-;;*** 1. Edit Fuse bits: High 0xCA ; Low 0xFF *************************;;
-;;*********************************************************************;;
-;;*********************************************************************;;
-;;** 1. Edit on date 07.10.2015 ***************************************;;
-;;** 2. Edit on date 14.10.2015 - bit field struct test & type bool ***;;
-;;** 3. Edit on date 15.10.2015 - update LCD lib h ********************;;
-;;** 4. Edit on date 15.10.2015 - correct LCD init, can't be first clr ;;
-;;*********************************************************************;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
+/*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;*****************************************************************************************;;
+;;*****************************************************************************************;;
+;;************** Eng. Petar Upinov ********************************************************;;
+;;***************** 07.10.2015 ************************************************************;;
+;;*****************************************************************************************;;
+;;*****************************************************************************************;;
+;;******** ATmega32 DCAS with new Library *************************************************;;
+;;*** (ATmega32 Digital Control Audio System) *********************************************;;
+;;*****************************************************************************************;;
+;;**************** Crystal 16MHz **********************************************************;;
+;;*** 1. Edit Fuse bits: High 0xCA ; Low 0xFF *********************************************;;
+;;*****************************************************************************************;;
+;;*****************************************************************************************;;
+;;** 1. Edit on date 07.10.2015 ***********************************************************;;
+;;** 2. Edit on date 14.10.2015 - bit field struct test & type bool ***********************;;
+;;** 3. Edit on date 15.10.2015 - update LCD lib h ****************************************;;
+;;** 4. Edit on date 15.10.2015 - correct LCD init, can't be first clr ********************;;
+;;** 5. Edit on date 16.10.2015 - update and correct LCD clear lib c h, struct with flags *;;
+;;*****************************************************************************************;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
 /*************************************
 ** INCLUDE INTEGRATED LIBRARY FILES **
@@ -36,17 +37,17 @@
 
 // Add C files to project: "ir_sirc.c", "rotation_encoder.c", "rtc.c", "spi.c", "utility.c"
 
-#include "_Soft_Library_Pesho_v6_/24c64.h"
-#include "_Soft_Library_Pesho_v6_/ds18x20.h"
-#include "_Soft_Library_Pesho_v6_/i2c_twi.h"
-#include "_Soft_Library_Pesho_v6_/ir_sirc.h"
-#include "_Soft_Library_Pesho_v6_/lcd_hd44780_74hc595.h"
-#include "_Soft_Library_Pesho_v6_/pga2310.h"
-#include "_Soft_Library_Pesho_v6_/rotation_encoder.h"
-#include "_Soft_Library_Pesho_v6_/rtc.h"
-#include "_Soft_Library_Pesho_v6_/spi.h"
-#include "_Soft_Library_Pesho_v6_/uart.h"
-#include "_Soft_Library_Pesho_v6_/utility.h"
+#include "_Soft_Library_Pesho_/24c64.h"
+#include "_Soft_Library_Pesho_/ds18x20.h"
+#include "_Soft_Library_Pesho_/i2c_twi.h"
+#include "_Soft_Library_Pesho_/ir_sirc.h"
+#include "_Soft_Library_Pesho_/lcd_hd44780_74hc595.h"
+#include "_Soft_Library_Pesho_/pga2310.h"
+#include "_Soft_Library_Pesho_/rotation_encoder.h"
+#include "_Soft_Library_Pesho_/rtc.h"
+#include "_Soft_Library_Pesho_/spi.h"
+#include "_Soft_Library_Pesho_/uart.h"
+#include "_Soft_Library_Pesho_/utility.h"
 
 /*********************************************
 ** VARIABLES, CONSTANTS, ARRAYS, STRUCTURES **
@@ -59,11 +60,11 @@ typedef int bool;
 // https://en.wikipedia.org/wiki/Bit_field
 // http://stackoverflow.com/questions/24933242/when-to-use-bit-fields-in-c
 //#define flagStatusBtnOnOffBit0 0
-struct flagStatusBtnOnOff
+struct flagStatus	 // bit fields from struct
 {
-	unsigned int bit0 : 1;	// = 0;	// bit0 from struct bit field
-	unsigned int bit1 : 1;	// = 1;	// bit1 from struct bit field
-} *flagStatusBtnRegister;
+	unsigned int flagPower	: 1;	// bit0: '0' = Power OFF, '1' = Power ON
+	unsigned int flagMute	: 1;	// bit1: '0' = Mute OFF, '1' = Mute ON
+} *flagStatusBits;
 
 /*
 struct flagStatusBtnOnOff
@@ -199,6 +200,15 @@ void timer2_off()	// Timer2 Off
 ********************************************************************************************/
 
 /*****************************************
+**** RESET EXT INTERRUPT  VECTOR 00 ******
+*****************************************/
+/*
+ISR(RESET_vect)
+{
+}
+*/
+
+/*****************************************
 **** EXTERNAL INTERRUPT 0 VECTOR 01 ******
 *****************************************/
 ISR(INT0_vect)
@@ -257,46 +267,34 @@ void buttons_press()
 	{
 		if(BUTTON_ON_OFF_low())	// obj ptr flagStatusBtnRegister from struct flagStatusBtnOnOff
 		{
-			if(flagStatusBtnRegister->bit0 == 0)
+			if(flagStatusBits->flagPower == 0)
 			{
-				flagStatusBtnRegister->bit0 = 1;
+				LED_high_DISPLAYLED_low();				// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
+				LCD_CLEAR_CONTAINS();					// CLEAR DISPLAY ALL CHARACTERS
+				LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);
+				lcdDataString("FIRST ROW");
+				flagStatusBits->flagPower = 1;
+				_delay_ms(200);
 			}
 			else
 			{
-				flagStatusBtnRegister->bit0 = 0;
+				LED_low_DISPLAYLED_high();				// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
+				LCD_CLEAR_CONTAINS();					// CLEAR DISPLAY ALL CHARACTERS
+				LCD_EXECUTE_COMMAND(LCD_SELECT_2ROW);
+				lcdDataString("SECOND ROW");
+				flagStatusBits->flagPower = 0;
+				_delay_ms(200);
 			}
+
+/*			if(flagStatusBits->flagPower == 1)
+			{
+
+				_delay_ms(200);
+			}*/
 		}
 
-		if(flagStatusBtnRegister->bit0 == 0)
-		{
-//			LCD_EXECUTE_COMMAND(LCD_CLEAR);
-			LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
-			// flagStatusBtnRegister->bit0 = 0;
-			//LCD_EXECUTE_DATA_ONE('A');
-			LCD_EXECUTE_COMMAND(LCD_SELECT_1ROW);
-			lcdDataString("FIRST ROW");
-			_delay_ms(200);
-		}
-		else
-		{
-//			LCD_EXECUTE_COMMAND(LCD_CLEAR);
-			LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
-			// flagStatusBtnRegister->bit0 = 1;
-			//LCD_EXECUTE_DATA_ONE('B');
-			LCD_EXECUTE_COMMAND(LCD_SELECT_2ROW);
-			lcdDataString("SECOND ROW");
-			_delay_ms(200);
-		}
 
-/*		if(flagStatusBtnRegister->bit0 == 0)
-		{
-			LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
-		}
-		else
-		{
-			LED_low_DISPLAYLED_high();		// PORTD4 - LED OFF (logic "0"), DISPLAY BACKLIGHT ON (logic "0"),  NON PWM, NON TIMER1
-		}
-*/
+
 /*		if(BUTTON_ON_OFF_low() && flagPower==0)			// PINB1 - BUTTON ON/OFF -> ON
 		{
 			ampliferOn();

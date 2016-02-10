@@ -49,22 +49,22 @@ all: $(TARGET) ATmega32A_GCC_DigitalControlAudioSystem_pLibs.hex ATmega32A_GCC_D
 ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o: ../ATmega32A_GCC_DigitalControlAudioSystem_pLibs.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 
-24c64.o: ../_Soft_Library_Pesho_v6_/24c64.c
+24c64.o: ../_Soft_Library_Pesho_/24c64.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 
-ds18x20.o: ../_Soft_Library_Pesho_v6_/ds18x20.c
+ds18x20.o: ../_Soft_Library_Pesho_/ds18x20.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 
-i2c_twi.o: ../_Soft_Library_Pesho_v6_/i2c_twi.c
+i2c_twi.o: ../_Soft_Library_Pesho_/i2c_twi.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 
-lcd_hd44780_74hc595.o: ../_Soft_Library_Pesho_v6_/lcd_hd44780_74hc595.c
+lcd_hd44780_74hc595.o: ../_Soft_Library_Pesho_/lcd_hd44780_74hc595.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 
-pga2310.o: ../_Soft_Library_Pesho_v6_/pga2310.c
+pga2310.o: ../_Soft_Library_Pesho_/pga2310.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 
-uart.o: ../_Soft_Library_Pesho_v6_/uart.c
+uart.o: ../_Soft_Library_Pesho_/uart.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 
 ##Link

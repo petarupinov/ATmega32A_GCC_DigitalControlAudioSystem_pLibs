@@ -1,7 +1,7 @@
 /*************************************************************************
 *** LIBRARY: LCD DISPLAY HITACHI HD44780 + SHIFT REGISTER 74HC595 ********
 *** AUTHOR:  PETAR UPINOV, email: petar.upinov@gmail.com     *************
-*** FILE NAME: lcd_hd44780_74hc595.c, v4, 15.10.2015         *************
+*** FILE NAME: lcd_hd44780_74hc595.c, v5, 16.10.2015         *************
 *** SOFT IDE: AVR-GCC compiler                               *************
 *** HARD uCU: ATmel AVR Microcontrollers                     *************
 *** TEST: ATmega8535@16MHz, ATmega32@16MHz                   *************
@@ -26,7 +26,6 @@
 **********************************/
 void LCD_INIT()
 {
-//	_delay_us(160);	// 1.52 mS	// comment for simulation
 	LCD_EXECUTE_COMMAND(LCD_8BIT_2ROWS_FONT5X7);		// 0b00111000	// 2. Function set: 8-bit interface data (DL = 1), 2-line display (N = 1), 5 x 7 dot character font (F = 0)
 //	_delay_us(40);	// 37 uS	// comment for simulation
 	LCD_EXECUTE_COMMAND(LCD_ON_BLINK_CURSOR);			// 0b00001111	// 3. Display on/off control: Display on (D = 1), Cursor on (C = 1), Blinking on (B = 1)
@@ -35,13 +34,17 @@ void LCD_INIT()
 //	_delay_us(40);	// 37 uS	// comment for simulation
 	LCD_EXECUTE_COMMAND(LCD_MOVE_FIRST);
 //	_delay_us(40);	// 37 uS	// comment for simulation
-	LCD_EXECUTE_COMMAND(LCD_CLEAR);						// 0b00000001	// 1. Display clear
+	LCD_EXECUTE_COMMAND(LCD_CLEAR);						// 0b00000001	// 1. Display clear; // !!! ... from old code LCD_CLEAR can't be first command !!!
+//	_delay_us(1600);	// 1.53 mS	// comment for simulation
+}
 
-// old code... LCD_CLEAR can't be first command !!!
-//	LCD_EXECUTE_COMMAND(LCD_CLEAR);					// LCD_CLEAR
-//	LCD_EXECUTE_COMMAND(LCD_MOVE_FIRST);			// LCD_MOVE_FIRST
-//	LCD_EXECUTE_COMMAND(LCD_ON_BLINK_CURSOR);		// LCD_ON_BLINK_CURSOR
-//	LCD_EXECUTE_COMMAND(LCD_8BIT_2ROWS_FONT5X10);	// LCD_8BIT_2ROWS_FONT5X10
+/**************************************
+** CLEAR ALL CONTAINS ON LCD DISPLAY **
+**************************************/
+void LCD_CLEAR_CONTAINS()
+{
+	LCD_EXECUTE_COMMAND(LCD_CLEAR);						// 0b00000001	// 1. Display clear; // !!! ... from old code LCD_CLEAR can't be first command !!!
+	_delay_us(1600);	// 1.53 mS	or use this _delay_ms(2);
 }
 
 /******************************************
@@ -71,17 +74,21 @@ void LCD_EXECUTE_COMMAND(unsigned char command)	// HELP: LCD_EXECUTE_COMMAND(uns
 
 		storeMSB = storeMSB << 1;	// shiftvane na << nalqvo
 	}
-
+//update from down comment
+	LCD_REGSELECT_low();	// RS = 0
+	LCD_READWRITE_low();	// RW = 0
+	LCD_ENABLE_high();		// EN = 1
+//update from down comment
 	LCD_RCK_low();
 	_delay_us(170);			//rcall 180 us
 	LCD_RCK_high();
 	_delay_us(170);			//rcall 180 us
-
+/*
 	LCD_REGSELECT_low();	// RS = 0
 	LCD_READWRITE_low();	// RW = 0
 	LCD_ENABLE_high();		// EN = 1
 	_delay_us(100);			//rcall 180 us
-
+*/
 	LCD_ENABLE_low();		// EN = 0
 	_delay_us(100);			//rcall 180 us
 
@@ -115,17 +122,21 @@ void LCD_EXECUTE_DATA(char data [], int numsymbols)	// HELP: LCD_EXECUTE_DATA(ch
 
 			storeMSB = storeMSB << 1;	// shiftvane na << nalqvo
 		}
-
+//update from down comment
+		LCD_REGSELECT_high();	// RS = 1
+		LCD_READWRITE_low();	// RW = 0
+		LCD_ENABLE_high();		// EN = 1
+//update from down comment
 		LCD_RCK_low();
 		_delay_us(170);			//rcall 180 us
 		LCD_RCK_high();
 		_delay_us(170);			//rcall 180 us
-
+/*
 		LCD_REGSELECT_high();	// RS = 1
 		LCD_READWRITE_low();	// RW = 0
 		LCD_ENABLE_high();		// EN = 1
 		_delay_us(100);
-
+*/
 		LCD_ENABLE_low();		// EN = 0
 		_delay_us(100);
 	}
@@ -159,20 +170,24 @@ void LCD_EXECUTE_DATA_ONE(unsigned char data)	// HELP: LCD_EXECUTE_DATA(unsigned
 
 		storeMSB = storeMSB << 1;	// shiftvane na << nalqvo
 	}
+//update from down comment
+	LCD_REGSELECT_high();	// RS = 1
+	LCD_READWRITE_low();	// RW = 0
+	LCD_ENABLE_high();		// EN = 1
+//update from down comment
 
 	LCD_RCK_low();
 	_delay_us(170);			//rcall 180 us
 	LCD_RCK_high();
 	_delay_us(170);			//rcall 180 us
-
+/*
 	LCD_REGSELECT_high();	// RS = 1
 	LCD_READWRITE_low();	// RW = 0
 	LCD_ENABLE_high();		// EN = 1
 	_delay_us(100);
-
+*/
 	LCD_ENABLE_low();		// EN = 0
 	_delay_us(100);
-
 }
 
 /*****************************************************************************
@@ -183,11 +198,11 @@ void LCD_EXECUTE_DATA_LAST()	// flush -> izchistvane na bufer - prinuditelno izp
 	LCD_ENABLE_low();
 	LCD_READWRITE_low();
 	LCD_REGSELECT_high();
-	_delay_us(100);				//rcall 180 us
+	_delay_us(40);				// from 100 or 180 //rcall 180 us
 	LCD_ENABLE_high();
 	LCD_READWRITE_low();
 	LCD_REGSELECT_high();
-	_delay_us(100);				//rcall 180 us
+	_delay_us(40);				// from 100 or 180 //rcall 180 us
 }
 
 /*********************************************************
@@ -219,17 +234,21 @@ void lcdDataString(char *data)
 
 			storeMSB = storeMSB << 1;	// shiftvane na << nalqvo
 		}
-
+//update from down comment
+		LCD_REGSELECT_high();	// RS = 1
+		LCD_READWRITE_low();	// RW = 0
+		LCD_ENABLE_high();		// EN = 1
+//update from down comment
 		LCD_RCK_low();
 		_delay_us(170);			//rcall 180 us
 		LCD_RCK_high();
 		_delay_us(170);			//rcall 180 us
-
+/*
 		LCD_REGSELECT_high();	// RS = 1
 		LCD_READWRITE_low();	// RW = 0
 		LCD_ENABLE_high();		// EN = 1
 		_delay_us(100);
-
+*/
 		LCD_ENABLE_low();		// EN = 0
 		_delay_us(100);
 	}

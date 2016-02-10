@@ -15,14 +15,13 @@ ATmega32A_GCC_DigitalControlAudioSystem_pLibs.o:  \
   c:/winavr-20100110/lib/gcc/../../avr/include/util/delay_basic.h \
   c:/winavr-20100110/lib/gcc/../../avr/include/stdlib.h \
   c:\winavr-20100110\bin\../lib/gcc/avr/4.3.3/include/stddef.h \
-  ../_Soft_Library_Pesho_v6_/24c64.h ../_Soft_Library_Pesho_v6_/ds18x20.h \
-  ../_Soft_Library_Pesho_v6_/i2c_twi.h \
-  ../_Soft_Library_Pesho_v6_/ir_sirc.h \
-  ../_Soft_Library_Pesho_v6_/lcd_hd44780_74hc595.h \
-  ../_Soft_Library_Pesho_v6_/pga2310.h \
-  ../_Soft_Library_Pesho_v6_/rotation_encoder.h \
-  ../_Soft_Library_Pesho_v6_/rtc.h ../_Soft_Library_Pesho_v6_/spi.h \
-  ../_Soft_Library_Pesho_v6_/uart.h ../_Soft_Library_Pesho_v6_/utility.h
+  ../_Soft_Library_Pesho_/24c64.h ../_Soft_Library_Pesho_/ds18x20.h \
+  ../_Soft_Library_Pesho_/i2c_twi.h ../_Soft_Library_Pesho_/ir_sirc.h \
+  ../_Soft_Library_Pesho_/lcd_hd44780_74hc595.h \
+  ../_Soft_Library_Pesho_/pga2310.h \
+  ../_Soft_Library_Pesho_/rotation_encoder.h \
+  ../_Soft_Library_Pesho_/rtc.h ../_Soft_Library_Pesho_/spi.h \
+  ../_Soft_Library_Pesho_/uart.h ../_Soft_Library_Pesho_/utility.h
 
 c:/winavr-20100110/lib/gcc/../../avr/include/avr/io.h:
 
@@ -54,24 +53,24 @@ c:/winavr-20100110/lib/gcc/../../avr/include/stdlib.h:
 
 c:\winavr-20100110\bin\../lib/gcc/avr/4.3.3/include/stddef.h:
 
-../_Soft_Library_Pesho_v6_/24c64.h:
+../_Soft_Library_Pesho_/24c64.h:
 
-../_Soft_Library_Pesho_v6_/ds18x20.h:
+../_Soft_Library_Pesho_/ds18x20.h:
 
-../_Soft_Library_Pesho_v6_/i2c_twi.h:
+../_Soft_Library_Pesho_/i2c_twi.h:
 
-../_Soft_Library_Pesho_v6_/ir_sirc.h:
+../_Soft_Library_Pesho_/ir_sirc.h:
 
-../_Soft_Library_Pesho_v6_/lcd_hd44780_74hc595.h:
+../_Soft_Library_Pesho_/lcd_hd44780_74hc595.h:
 
-../_Soft_Library_Pesho_v6_/pga2310.h:
+../_Soft_Library_Pesho_/pga2310.h:
 
-../_Soft_Library_Pesho_v6_/rotation_encoder.h:
+../_Soft_Library_Pesho_/rotation_encoder.h:
 
-../_Soft_Library_Pesho_v6_/rtc.h:
+../_Soft_Library_Pesho_/rtc.h:
 
-../_Soft_Library_Pesho_v6_/spi.h:
+../_Soft_Library_Pesho_/spi.h:
 
-../_Soft_Library_Pesho_v6_/uart.h:
+../_Soft_Library_Pesho_/uart.h:
 
-../_Soft_Library_Pesho_v6_/utility.h:
+../_Soft_Library_Pesho_/utility.h:

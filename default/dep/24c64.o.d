@@ -1,4 +1,4 @@
-24c64.o: ../_Soft_Library_Pesho_v6_/24c64.c \
+24c64.o: ../_Soft_Library_Pesho_/24c64.c \
   c:/winavr-20100110/lib/gcc/../../avr/include/avr/io.h \
   c:/winavr-20100110/lib/gcc/../../avr/include/avr/sfr_defs.h \
   c:/winavr-20100110/lib/gcc/../../avr/include/inttypes.h \
@@ -14,8 +14,8 @@
   c:/winavr-20100110/lib/gcc/../../avr/include/stdlib.h \
   c:\winavr-20100110\bin\../lib/gcc/avr/4.3.3/include/stddef.h \
   c:/winavr-20100110/lib/gcc/../../avr/include/avr/eeprom.h \
-  ../_Soft_Library_Pesho_v6_/utility.h \
-  ../_Soft_Library_Pesho_v6_/i2c_twi.h ../_Soft_Library_Pesho_v6_/24c64.h
+  ../_Soft_Library_Pesho_/utility.h ../_Soft_Library_Pesho_/i2c_twi.h \
+  ../_Soft_Library_Pesho_/24c64.h
 
 c:/winavr-20100110/lib/gcc/../../avr/include/avr/io.h:
 
@@ -47,8 +47,8 @@ c:\winavr-20100110\bin\../lib/gcc/avr/4.3.3/include/stddef.h:
 
 c:/winavr-20100110/lib/gcc/../../avr/include/avr/eeprom.h:
 
-../_Soft_Library_Pesho_v6_/utility.h:
+../_Soft_Library_Pesho_/utility.h:
 
-../_Soft_Library_Pesho_v6_/i2c_twi.h:
+../_Soft_Library_Pesho_/i2c_twi.h:
 
-../_Soft_Library_Pesho_v6_/24c64.h:
+../_Soft_Library_Pesho_/24c64.h:
