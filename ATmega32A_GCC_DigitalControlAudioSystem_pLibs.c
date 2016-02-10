@@ -27,6 +27,7 @@
 ;;**13. Edit on date 19.11.2015 - add functions ampliferOn/Off ****************************;;
 ;;**14. Edit on date 22.11.2015 - button power and escape works ***************************;;
 ;;**15. Edit on date 23.11.2015 - add pga2310 and rotary encoder volume *******************;;
+;;**16. Edit on date 23.11.2015 - update only rotaryEncoder() function ********************;;
 ;;*****************************************************************************************;;
 ;;** Used library version: _Soft_Library_Pesho_v0.06 ^^lcd updated^^ **********************;;
 ;;*****************************************************************************************;;
@@ -353,23 +354,40 @@ void ampliferOff(void)
 ***********************/
 void rotaryEncoder(void)
 {
-	volumeIndex = rotaryEncoderNikBarzakov(volumeIndex);	// value is global var
-	if (volumeIndex > (VOLUME_MAX - 2))
+	unsigned char temp = 2;
+	temp = rotaryEncoderNikBarzakov(temp);
+	if(2==temp)
 	{
-		volumeIndex = (VOLUME_MAX - 1);
+		// do nothing, encoder havn't been rotated  // ne e bil zavartan
 	}
-	else if(volumeIndex < (VOLUME_MIN + 1))
+	else if(1==temp)
 	{
-		volumeIndex = VOLUME_MIN;
+		// encoder is decrement
+		volumeIndex--;	// vmesto tova moje da se vzema stoinostta direktno ot enkodera
+		if(volumeIndex < (VOLUME_MIN + 1))
+		{
+			volumeIndex = VOLUME_MIN;
+		}
+		PGA2310_Volume_Update(volumeValue[volumeIndex], volumeValue[volumeIndex]);
+		LCD_COMMAND(LCD_SELECT_4ROW);				// select row 1
+		LCD_DATA_STRING("Volume ");	// 20 symbols
+		LCD_DATA_INT(volumeValue[volumeIndex]);	// 20 symbols
+		LCD_DATA_STRING("         L ");	// 20 symbols
 	}
-	else
+	else if(3==temp)
 	{
+		// encoder is increment
+		volumeIndex++;	// vmesto tova moje da se vzema stoinostta direktno ot enkodera
+		if (volumeIndex > (VOLUME_MAX - 2))
+		{
+			volumeIndex = (VOLUME_MAX - 1);
+		}
+		PGA2310_Volume_Update(volumeValue[volumeIndex], volumeValue[volumeIndex]);
+		LCD_COMMAND(LCD_SELECT_4ROW);				// select row 1
+		LCD_DATA_STRING("Volume ");	// 20 symbols
+		LCD_DATA_INT(volumeValue[volumeIndex]);	// 20 symbols
+		LCD_DATA_STRING("         L ");	// 20 symbols
 	}
-	PGA2310_Volume_Update(volumeValue[volumeIndex], volumeValue[volumeIndex]);
-	LCD_COMMAND(LCD_SELECT_4ROW);				// select row 1
-	LCD_DATA_STRING("Volume ");	// 20 symbols
-	LCD_DATA_INT(volumeValue[volumeIndex]);	// 20 symbols
-	LCD_DATA_STRING("         L ");	// 20 symbols
 }
 
 
