@@ -20,13 +20,13 @@
 /*******************************
 ** DEFINITION PROJECT VERSION **
 *******************************/
-#define FIRMWARE_VERSION 31
+#define FIRMWARE_VERSION 32
 
 /*******************************
 ** DEFINITION DEBUG CONSTANTS **
 *******************************/
 //#define DEBUG_SETTING	1	// ENABLE/DISABLE DEBUG SETTINGS INFORMATION with comment or uncomment this row
-#define DEBUG_INFO		1	// ENABLE/DISABLE DEBUG STATUS INFORMATION with comment or uncomment this row
+//#define DEBUG_INFO		1	// ENABLE/DISABLE DEBUG STATUS INFORMATION with comment or uncomment this row
 #define DEBUG_ERROR		1	// ENABLE/DISABLE DEBUG ERROR INFORMATION with comment or uncomment this row
 
 /*********************************************
@@ -109,6 +109,8 @@ void ext0_intrpt_on(void);		// external interrupt 0 on PD2 - ENABLE new IR DETEC
 void ext0_intrpt_off(void);		// external interrupt 0 on PD2 - DISABLE new IR DETECTION
 void ext1_intrpt_init(void);	// external interrupt 1 on PD3 - initialization
 void ext2_intrpt_init(void);	// external interrupt 2 on PB2 - initialization
+void timer2Internal_intrpt_off(void);	// internal interrupt timer2 on compare match - initialization
+void timer2Internal_intrpt_on(void);	// internal interrupt timer2 on compare match - initialization
 
 void irDecode(void);
 
@@ -135,6 +137,7 @@ void volumeUpdate(void);
 void commonEncoder(void);
 
 void temperature();				// temperature function
+void autoControlTemperature();	// auto controlling temperature, check when timer2 is interrupted
 unsigned char oneWireLeft();	// izmervane s temperaturen sensor left
 unsigned char oneWireRight();	// izmervane s temperaturen sensor right
 char temperMeasur(unsigned char byte0, unsigned char byte1, unsigned char byte6, unsigned char byte7);		// presmqtane na temperatur

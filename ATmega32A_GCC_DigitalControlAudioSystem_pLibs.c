@@ -43,6 +43,7 @@
 ;;**29. Edit on date 09.12.2015 - adding fan stepping with timer1 ORC1AL ******************;;
 ;;**30. Edit on date 09.12.2015 - change fan function names & temp sensors are works ******;;
 ;;**31. Edit on date 15.12.2015 - add temp sensors array with id rom code *****************;;
+;;**32. Edit on date 17.01.2016 -  *****************;;
 ;;*****************************************************************************************;;
 ;;** Used library version: _Soft_Library_Pesho_v0.07 **************************************;;
 ;;*****************************************************************************************;;
@@ -98,11 +99,65 @@ unsigned char volumeIndex = VOLUME_MUTE;	// defined in pga2310.h
 unsigned char volumeValue [VOLUME_LIMIT_POSITIONS] = { 0x00, 0x28, 0x32, 0x3C, 0x46, 0x50, 0x5A, 0x64, 0x6E, 0x78, 0x82, 0x8C, 0x96, 0xA0, 0xAA, 0xB4, 0xBE, 0xC8, 0xD2, 0xD7 };
 //       values of volume  ->	0,    40,   50,   60,   70,   80,   90,   100,  110,  120,  130,  140,  150,  160,  170,  180,  190,  200,  210,  215	<-	values of volume
 // index of values of volume    0      1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19
+typedef enum
+{
+  VOLUME_0 = 0x00,   //   0
+  VOLUME_1 = 0x28,   //  40
+  VOLUME_2 = 0x32,   //  50
+  VOLUME_3 = 0x3C,   //  60
+  VOLUME_4 = 0x46,   //  70
+  VOLUME_5 = 0x50,   //  80
+  VOLUME_6 = 0x5A,   //  90
+  VOLUME_7 = 0x64,   // 100
+  VOLUME_8 = 0x6E,   // 110
+  VOLUME_9 = 0x78,   // 120
+  VOLUME_10 = 0x82,  // 130
+  VOLUME_11 = 0x8C,  // 140
+  VOLUME_12 = 0x96,  // 150
+  VOLUME_13 = 0xA0,  // 160
+  VOLUME_14 = 0xAA,  // 170
+  VOLUME_15 = 0xB4,  // 180
+  VOLUME_16 = 0xBE,  // 190
+  VOLUME_17 = 0xC8,  // 200
+  VOLUME_18 = 0xD2,  // 210
+  VOLUME_19 = 0xD7,  // 215
+} VOLUME_LIMIT_POSITIONS_1;
+
 
 // TEMPERATURE SENSOR
-unsigned char storeTemp [10] = {};	// data bytes massive
+unsigned char storeTemp [10] = { 0 };	// data bytes massive
 unsigned char leftTempSensorRomCode[8]	= { 0x10, 0xDB, 0x09, 0xA5, 0x01, 0x08, 0x00, 0xC1 };
 unsigned char rightTempSensorRomCode[8]	= { 0x10, 0x6D, 0xF4, 0x8F, 0x02, 0x08, 0x00, 0xB1 };
+typedef enum
+{
+	RomCodeLeftTempSensorByte0 = 0x10,
+	RomCodeLeftTempSensorByte1 = 0xDB,
+	RomCodeLeftTempSensorByte2 = 0x09,
+	RomCodeLeftTempSensorByte3 = 0xA5,
+	RomCodeLeftTempSensorByte4 = 0x01,
+	RomCodeLeftTempSensorByte5 = 0x08,
+	RomCodeLeftTempSensorByte6 = 0x00,
+	RomCodeLeftTempSensorByte7 = 0xC1,
+} TempSensor_1; // leftTempSensor;
+
+typedef enum
+{
+	RomCodeRightTempSensorByte0 = 0x10,
+	RomCodeRightTempSensorByte1 = 0x6D,
+	RomCodeRightTempSensorByte2 = 0xF4,
+	RomCodeRightTempSensorByte3 = 0x8F,
+	RomCodeRightTempSensorByte4 = 0x02,
+	RomCodeRightTempSensorByte5 = 0x08,
+	RomCodeRightTempSensorByte6 = 0x00,
+	RomCodeRightTempSensorByte7 = 0xB1,
+} TempSensor_2; // rightTempSensor;
+
+typedef struct tempSensor
+{
+	TempSensor_1;
+	TempSensor_2;
+};
+
 
 // FAN SPEED STEPS
 #define FAN_LIMIT_POSITIONS 8
@@ -113,6 +168,33 @@ unsigned char fanSpeed = FAN_SPEED_MIN;	// FAN SPEED OCR1AL = 100
 unsigned char fanSpeedStep [FAN_LIMIT_POSITIONS] = { 0x00, 100, 125, 150, 175, 200, 225, 250 };
 unsigned char byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9; // bytes ot temperaturen sensor
 
+typedef enum
+{
+	FAN_SPEED_0 = 0,
+	FAN_SPEED_1 = 100,
+	FAN_SPEED_2 = 125,
+	FAN_SPEED_3 = 150,
+	FAN_SPEED_4 = 175,
+	FAN_SPEED_5 = 200,
+	FAN_SPEED_6 = 225,
+	FAN_SPEED_7 = 250
+} FAN_SPEED_POSITIONS_1;
+
+//unsigned char *menu1 = "MENU1";
+//unsigned char *menu2 = "MENU2";
+//unsigned char *menu3 = "MENU3";
+
+unsigned char indexMenuTable = 0;
+unsigned char *chooseMenu[] =
+{
+		 "MENU1",
+		 "MENU2",
+		 "MENU3",
+//		menu1,
+//		menu2,
+//		menu3,
+};
+exitSetupMode = 1;
 
 /*****************************************
 ** INITIZLIZATION OF INPUT/OUTPUT PORTS **
@@ -152,8 +234,8 @@ void ext0_intrpt_init(void)
 	MCUCR = 0b00000010;	// SETUP EXT INT 0, ISC01 = 1, ISC00 = 0: Falling edge on INT0 activates the interrupt; ISC01 = 1, ISC00 = 1: Rising edge on INT0 activates the interrupt;
 
 // IN FUNCTIONS:
-//	GICR   = 0b01000000;	// INT0 = 0: Disable External Interrupt on INT0; INT0 = 1: Enable External Interrupt on INT0;
-//	GIFR   = 0b01000000;	// Clear INT0 flag.
+//	GICR = 0b01000000;	// INT0 = 0: Disable External Interrupt on INT0; INT0 = 1: Enable External Interrupt on INT0;
+//	GIFR = 0b01000000;	// Clear INT0 flag.
 }
 
 /********************************
@@ -161,8 +243,8 @@ void ext0_intrpt_init(void)
 ********************************/
 void ext0_intrpt_on(void)		// Enable external interrupt 0 (PD0 - ENABLE new IR DETECTION)
 {
-	GICR   = 0b01000000;	// INT0 = 0: Disable External Interrupt on INT0; INT0 = 1: Enable External Interrupt on INT0;
-	GIFR   = 0b01000000;	// Clear INT0 flag.
+	GICR |= 0b01000000;	// INT0 = 0: Disable External Interrupt on INT0; INT0 = 1: Enable External Interrupt on INT0;
+	GIFR |= 0b01000000;	// Clear INT0 flag.
 }
 
 /*********************************
@@ -170,8 +252,8 @@ void ext0_intrpt_on(void)		// Enable external interrupt 0 (PD0 - ENABLE new IR D
 *********************************/
 void ext0_intrpt_off(void)		// Disable external interrupt 0 (PD0 - DISABLE new IR DETECTION)
 {
-	GICR   = 0b00000000;	// INT0 = 0: Disable External Interrupt on INT0; INT0 = 1: Enable External Interrupt on INT0;
-	GIFR   = 0b01000000;	// Clear INT0 flag.
+	GICR |= 0b00000000;	// INT0 = 0: Disable External Interrupt on INT0; INT0 = 1: Enable External Interrupt on INT0;
+	GIFR |= 0b01000000;	// Clear INT0 flag.
 }
 
 /*******************************************
@@ -215,7 +297,7 @@ void timer1_init(void)
 {
 // http://www.mikroe.com/forum/viewtopic.php?f=72&t=51076
 
-	TIMSK  = 0b00000000;	// maskov registar za prekasvaniq
+	TIMSK  |= 0b00000000;	// maskov registar za prekasvaniq
 	TCNT1H = 0b00000000;
 	TCNT1L = 0b00000000;
 
@@ -246,9 +328,20 @@ void timer1_init(void)
 *****************************/
 void timer2_init(void)
 {
-	SFIOR = 0b00000010;		// Prescaler Reset Timer2 (bit1 –> PSR2)
-	TCCR2 = 0b10000001;		// 0b10100001 - OC1A,OC1B - PWM;  0b10000001 - OC1A PWM, OC1B - Disabled, normal port.
-	OCR2 = 0; // FAN PWM ON
+	TIMSK |= 0b00000000;		// Disable Internal Interrupts on Timer2
+	TCNT2 = 0b00000000;		// Clear Counter Timer2
+//	SFIOR |= 0b00000010;		// Prescaler Reset Timer2 (bit1 ï¿½> PSR2)
+}
+void timer2Internal_intrpt_off(void)
+{
+	TIMSK |= 0b00000000;		// OCIE2 [bit7] = 0: Disable Internal Interrupt on Timer2CompareMatch; OCIE2 [bit7] = 1: Enable Internal Interrupt on Timer2CompareMatch;
+	TIFR  |= 0b10000000;		// OCF2  [bit7] = 1: Clear Timer2CompareMatch flag.
+}
+
+void timer2Internal_intrpt_on(void)
+{
+	TIMSK |= 0b10000000;		// OCIE2 [bit7] = 0: Disable Internal Interrupt on Timer2CompareMatch; OCIE2 [bit7] = 1: Enable Internal Interrupt on Timer2CompareMatch;
+	TIFR  |= 0b10000000;		// OCF2  [bit7] = 1: Clear Timer2CompareMatch flag.
 }
 
 /********************************************************************************************
@@ -318,14 +411,14 @@ void fan_pwm_off(void)
 ***************************************/
 void timer2_on(void)	// Timer2 On
 {
-//	TCCR2 = 0b10000001;		// 0b10100001 - OC1A,OC1B - PWM;  0b10000001 - OC1A PWM, OC1B - Disabled, normal port.
-//	OCR2 = 1; // FAN PWM ON
+	TCCR2 = 0b01100001;		// 0b01100001 - WGM20,COM21,CS20 - PWM, Phase correct, No prescaller divide or division by 1
+	OCR2 = 100;				// Compare match by Overflow Timer with ~15 times [us]
 }
 
 void timer2_off(void)	// Timer2 Off
 {
-//	TCCR2 = 0b00000000;		// DISABLED OCOC1A - PWM, OC1B - Disabled, normal port.
-//	OCR2 = 0; // FAN PWM OFF
+	TCCR2 = 0b00000000;		// 0b01100001 - WGM20,COM21,CS20 - PWM, Phase correct, No prescaller divide or division by 1
+	OCR2 = 0;				// Compare match by Overflow Timer with ~15 times [us]
 }
 
 /************************************
@@ -426,12 +519,6 @@ void irDecode(void)
 		LED_high_DISPLAYLED_low();
 		_delay_ms(200);	
 	}
-	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_MODE)) && (flagPower==0 || flagPower==1))						// Sony CarAudio IR Remote Device - "MODE"
-	{
-		setupMode();
-		_delay_ms(200);
-//		break;
-	}
 	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_LIST)) && (flagPower==0 || flagPower==1))						// Sony CarAudio IR Remote Device - "LIST"
 	{
 		about();
@@ -513,6 +600,65 @@ void irDecode(void)
 		}
 	}
 */
+/*
+	else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_MODE)) && flagStatusBits->flagPower == 1)						// Sony CarAudio IR Remote Device - "MODE"
+	{
+		#ifdef DEBUG_INFO
+			transmitUartString("[SETUP MODE]");		// uart debug information string
+			transmitUartString("\r\n");			// uart debug information string
+		#endif
+		LCD_COMMAND(LCD_SELECT_2ROW);	// select row 3								// and next is update volume lcd information
+		LCD_DATA_STRING("[SETUP MODE]");	// 20 symbols
+		LCD_COMMAND(LCD_SELECT_3ROW);	// select row 3								// and next is update volume lcd information
+		LCD_DATA_STRING("Press UP/DOWN");	// 20 symbols
+		//	LCD_DATA_INT(fanSpeed);		// 20 symbols
+		while(exitSetupMode)
+		GetSIRC12();
+		LCD_COMMAND(LCD_SELECT_4ROW);	// select row 3								// and next is update volume lcd information
+		if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_DOWN)) && flagStatusBits->flagPower == 1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> ON
+		{// MENU UP
+			indexMenuTable++;
+			if(indexMenuTable>2)
+			{
+				indexMenuTable=0;
+			}
+			LCD_DATA_STRING(chooseMenu[indexMenuTable]);	// 20 symbols
+			#ifdef DEBUG_INFO
+				transmitUartString("[SETUP MODE]: Pressed UP");		// uart debug information string
+				transmitUartString("\r\n");			// uart debug information string
+				transmitUartString(chooseMenu[indexMenuTable]);		// uart debug information string
+				transmitUartString("\r\n");			// uart debug information string
+			#endif
+
+		}
+		else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_UP)) && flagStatusBits->flagPower == 1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> ON
+		{//MENU DOWN
+			indexMenuTable--;
+			if(indexMenuTable<0)
+			{
+				indexMenuTable=2;
+			}
+			LCD_DATA_STRING(chooseMenu[indexMenuTable]);	// 20 symbols
+			#ifdef DEBUG_INFO
+				transmitUartString("[SETUP MODE]: Pressed DOWN");		// uart debug information string
+				transmitUartString("\r\n");			// uart debug information string
+				transmitUartString(chooseMenu[indexMenuTable]);		// uart debug information string
+				transmitUartString("\r\n");			// uart debug information string
+			#endif
+		}
+		else if(((irAddress == IR_REMOTE_CAR_DEVICE_RM_X157) && (irCommand == IR_REMOTE_COMMAND_RM_X157_ENTER)) && flagStatusBits->flagPower == 1)		// Sony TV & CarAudio IR Remote Device - "MUTE" -> ON
+		{//MENU Enter
+	//		setupMode(chooseMenu[menuTable]);	// 20 symbols
+			exitSetupMode = 0;
+			#ifdef DEBUG_INFO
+				transmitUartString("[SETUP MODE]: Pressed MENU to EXIT");		// uart debug information string
+				transmitUartString("\r\n");			// uart debug information string
+			#endif
+		}
+		_delay_ms(200);
+//		break;
+	}
+*/
 	else
 	{
 		// DO NOTING
@@ -555,6 +701,7 @@ void ampliferOn(void)
 //	FAN_high();			// PORTD5 - FAN ON (logic "1")	NON PWM, NON TIMER1	
 	fanSpeed = FAN_SPEED_MAX;	// amplifer run with max fan speed
 	fan_pwm_control_speed();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
+	timer2_on();	// enable auto regular fan by temp sensor
 
 // RELAYS ON FUNC & MESSAGE
 	#ifdef DEBUG_INFO
@@ -613,7 +760,7 @@ void ampliferOff(void)
 	REL_POWER_low();// RELAY POWER OFF				// PESHO COMMENT 14.08.2015, 21:10
 
 // FANS FUNC & MESSAGE
-	#ifdef DEBUG_INFO
+	#ifdef DEBUG_ERROR
 		transmitUartString("[UART INFO] Fan is off\r\n");
 	#endif
 	fan_pwm_off();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
@@ -750,7 +897,7 @@ void volumeUpdate(void)
 		LCD_DATA_STRING("Volume: 0");	// 20 symbols
 	}
 	LCD_DATA_INT(volumeIndex);			// 20 symbols
-	#ifdef DEBUG_INFO
+	#ifdef DEBUG_ERROR
 		transmitUartString("[UART INFO] Volume: ");		// uart debug information string
 		transmitUartInt(volumeIndex);		// uart debug information string 
 		transmitUartString("\r\n");			// uart debug information string
@@ -848,7 +995,7 @@ void temperature()
 	oneWireLeft();
 	for(i=0; i<9; i++)
 	{
-	#ifdef DEBUG_INFO
+	#ifdef DEBUG_ERROR
 		transmitUartString("[UART INFO] byte ");
 		transmitUartInt(i);
 		transmitUartString(" : ");
@@ -864,7 +1011,7 @@ void temperature()
 	oneWireRight();
 	for(i=0; i<9; i++)
 	{
-	#ifdef DEBUG_INFO
+	#ifdef DEBUG_ERROR
 		transmitUartString("[UART INFO] byte ");
 		transmitUartInt(i);
 		transmitUartString(" : ");
@@ -879,6 +1026,74 @@ void temperature()
 	LCD_DATA_STRING("             DS18x20");		//
 }
 
+void autoControlTemperature()
+{
+	unsigned char i;
+	char resultL, resultR;
+
+	#ifdef DEBUG_ERROR
+		transmitUartString("[UART INFO] Left Temperature Sensor\r\n");
+	#endif
+	oneWireLeft();
+	resultL = temperMeasur(byte0, byte1, byte6, byte7);
+	#ifdef DEBUG_ERROR
+		transmitUartString("[UART INFO] RESULT LEFT Sensor = ");
+		transmitUartInt(resultL);
+		transmitUartString("\r\n");
+	#endif
+
+	#ifdef DEBUG_ERROR
+		transmitUartString("[UART INFO] Right Temperature Sensor\r\n");
+	#endif
+	oneWireRight();
+	resultR = temperMeasur(byte0, byte1, byte6, byte7);
+	#ifdef DEBUG_ERROR
+		transmitUartString("[UART INFO] RESULT RIGHT Sensor = ");
+		transmitUartInt(resultR);
+		transmitUartString("\r\n");
+	#endif
+	if((resultL < 20) && (resultR < 20))
+	{
+		fanSpeed = fanSpeedStep[FAN_SPEED_MIN]; // fan value = 100
+	}
+	else if((resultL < 35) && (resultR < 35))
+	{
+		fanSpeed = fanSpeedStep[FAN_SPEED_MIN+1]; // fan value = 125
+	}
+	else if((resultL < 40) && (resultR < 40))
+	{
+		fanSpeed = fanSpeedStep[FAN_SPEED_MIN+2]; // fan value = 150
+	}
+	else if((resultL < 50) && (resultR < 50))
+	{
+		fanSpeed = fanSpeedStep[FAN_SPEED_MIN+3]; // fan value = 175
+	}
+	else if((resultL < 55) && (resultR < 55))
+	{
+		fanSpeed = fanSpeedStep[FAN_SPEED_MIN+4]; // fan value = 200
+	}
+	else if((resultL < 60) && (resultR < 60))
+	{
+		fanSpeed = fanSpeedStep[FAN_SPEED_MIN+5]; // fan value = 225
+	}
+	else if((resultL < 65) && (resultR < 65))
+	{
+		fanSpeed = fanSpeedStep[FAN_SPEED_MAX]; // fan value = 250
+	}
+	else
+	{
+	}
+	#ifdef DEBUG_ERROR
+		transmitUartString("Auto controlled Fan Step: ");
+		transmitUartInt(fanSpeed);
+		transmitUartString(" or ");
+		transmitUartInt(fanSpeedStep[fanSpeed]);
+		transmitUartString("\r\n");
+	#endif
+	fan_pwm_control_speed();
+	_delay_ms(1000);
+}
+
 /*******************************************
 **** 1-WIRE DS18x20 Temperature Sensors ****
 *******************************************/
@@ -887,7 +1102,8 @@ unsigned char oneWireLeft()
 	unsigned char i;
 
 	#ifdef DEBUG_INFO
-		transmitUartString("[UART INFO] TEMPERATURE SENSOR LEFT: 10 DB 09 A5 01 08 00 C1 \r\n");		// uart debug information string
+		transmitUartString("[UART INFO] TEMPERATURE SENSOR LEFT ROMCODE: 10 DB 09 A5 01 08 00 C1 \r\n");		// uart debug information string
+		transmitUartString("[UART INFO] TEMP REGISTERS DATA RAW DUMP\r\n");		// uart debug information string
 	#endif	
 	if(reset())				// Master issues reset pulse. DS18S20s respond with presence pulse.
 	{
@@ -945,7 +1161,8 @@ unsigned char oneWireRight()
 	unsigned char i;
 
 	#ifdef DEBUG_INFO
-		transmitUartString("[UART INFO] TEMPERATURE SENSOR RIGHT: 10 6D F4 8F 02 08 00 B1 \r\n");		// uart debug information string
+		transmitUartString("[UART INFO] TEMPERATURE SENSOR RIGHT ROMCODE: 10 6D F4 8F 02 08 00 B1 \r\n");		// uart debug information string
+		transmitUartString("[UART INFO] TEMP REGISTERS DATA RAW DUMP\r\n");		// uart debug information string
 	#endif	
 	if(reset())				// Master issues reset pulse. DS18S20s respond with presence pulse.
 	{
@@ -1029,11 +1246,11 @@ char temperMeasur(unsigned char byte0, unsigned char byte1, unsigned char byte6,
 	}
 	else if((byte1 == 0x00) && (byte0 != 0x00))
 	{
-		transmitUartString("+");
+//		transmitUartString("+");		// POSITIVE TEMPERATURE
 		tC = (byte0/2);
 		j = tC - k;
-	#ifdef DEBUG_INFO
-		transmitUartString("[UART INFO] Temperature: ");		// uart debug information string
+	#ifdef DEBUG_ERROR
+		transmitUartString("[UART INFO] Temperature: +");		// uart debug information string
 		transmitUartInt(tC);		// uart debug information string 
 		transmitUartString(".0 C\r\n");			// uart debug information string
 	#endif
@@ -1043,12 +1260,12 @@ char temperMeasur(unsigned char byte0, unsigned char byte1, unsigned char byte6,
 	}
 	else if((byte1 == 0xFF) && (byte0 != 0x00))
 	{
-		transmitUartString("-");
+//		transmitUartString("-");		// NEGATIVE TEMPERATURE
 //		tC = ((byte0 - 255.5) / 2);		// ne e dobre obraboteno za otricatelni chisla
 		tC = ((byte0 - 255) / 2);
 		j = tC - k;
 	#ifdef DEBUG_INFO
-		transmitUartString("[UART INFO] Temperature: ");		// uart debug information string
+		transmitUartString("[UART INFO] Temperature: -");		// uart debug information string
 		transmitUartInt(tC);		// uart debug information string 
 		transmitUartString(".0 C\r\n");			// uart debug information string
 	#endif
@@ -1064,13 +1281,14 @@ char temperMeasur(unsigned char byte0, unsigned char byte1, unsigned char byte6,
 	#endif
 		return 1;
 	}
+	temper = tC;
 
 	return temper;
 }
 
 void about(void)
 {
-	#ifdef DEBUG_INFO
+	#ifdef DEBUG_ERROR
 		transmitUartString("[UART INFO] =====================================================\r\n");
 		transmitUartString("[UART INFO] \tAuthors and creators: P.Upinov and P.Stoyanov\r\n");
 		transmitUartString("[UART INFO] \tDevice name: Digital Control Audio System\r\n");
@@ -1152,6 +1370,14 @@ ISR(INT2_vect)
 *****************************************/
 ISR(TIMER2_COMP_vect)
 {
+	timer2Internal_intrpt_off();	// DISABLE new INTERNAL TIMER 2 INTERRUPT
+// LOGIC CHECK BEGIN
+// run measure temperature
+	autoControlTemperature();
+	// set fan value
+//	get temperature and set fan falue
+// LOGIC CHECK END
+	timer2Internal_intrpt_on();		// ENABLE new INTERNAL TIMER 2 INTERRUPT
 }
 
 /*****************************************
@@ -1175,7 +1401,7 @@ void init_all()
 {
 	port_init();		// IO init and configure all port
 	timer1_init();		// FAN INIT
-//	timer2_init();
+	timer2_init();		// Auto controlled fan by temperature sensors when timer2 is interrupted
 	LCD_INIT();			// LCD init and reset all lcd contain
 	uart_init();		// UART debug init
 	about();			// Any debug important information
@@ -1183,7 +1409,6 @@ void init_all()
 	pga2310_init();		// SPI init and reset all (U6, U7, U8) PGA2310 volume values to null
 	relays_in_init();	// nujno e daden reset be da bade izkliuche usilvatelq, togava reletata za vhod i izhod (bez power relay) sa ostanali vkliucheni
 	relays_out_init();	// nujno e daden reset be da bade izkliuche usilvatelq, togava reletata za vhod i izhod (bez power relay)sa ostanali vkliucheni
-
 
 }
 
@@ -1267,6 +1492,7 @@ void buttons_press()
 		else
 		{
 		}
+		autoControlTemperature();
 	}
 }
 
@@ -1280,11 +1506,12 @@ void buttons_press()
 
 int main(void)
 {
-	init_all();				// inicializacia na vsichko
-	ext0_intrpt_on();		// ENABLE interrupts to access IR DETECTION as call to function "IR_DECODER()" for -> SONY IR REMOTE
+	init_all();				// PREDI DA TRAGNEM // inicializacia na vsichko
+	ext0_intrpt_on();		// PREDI DA TRAGNEM // ENABLE interrupts to access IR DETECTION as call to function "IR_DECODER()" for -> SONY IR REMOTE
 //	ext2_intrpt_on();
+//	temperature();
 
-	sei();							// file "avr/interrupt.h"
+	sei();					// PREDI DA TRAGNEM 		// file "avr/interrupt.h"
 //	SREG = (1<<I);
 
 	LED_high_DISPLAYLED_low();		// PORTD4 - LED ON (logic "1"), DISPLAY BACKLIGHT OFF (logic "1"),  NON PWM, NON TIMER1
