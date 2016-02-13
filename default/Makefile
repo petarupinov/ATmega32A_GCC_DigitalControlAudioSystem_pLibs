@@ -117,4 +117,9 @@ flash:
 # sudo apt-get install screen
 # sudo screen /dev/ttyUSB1 9600
 
+usb:
+	lsusb
+	dmesg | grep tty
 
+exit:
+	

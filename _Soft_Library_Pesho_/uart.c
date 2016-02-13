@@ -215,7 +215,15 @@ void transmitUartLong(long data)		// void transmitUartLong(const long data)
 	transmitUartString(ltoa(data, buffer, 10));		// 10 -> DECIMAL
 }
 
-
+/********************************************		// NOT FINISHED
+** TRANSMIT/SEND double TYPE OF UART/USART **		// NOT FINISHED
+********************************************/		// NOT FINISHED
+// USE THIS: transmitUartInt( (int)k + 1 );
+void transmitUartDouble(double data)		// void transmitUartInt(const int data)
+{
+	char buffer[10];
+	transmitUartString(itoa(data, buffer, 10));		// 10 -> DECIMAL
+}
 
 /**************************************************		// NOT FINISHED
 ** RECEIVE/READ unsigned char BYTE OF UART/USART **		// NOT FINISHED

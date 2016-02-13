@@ -1,51 +1,13 @@
 /*;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;*****************************************************************************************;;
-;;*****************************************************************************************;;
 ;;************** Eng. Petar Upinov ********************************************************;;
 ;;***************** 07.10.2015 ************************************************************;;
 ;;*****************************************************************************************;;
-;;*****************************************************************************************;;
 ;;******** ATmega32 DCAS with new Library *************************************************;;
-;;*** (ATmega32 Digital Control Audio System) *********************************************;;
+;;***** (ATmega32 Digital Control Audio System) *******************************************;;
 ;;*****************************************************************************************;;
 ;;**************** Crystal 16MHz **********************************************************;;
-;;*** 1. Edit Fuse bits: High 0xCA ; Low 0xFF *********************************************;;
-;;*****************************************************************************************;;
-;;*****************************************************************************************;;
-;;** 1. Edit on date 07.10.2015 ***********************************************************;;
-;;** 2. Edit on date 14.10.2015 - bit field struct test & type bool ***********************;;
-;;** 3. Edit on date 15.10.2015 - update LCD lib h ****************************************;;
-;;** 4. Edit on date 15.10.2015 - correct LCD init, can't be first clr ********************;;
-;;** 5. Edit on date 16.10.2015 - update and correct LCD clear lib c h, struct with flags *;;
-;;** 6. Edit on date 17.10.2015 - update with custom characters ***************************;;
-;;** 7. Edit on date 18.10.2015 - update all library files ********************************;;
-;;** 8. Edit on date 26.10.2015 - update spi and pga2310 **********************************;;
-;;** 9. Edit on date 26.10.2015 - update i2c, rtc, 24c64 **********************************;;
-;;**10. Edit on date 26.10.2015 - update **************************************************;;
-;;**11. Edit on date 26.10.2015 - update rotation encoder and little bit uart *************;;
-;;**12. Edit on date 18.11.2015 - update utility lib version ******************************;;
-;;**13. Edit on date 19.11.2015 - add functions ampliferOn/Off ****************************;;
-;;**14. Edit on date 22.11.2015 - button power and escape works ***************************;;
-;;**15. Edit on date 23.11.2015 - add pga2310 and rotary encoder volume *******************;;
-;;**16. Edit on date 23.11.2015 - update only rotaryEncoder() function ********************;;
-;;**17. Edit on date 23.11.2015 - finished rotary encoder and view result on lcd **********;;
-;;**18. Edit on date 25.11.2015 - added relay_74hc595.h and .c and relay functions ********;;
-;;**19. Edit on date 28.11.2015 - rename rotaryEncoder() -> volumeEncoder() ***************;;
-;;**20. Edit on date 28.11.2015 - update lib rotary encoder.h and .c files ****************;;
-;;**21. Edit on date 28.11.2015 - update lib uart.c and add uart support ******************;;
-;;**22. Edit on date 29.11.2015 - update all libs and add debug support *******************;;
-;;**23. Edit on date 29.11.2015 - adding and formating debug messages *********************;;
-;;**24. Edit on date 29.11.2015 - adding about and firmware version ***********************;;
-;;**25. Edit on date 29.11.2015 - adding fan support **************************************;;
-;;**26. Edit on date 04.12.2015 - adding ir support ***************************************;;
-;;**27. Edit on date 06.12.2015 - adding main header file in project **********************;;
-;;**28. Edit on date 07.12.2015 - adding remote volume and mute ***************************;;
-;;**29. Edit on date 09.12.2015 - adding fan stepping with timer1 ORC1AL ******************;;
-;;**30. Edit on date 09.12.2015 - change fan function names & temp sensors are works ******;;
-;;**31. Edit on date 15.12.2015 - add temp sensors array with id rom code *****************;;
-;;**32. Edit on date 17.01.2016 -  *****************;;
-;;*****************************************************************************************;;
-;;** Used library version: _Soft_Library_Pesho_v0.07 **************************************;;
+;;****** Edit Fuse bits: High 0xCA ; Low 0xFF *********************************************;;
 ;;*****************************************************************************************;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;*/
 
@@ -128,73 +90,33 @@ typedef enum
 unsigned char storeTemp [10] = { 0 };	// data bytes massive
 unsigned char leftTempSensorRomCode[8]	= { 0x10, 0xDB, 0x09, 0xA5, 0x01, 0x08, 0x00, 0xC1 };
 unsigned char rightTempSensorRomCode[8]	= { 0x10, 0x6D, 0xF4, 0x8F, 0x02, 0x08, 0x00, 0xB1 };
-typedef enum
-{
-	RomCodeLeftTempSensorByte0 = 0x10,
-	RomCodeLeftTempSensorByte1 = 0xDB,
-	RomCodeLeftTempSensorByte2 = 0x09,
-	RomCodeLeftTempSensorByte3 = 0xA5,
-	RomCodeLeftTempSensorByte4 = 0x01,
-	RomCodeLeftTempSensorByte5 = 0x08,
-	RomCodeLeftTempSensorByte6 = 0x00,
-	RomCodeLeftTempSensorByte7 = 0xC1,
-} TempSensor_1; // leftTempSensor;
+
+unsigned int isr2;	// = 2 bytes range[0-65535] How overflows timer2 have done ?
 
 typedef enum
 {
-	RomCodeRightTempSensorByte0 = 0x10,
-	RomCodeRightTempSensorByte1 = 0x6D,
-	RomCodeRightTempSensorByte2 = 0xF4,
-	RomCodeRightTempSensorByte3 = 0x8F,
-	RomCodeRightTempSensorByte4 = 0x02,
-	RomCodeRightTempSensorByte5 = 0x08,
-	RomCodeRightTempSensorByte6 = 0x00,
-	RomCodeRightTempSensorByte7 = 0xB1,
-} TempSensor_2; // rightTempSensor;
-
-typedef struct tempSensor
-{
-	TempSensor_1;
-	TempSensor_2;
+	FAN_SPEED_ABSOLUTE_MIN	= 0,	// = 0
+	FAN_SPEED_0				= 0,	// = 0
+	FAN_SPEED_MIN 			= 1,	// = 1
+	FAN_SPEED_1 			= 1,	// = 1
+	FAN_SPEED_2				= 2,	// = 2
+	FAN_SPEED_3				= 3,	// = 3
+	FAN_SPEED_4				= 4,	// = 4
+	FAN_SPEED_5				= 5,	// = 5
+	FAN_SPEED_6				= 6,	// = 6
+	FAN_SPEED_7				= 7,	// = 7
+	FAN_SPEED_MAX			= 8,	// = 8
+	FAN_LIMIT_POSITIONS		= 8,	// = 8
 };
-
 
 // FAN SPEED STEPS
-#define FAN_LIMIT_POSITIONS 8
-#define FAN_SPEED_ABSOLUTE_MIN 0
-#define FAN_SPEED_MIN 1		// min buffer position
-#define FAN_SPEED_MAX 7		// max buffer position
-unsigned char fanSpeed = FAN_SPEED_MIN;	// FAN SPEED OCR1AL = 100
-unsigned char fanSpeedStep [FAN_LIMIT_POSITIONS] = { 0x00, 100, 125, 150, 175, 200, 225, 250 };
+//#define FAN_LIMIT_POSITIONS 8
+//#define FAN_SPEED_ABSOLUTE_MIN 0
+//#define FAN_SPEED_MIN 1		// min buffer position
+//#define FAN_SPEED_MAX 7		// max buffer position
+unsigned char fanSpeed = FAN_SPEED_MAX-FAN_SPEED_MIN;	// FAN SPEED OCR1AL = 150
+unsigned char fanSpeedStep [FAN_LIMIT_POSITIONS] = { 0x00, 150, 160, 175, 190, 200, 225, 250 };
 unsigned char byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9; // bytes ot temperaturen sensor
-
-typedef enum
-{
-	FAN_SPEED_0 = 0,
-	FAN_SPEED_1 = 100,
-	FAN_SPEED_2 = 125,
-	FAN_SPEED_3 = 150,
-	FAN_SPEED_4 = 175,
-	FAN_SPEED_5 = 200,
-	FAN_SPEED_6 = 225,
-	FAN_SPEED_7 = 250
-} FAN_SPEED_POSITIONS_1;
-
-//unsigned char *menu1 = "MENU1";
-//unsigned char *menu2 = "MENU2";
-//unsigned char *menu3 = "MENU3";
-
-unsigned char indexMenuTable = 0;
-unsigned char *chooseMenu[] =
-{
-		 "MENU1",
-		 "MENU2",
-		 "MENU3",
-//		menu1,
-//		menu2,
-//		menu3,
-};
-exitSetupMode = 1;
 
 /*****************************************
 ** INITIZLIZATION OF INPUT/OUTPUT PORTS **
@@ -297,7 +219,7 @@ void timer1_init(void)
 {
 // http://www.mikroe.com/forum/viewtopic.php?f=72&t=51076
 
-	TIMSK  |= 0b00000000;	// maskov registar za prekasvaniq
+	TIMSK  |= 0b00000000;	// maskov registar za prekasvaniq, ne e nujno da ima prekasvane po timer1, izpolzvame go samo za rabota po izvod
 	TCNT1H = 0b00000000;
 	TCNT1L = 0b00000000;
 
@@ -328,20 +250,52 @@ void timer1_init(void)
 *****************************/
 void timer2_init(void)
 {
-	TIMSK |= 0b00000000;		// Disable Internal Interrupts on Timer2
-	TCNT2 = 0b00000000;		// Clear Counter Timer2
-//	SFIOR |= 0b00000010;		// Prescaler Reset Timer2 (bit1 �> PSR2)
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Fan is on\r\n");
+	transmitUartString("[UART INFO] Fan rotation with max speed\r\n");
+#endif
+//	FAN_high();			// PORTD5 - FAN ON (logic "1")	NON PWM, NON TIMER1
+fanSpeed = FAN_SPEED_MAX-FAN_SPEED_MIN;	// amplifer run with max fan speed
+fan_pwm_control_speed();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
+_delay_ms(3000);			// wait 3 seconds for maximum rotating fans
+
+#ifdef DEBUG_ERROR
+	transmitUartString("[UART INFO] Speed of fans are controlled by auto program\r\n");
+#endif
+//==================================================================================================================
+	TCNT2 &= 0b00000000;	// Clear Counter Timer2
+//   TCCR2 = FOC | WGM20 | COM21 | COM20 | WGM21 | CS22 | CS21 | CS20 |
+	TCCR2 = 0b00001010;	// 0b00001xxx, xxx = 001 /1, 010 /8, 011 /32, 100 /64, 101 /128, 110 /256, 111 /1024			//   TCCR2 |= (1 << WGM21) | (1 << CS22) | (1 << CS21) | (1 << CS20); // configure timer2 for CTC mode(WGM21), 1024 prescaller (CS20,21,22)
+	TIMSK |= (1 << OCIE2); // enable the CTC interrupt	//	TIMSK |= 0b01000000;	// TIMSK |= (1 << TOIE2); // Disable Internal Interrupts on Timer2
+
+	OCR2 = 255;	//255;
+//	OCR2 = 255;
+//	OCR2 = 15625;			// (16 000 000Hz / 1024 prescaller) = 15625 Hz; 8biregister = 255+0=256; 255/15625 = 0,01632 sec; 0,01632*62 = 1.01184sec
+							// No ne moje da dostigne 15625, zashtoto 8-bit register OCR2 moje da dostigne ot 0 do 255, za tova moje bi 255/255=1 sec??
+//==================================================================================================================
+
+//	SFIOR |= 0b00000010;	// Prescaler Reset Timer2 (bit1 �> PSR2)
+//	TCCR2 = 0b01100001;		// 0b01100001 - WGM20,COM21,CS20 - PWM, Phase correct, No prescaller divide or division by 1
+//	OCR2 = 100;				// Compare match by Overflow Timer with ~15 times [us]
+
+
+//	TCCR2 |= (1 << CS22)|(1 << CS21);  	// set up timer with prescaler = 256
+//	TCNT2 = 0;							// initialize counter
+//	TIMSK |= (1 << TOIE2);				// enable overflow interrupt
+//	sei();								// enable global interrupts
+	// initialize overflow counter variable
+	isr2 = 0;
 }
 void timer2Internal_intrpt_off(void)
 {
-	TIMSK |= 0b00000000;		// OCIE2 [bit7] = 0: Disable Internal Interrupt on Timer2CompareMatch; OCIE2 [bit7] = 1: Enable Internal Interrupt on Timer2CompareMatch;
-	TIFR  |= 0b10000000;		// OCF2  [bit7] = 1: Clear Timer2CompareMatch flag.
+//	TIMSK |= 0b00000000;		// OCIE2 [bit7] = 0: Disable Internal Interrupt on Timer2CompareMatch; OCIE2 [bit7] = 1: Enable Internal Interrupt on Timer2CompareMatch;
+//	TIFR  |= 0b10000000;		// OCF2  [bit7] = 1: Clear Timer2CompareMatch flag.
 }
 
 void timer2Internal_intrpt_on(void)
 {
-	TIMSK |= 0b10000000;		// OCIE2 [bit7] = 0: Disable Internal Interrupt on Timer2CompareMatch; OCIE2 [bit7] = 1: Enable Internal Interrupt on Timer2CompareMatch;
-	TIFR  |= 0b10000000;		// OCF2  [bit7] = 1: Clear Timer2CompareMatch flag.
+//	TIMSK |= 0b10000000;		// OCIE2 [bit7] = 0: Disable Internal Interrupt on Timer2CompareMatch; OCIE2 [bit7] = 1: Enable Internal Interrupt on Timer2CompareMatch;
+//	TIFR  |= 0b10000000;		// OCF2  [bit7] = 1: Clear Timer2CompareMatch flag.
 }
 
 /********************************************************************************************
@@ -369,14 +323,18 @@ void timer0_off()
 void timer1_on_speed(void)
 {
 //		ldi	r16, 0			; maskov registar za prekasvaniq
-//		out	TIMSK, r16		; 
+//		out	TIMSK, r16		; ne e nujno da ima prekasvane
 	TCCR1A = 0b10100001;	// 0b10000001;	// nastroika na 2 kanala rejim na rabota na SHIM		// 0b10100001 - OC1A,OC1B - PWM;  0b10000001 - OC1A PWM, OC1B - Disabled, normal port.
 	TCCR1B = 0b00000001;	// 0b00010001;	// nastroika na 2 kanala rejim na rabota na SHIM i preddelitel 8
 
 // CHANNEL A
 	OCR1AH = 0;		// 0; // FAN PWM ON		// out	OCR1AH, r16		; 0   = 0b00000000 (DEC = BIN)
 	OCR1AL = fanSpeedStep [fanSpeed];//100;	// 1; // FAN PWM ON		// out	OCR1AL, r17		; 200 = 0b11001000 (DEC = BIN)
-
+#ifdef DEBUG_INFO
+	transmitUartString("[UART INFO] Set calculated fanSpeed value: ");		// uart debug information string
+	transmitUartInt(fanSpeed);		// uart debug information string
+	transmitUartString("\r\n");		// uart debug information string
+#endif
 // CHANNEL B
 //	OCR1BH = 0; // LED PWM ON				// out	OCR1BH, r16		; 0   = 0b00000000 (DEC = BIN)
 //	OCR1BL = 1; // LED PWM ON				// out	OCR1BL, r17		; 200 = 0b11001000 (DEC = BIN)
@@ -384,14 +342,33 @@ void timer1_on_speed(void)
 
 void timer1_off(void)
 {
-	TCCR1A = 0b00000000;		// DISABLED OCOC1A - PWM, OC1B - Disabled, normal port.
-	TCCR1B = 0b00000000;		// 
+	TCCR1A = 0b00000000;	// DISABLED OCOC1A - PWM, OC1B - Disabled, normal port.
+	TCCR1B = 0b00000000;	//
+	SFIOR |= 0b00000001;	// Prescaler Reset Timer1/0 (bit0  PSR10)
+
+
 
 	OCR1AH = 0; // FAN PWM OFF
 	OCR1AL = 0; // FAN PWM OFF
 
 //	OCR1BH = 0; // LED PWM OFF
 //	OCR1BL = 0; // LED PWM OFF
+}
+
+/***************************************
+******** DEFINITIONS OF TIMER 2 ********
+***************************************/
+void timer2_on(void)
+{
+//   TCCR2 = 0b00001010;	// 0b00001xxx, xxx = 001 /1, 010 /8, 011 /32, 100 /64, 101 /128, 110 /256, 111 /1024			//   TCCR2 |= (1 << WGM21) | (1 << CS22) | (1 << CS21) | (1 << CS20); // configure timer2 for CTC mode(WGM21), 1024 prescaller (CS20,21,22)
+//   OCR2 = 255;			//255;
+}
+
+void timer2_off(void)
+{
+//	TCCR2 = 0b00000000;	// TCCR2 |= (1 << CS20); // (1 << CS20) 0b01100001 - WGM20,COM21,CS20 - PWM, Phase correct, No prescaller divide or division by 1
+//	OCR2 = 0;
+//	SFIOR |= 0b00000010;	// Prescaler Reset Timer2 (bit1 > PSR2)
 }
 
 /***********************************
@@ -404,21 +381,6 @@ void fan_pwm_control_speed(void)
 void fan_pwm_off(void)
 {
 	timer1_off();
-}
-
-/***************************************
-******** DEFINITIONS OF TIMER 2 ********
-***************************************/
-void timer2_on(void)	// Timer2 On
-{
-	TCCR2 = 0b01100001;		// 0b01100001 - WGM20,COM21,CS20 - PWM, Phase correct, No prescaller divide or division by 1
-	OCR2 = 100;				// Compare match by Overflow Timer with ~15 times [us]
-}
-
-void timer2_off(void)	// Timer2 Off
-{
-	TCCR2 = 0b00000000;		// 0b01100001 - WGM20,COM21,CS20 - PWM, Phase correct, No prescaller divide or division by 1
-	OCR2 = 0;				// Compare match by Overflow Timer with ~15 times [us]
 }
 
 /************************************
@@ -692,16 +654,16 @@ void ampliferOn(void)
 	LCD_DATA_STRING("P.UPINOV  P.STOYANOV");	// 20 symbols //	LCD_EXECUTE_DATA("P.UPINOV  P.STOYANOV",20);	// char "DATA", int 13 of chars of "DATA"
 	LCD_COMMAND(LCD_ON);						// LCD ON without CURSOR
 
-// FANS FUNC & MESSAGE
-	#ifdef DEBUG_INFO
-		transmitUartString("[UART INFO] Fan is on\r\n");
-		transmitUartString("[UART INFO] Fan rotation with max speed\r\n");
-		transmitUartString("[UART INFO] Fan is always on, it isn't sensitive to temperature, because DS18S20 is disabling\r\n");
-	#endif
-//	FAN_high();			// PORTD5 - FAN ON (logic "1")	NON PWM, NON TIMER1	
-	fanSpeed = FAN_SPEED_MAX;	// amplifer run with max fan speed
-	fan_pwm_control_speed();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
-	timer2_on();	// enable auto regular fan by temp sensor
+// FANS FUNC & MESSAGE -> MOVED IN timer2
+//	#ifdef DEBUG_INFO
+//		transmitUartString("[UART INFO] Fan is on\r\n");
+//		transmitUartString("[UART INFO] Fan rotation with max speed\r\n");
+//		transmitUartString("[UART INFO] Fan is always on, it isn't sensitive to temperature, because DS18S20 is disabling\r\n");
+//	#endif
+////	FAN_high();			// PORTD5 - FAN ON (logic "1")	NON PWM, NON TIMER1
+//	fanSpeed = FAN_SPEED_MAX;	// amplifer run with max fan speed
+//	fan_pwm_control_speed();	// KOMENTAR ZARADI SIMULACIQTA - MNOGO BAVI PRI SIMULACIQ S TIMER1
+//	timer2_on();	// enable auto regular fan by temp sensor
 
 // RELAYS ON FUNC & MESSAGE
 	#ifdef DEBUG_INFO
@@ -721,12 +683,20 @@ void ampliferOn(void)
 	_delay_ms(1000);	// izchakvane pri natiskane za vkliuchvane i otpuskane na buton - filtar treptqsht kontakt buton
 
 // FANS FUNC & MESSAGE
-	#ifdef DEBUG_INFO
-		transmitUartString("[UART INFO] Fan rotation with min speed\r\n");
-		transmitUartString("[UART INFO] Fan manual controlling with remote menu up to speed step up and menu down button to speed step down\r\n");
-	#endif	
-	fanSpeed = FAN_SPEED_MIN;	// amplifer works with min fan speed
-	fan_pwm_control_speed();
+//	#ifdef DEBUG_INFO
+//		transmitUartString("[UART INFO] Fan rotation with min speed\r\n");
+//		transmitUartString("[UART INFO] Fan manual controlling with remote menu up to speed step up and menu down button to speed step down\r\n");
+//	#endif
+//	fanSpeed = FAN_SPEED_MIN;	// amplifer works with min fan speed
+//	fan_pwm_control_speed();
+	#ifdef DEBUG_ERROR
+		transmitUartString("[UART INFO] Amplifer is auto controlling fans!\r\n");
+	#endif
+//	timer2_init();	// Fan controlling, when the fan will be setup, this init to be moved in init_all();
+
+	#ifdef DEBUG_ERROR
+		transmitUartString("[UART INFO] Amplifer was switched on!\r\n");
+	#endif
 }
 
 /*********************
@@ -1029,7 +999,7 @@ void temperature()
 void autoControlTemperature()
 {
 	unsigned char i;
-	char resultL, resultR;
+	char resultL, resultR, resultCompare;
 
 	#ifdef DEBUG_ERROR
 		transmitUartString("[UART INFO] Left Temperature Sensor\r\n");
@@ -1052,46 +1022,63 @@ void autoControlTemperature()
 		transmitUartInt(resultR);
 		transmitUartString("\r\n");
 	#endif
-	if((resultL < 20) && (resultR < 20))
+
+	resultCompare = resultL > resultR ? resultL : resultR;
+	#ifdef DEBUG_ERROR
+		transmitUartString("[UART INFO] Bigger temperature value between left or right sensors is: resultCompare = ");
+		transmitUartInt(resultCompare);
+		transmitUartString("\r\n");
+	#endif
+
+//	{ 0x00, 150, 160, 175, 190, 200, 225, 250 };
+	if((resultCompare <= 1) || (resultCompare <= 20))
 	{
-		fanSpeed = fanSpeedStep[FAN_SPEED_MIN]; // fan value = 100
+		fanSpeed = fanSpeedStep[FAN_SPEED_0]; // fan value = 0
 	}
-	else if((resultL < 35) && (resultR < 35))
+	else if((resultCompare <= 21) || (resultCompare <= 26))
 	{
-		fanSpeed = fanSpeedStep[FAN_SPEED_MIN+1]; // fan value = 125
+		fanSpeed = fanSpeedStep[FAN_SPEED_1]; // fan value = 150
 	}
-	else if((resultL < 40) && (resultR < 40))
+	else if((resultCompare <= 27) || (resultCompare <= 29)) //35
 	{
-		fanSpeed = fanSpeedStep[FAN_SPEED_MIN+2]; // fan value = 150
+		fanSpeed = fanSpeedStep[FAN_SPEED_2]; // fan value = 160
 	}
-	else if((resultL < 50) && (resultR < 50))
+	else if((resultCompare <= 30) || (resultCompare <= 32)) //40
 	{
-		fanSpeed = fanSpeedStep[FAN_SPEED_MIN+3]; // fan value = 175
+		fanSpeed = fanSpeedStep[FAN_SPEED_3]; // fan value = 175
 	}
-	else if((resultL < 55) && (resultR < 55))
+	else if((resultCompare <= 33) || (resultCompare <= 35))//50
 	{
-		fanSpeed = fanSpeedStep[FAN_SPEED_MIN+4]; // fan value = 200
+		fanSpeed = fanSpeedStep[FAN_SPEED_4]; // fan value = 190
 	}
-	else if((resultL < 60) && (resultR < 60))
+	else if((resultCompare <= 36) || (resultCompare <= 37))//55
 	{
-		fanSpeed = fanSpeedStep[FAN_SPEED_MIN+5]; // fan value = 225
+		fanSpeed = fanSpeedStep[FAN_SPEED_5]; // fan value = 200
 	}
-	else if((resultL < 65) && (resultR < 65))
+	else if((resultCompare <= 38) || (resultCompare <= 40))//60
 	{
-		fanSpeed = fanSpeedStep[FAN_SPEED_MAX]; // fan value = 250
+		fanSpeed = fanSpeedStep[FAN_SPEED_6]; // fan value = 225
+	}
+	else if(resultCompare > 40)//65
+	{
+		fanSpeed = fanSpeedStep[FAN_SPEED_7]; // fan value = 250
 	}
 	else
 	{
+		#ifdef DEBUG_ERROR
+			transmitUartString("Error: Temperature isn't correct value to controlling fan!");
+			transmitUartInt(fanSpeed);
+			transmitUartString("\r\n");
+		#endif
 	}
+
 	#ifdef DEBUG_ERROR
-		transmitUartString("Auto controlled Fan Step: ");
+		transmitUartString("Auto controlled fan value step. Set value: ");
+		transmitUartString(" fanSpeedStep[");
 		transmitUartInt(fanSpeed);
-		transmitUartString(" or ");
-		transmitUartInt(fanSpeedStep[fanSpeed]);
-		transmitUartString("\r\n");
+		transmitUartString("] \r\n");
 	#endif
-	fan_pwm_control_speed();
-	_delay_ms(1000);
+	fan_pwm_control_speed();	// update fan speed
 }
 
 /*******************************************
@@ -1326,9 +1313,11 @@ ISR(RESET_vect)
 ISR(INT0_vect)
 {
 	ext0_intrpt_off();	// DISABLE new IR DETECTION
+	cli();				//	SREG &= ~(1 << I);
 
 // LOGIC CHECK BEGIN
 // VERIFY PRESSED IR BUTTON and switch to low line of IR pin PD2
+
 	unsigned char low_level = 0;
     if(irPin == 0)
 	{		//while the pin is low which is our pulse count
@@ -1347,7 +1336,7 @@ ISR(INT0_vect)
 		}
     }
 // LOGIC CHECK END
-
+    sei();				//	SREG |= (1 << I);
 	ext0_intrpt_on();	// ENABLE new IR DETECTION
 }
 
@@ -1370,14 +1359,30 @@ ISR(INT2_vect)
 *****************************************/
 ISR(TIMER2_COMP_vect)
 {
-	timer2Internal_intrpt_off();	// DISABLE new INTERNAL TIMER 2 INTERRUPT
-// LOGIC CHECK BEGIN
-// run measure temperature
-	autoControlTemperature();
-	// set fan value
-//	get temperature and set fan falue
-// LOGIC CHECK END
-	timer2Internal_intrpt_on();		// ENABLE new INTERNAL TIMER 2 INTERRUPT
+	//	timer2Internal_intrpt_off();	// DISABLE new INTERNAL TIMER 2 INTERRUPT
+	TIMSK &= ~(1 << OCIE2); // enable the CTC interrupt
+	// LOGIC CHECK BEGIN
+
+	isr2++;
+	if(isr2 == 2)	// isr = 2, TCCR = 0x----1111; isr = 62, TCCR = 0x----1001
+	{
+		#ifdef DEBUG_ERROR
+			transmitUartString("[UART INFO] Timer2_COMP isr2 = ");
+			transmitUartInt(isr2);
+			transmitUartString(", time = ");
+			transmitUartString(" \r\n");
+		#endif
+
+		autoControlTemperature();
+	}
+	else if(isr2 >= 65535)
+	{
+		isr2 = 0;
+	}
+
+	TIMSK |= (1 << OCIE2); // enable the CTC interrupt
+	// LOGIC CHECK END
+	//	timer2Internal_intrpt_on();		// ENABLE new INTERNAL TIMER 2 INTERRUPT
 }
 
 /*****************************************
@@ -1399,12 +1404,12 @@ ISR(TIMER2_OVF_vect)
 
 void init_all()
 {
-	port_init();		// IO init and configure all port
-	timer1_init();		// FAN INIT
-	timer2_init();		// Auto controlled fan by temperature sensors when timer2 is interrupted
-	LCD_INIT();			// LCD init and reset all lcd contain
-	uart_init();		// UART debug init
-	about();			// Any debug important information
+	port_init();		// 1. IO init and configure all port
+	LCD_INIT();			// 2. LCD init and reset all lcd contain
+	uart_init();		// 3. UART debug init
+	timer1_init();		// 4. FAN INIT
+	timer2_init();		// 5. Auto controlled fan by temperature sensors when timer2 is interrupted
+	about();			// x. Any debug important information
 
 	pga2310_init();		// SPI init and reset all (U6, U7, U8) PGA2310 volume values to null
 	relays_in_init();	// nujno e daden reset be da bade izkliuche usilvatelq, togava reletata za vhod i izhod (bez power relay) sa ostanali vkliucheni
@@ -1492,7 +1497,7 @@ void buttons_press()
 		else
 		{
 		}
-		autoControlTemperature();
+//		autoControlTemperature();
 	}
 }
 

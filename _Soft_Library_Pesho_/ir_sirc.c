@@ -37,6 +37,8 @@ void GetSIRC12(void)
     {
 		lTime++;				//increment every 200uS until pin is high
 		_delay_us(200);			//200uS delay
+								// dokato irPin-a e v nisko nivo se lTimer, pri Sony Startovo uslovie e 2400uS low level + 600uS high level
+								// t.e. 200uS * lTime, kato toleransa na lTime 10 i 14 ili saotvetno 2000uS i 2800uS
 	}
 
 	if((lTime <= 10) || (lTime >= 14))	//Start too short or long and restart
